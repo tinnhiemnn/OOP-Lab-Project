@@ -1,45 +1,28 @@
-#ifndef DATABASEMANAGER_H
-#define DATABASEMANAGER_H
+#pragma once
 
 #include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QDebug>
+#include <QString>
 
 class DatabaseManager {
 private:
     QSqlDatabase db;
+    QString lastErrorMessage;
+    
     // Private constructor
-    DatabaseManager() {
-        db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName("../data/hotel.db"); 
-    }
-
-public:
+    DatabaseManager();
+    
     // Delete copied
     DatabaseManager(const DatabaseManager&) = delete;
     DatabaseManager& operator=(const DatabaseManager&) = delete;
 
-    static DatabaseManager& getInstance() {
-        static DatabaseManager instance;
-        return instance;
-    }
+    QString resolveDatabasePath(const QString& databasePath) const;
 
-    bool openConnection() {
-        if (!db.isOpen()) {
-            if (!db.open()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void closeConnection() {
-        if (db.isOpen()) {
-            db.close();
-        }
-    }
+public:
+    static DatabaseManager& getInstance();
+    bool openDatabase(const QString& databasePath = QString());
+    bool initializeSchema();
+    QSqlDatabase database() const;
+    QString lastError() const;
 
 };
 
-#endif // DATABASEMANAGER_H
