@@ -2,7 +2,6 @@
 
 #include "models/Room.h"
 #include <algorithm>
-#include <string>
 
 class DeluxeRoom : public Room
 {

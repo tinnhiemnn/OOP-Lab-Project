@@ -1,7 +1,6 @@
 #pragma once
 
 #include "models/User.h"
-#include <string>
 
 class Customer : public User
 {
@@ -10,12 +9,11 @@ private:
 
 public:
     Customer() = default;
-    Customer(std::string id, std::string name, std::string email, std::string password, std::string phone)
+    Customer(std::string id, std::string name, std::string email, std::string phone)
         : User(std::move(id),
-        std::move(name),
-        std::move(email),
-        std::move(password)),
-        phone(std::move(phone)) {}
+               std::move(name),
+               std::move(email)),
+          phone(std::move(phone)) {}
 
     const std::string& getPhone() const { return phone; }
 

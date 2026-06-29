@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <utility>
 
 enum class PaymentMethod
 {
@@ -16,30 +15,43 @@ class Invoice
 private:
     std::string id;
     std::string bookingId;
+    std::string receptionistId;
     std::string issuedDate;
 
     double totalAmount = 0.0;
+    double discountAmount = 0.0;
 
     PaymentMethod paymentMethod = PaymentMethod::Cash;
 
-    bool paid = false;
+    std::string discountName;
 
 public:
     Invoice() = default;
-    Invoice(std::string id, std::string bookingId, std::string issuedDate, double totalAmount = 0, PaymentMethod paymentMethod = PaymentMethod::Cash, bool paid = false)
+    Invoice(std::string id,
+            std::string bookingId,
+            std::string receptionistId,
+            std::string issuedDate,
+            double totalAmount = 0,
+            double discountAmount = 0,
+            PaymentMethod paymentMethod = PaymentMethod::Cash,
+            std::string discountName = "")
         : id(std::move(id)),
-          bookingId(std::move(bookingId)),
-          issuedDate(std::move(issuedDate)),
-          totalAmount(totalAmount),
-          paymentMethod(paymentMethod),
-          paid(paid) {}
+        bookingId(std::move(bookingId)),
+        receptionistId(std::move(receptionistId)),
+        issuedDate(std::move(issuedDate)),
+        totalAmount(totalAmount),
+        discountAmount(discountAmount),
+        paymentMethod(paymentMethod),
+        discountName(std::move(discountName)) {}
 
     const std::string& getId() const { return id; }
     const std::string& getBookingId() const { return bookingId; }
+    const std::string& getReceptionistId() const { return receptionistId; }
     const std::string& getIssuedDate() const { return issuedDate; }
     double getTotalAmount() const { return totalAmount; }
+    double getDiscountAmount() const { return discountAmount; }
     PaymentMethod getPaymentMethod() const { return paymentMethod; }
-    bool isPaid() const { return paid; }
+    const std::string& getDiscountName() const { return discountName; }
 
     void setTotalAmount(double amount)
     {
@@ -51,15 +63,14 @@ public:
         paymentMethod = method;
     }
 
-    //methods
-    void generateInvoice(double amount)
+    void setDiscountName(const std::string& value)
     {
-        totalAmount = amount;
+        discountName = value;
     }
 
-    void pay()
+    void setDiscountAmount(double amount)
     {
-        paid = true;
+        discountAmount = amount;
     }
 
     //chuyển đổi pttt

@@ -2,11 +2,9 @@
 
 #include <algorithm>
 #include <string>
-#include <utility>
 
 enum class BookingStatus
 {
-    Pending,
     Booked,
     CheckedIn,
     CheckedOut,
@@ -18,7 +16,9 @@ class Booking
 private:
     std::string id;
     std::string customerId;
+    std::string receptionistId;
     std::string roomId;
+    std::string groupCode;
 
     std::string checkIn;
     std::string checkOut;
@@ -29,23 +29,25 @@ private:
     bool useDecoration = false;
     std::string decorationNote;
 
-    BookingStatus status = BookingStatus::Pending;
+    BookingStatus status = BookingStatus::Booked;
 
 public:
     Booking() = default;
-    Booking(std::string id, std::string customerId, std::string roomId, std::string checkIn, std::string checkOut, BookingStatus status = BookingStatus::Pending)
+    Booking(std::string id, std::string customerId, std::string receptionistId, std::string roomId, std::string groupCode, std::string checkIn, std::string checkOut, BookingStatus status = BookingStatus::Booked)
         : id(std::move(id)),
           customerId(std::move(customerId)),
+          receptionistId(std::move(receptionistId)),
           roomId(std::move(roomId)),
+          groupCode(std::move(groupCode)),
           checkIn(std::move(checkIn)),
           checkOut(std::move(checkOut)),
-          status(status)
-    {
-    }
+          status(status) {}
 
     const std::string& getId() const { return id; }
     const std::string& getCustomerId() const { return customerId; }
+    const std::string& getReceptionistId() const { return receptionistId; }
     const std::string& getRoomId() const { return roomId; }
+    const std::string& getGroupCode() const { return groupCode; }
 
     const std::string& getCheckIn() const { return checkIn; }
     const std::string& getCheckOut() const { return checkOut; }
@@ -80,16 +82,14 @@ public:
     }
 
     //booking
-    void processBooking() { status = BookingStatus::Booked; }
     void cancelBooking() { status = BookingStatus::Cancelled; }
     void markCheckedIn() { status = BookingStatus::CheckedIn; }
     void markCheckedOut() { status = BookingStatus::CheckedOut; }
 
     bool isActive() const
     {
-        return status == BookingStatus::Pending 
-        || status == BookingStatus::Booked 
-        || status == BookingStatus::CheckedIn;
+        return status == BookingStatus::Booked 
+            || status == BookingStatus::CheckedIn;
     }
 
     //chuyển booking -> String
@@ -99,7 +99,7 @@ public:
         if (value == BookingStatus::CheckedIn) return "CheckedIn";
         if (value == BookingStatus::CheckedOut) return "CheckedOut";
         if (value == BookingStatus::Cancelled) return "Cancelled";
-        return "Pending";
+        return "Cancelled";
     }
 
     //chuyển String -> booking
@@ -109,6 +109,6 @@ public:
         if (value == "CheckedIn") return BookingStatus::CheckedIn;
         if (value == "CheckedOut") return BookingStatus::CheckedOut;
         if (value == "Cancelled") return BookingStatus::Cancelled;
-        return BookingStatus::Pending;
+        return BookingStatus::Cancelled;
     }
 };

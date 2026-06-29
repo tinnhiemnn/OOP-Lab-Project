@@ -2,8 +2,6 @@
 
 #include "models/Room.h"
 #include <algorithm>
-#include <string>
-#include <utility>
 
 class StandardRoom : public Room
 {
