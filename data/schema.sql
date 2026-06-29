@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS customers (
 CREATE TABLE IF NOT EXISTS receptionists (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    phone TEXT NOT NULL,
     email TEXT NOT NULL
 );
 
@@ -32,7 +31,6 @@ CREATE TABLE IF NOT EXISTS bookings (
     laundry_service BOOLEAN NOT NULL DEFAULT 0,
     decor_service BOOLEAN NOT NULL DEFAULT 0, 
     decor_note TEXT,
-    total_price REAL NOT NULL,
     status TEXT NOT NULL,
     FOREIGN KEY(customer_id) REFERENCES customers(id) ON DELETE SET NULL,
     FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL,
