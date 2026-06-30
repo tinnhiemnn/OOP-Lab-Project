@@ -11,14 +11,12 @@ public:
                                             const std::string& roomId,
                                             double basePrice,
                                             RoomStatus status = RoomStatus::Available,
-                                            int numberOfBeds = 1,
-                                            const std::string& specialServices = "");
+                                            int numberOfBeds = 1);
 
     static std::unique_ptr<Room> createRoom(const std::string& type,
                                             const std::string& roomId,
                                             double basePrice,
                                             RoomStatus status = RoomStatus::Available,
-                                            int numberOfBeds = 1,
-                                            const std::string& specialServices = "");
+                                            int numberOfBeds = 1);
 };
 

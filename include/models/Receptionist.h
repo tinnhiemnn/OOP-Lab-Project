@@ -11,9 +11,4 @@ public:
         : User(std::move(id),
         std::move(name),
         std::move(email)) {}
-    
-    std::string role() const override
-    {
-        return "Receptionist";
-    }
 };

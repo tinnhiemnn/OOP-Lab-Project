@@ -26,9 +26,4 @@ public:
     void setId(const std::string& value) { id = value; }
     void setName(const std::string& value) { name = value; }
     void setEmail(const std::string& value) { email = value; }
-    
-    virtual std::string role() const
-    {
-        return "User";
-    }
 };
