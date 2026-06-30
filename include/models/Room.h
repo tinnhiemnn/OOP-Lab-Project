@@ -72,16 +72,19 @@ public:
     }
 
     //chuyển RoomStatus -> String
-    static std::string statusToString(RoomStatus value)
-    {
-        if (value == RoomStatus::Maintenance) return "Maintenance";
-        return "Available";
+    static std::string statusToString(RoomStatus value) {
+        switch (value) {
+            case RoomStatus::Maintenance:  return "Maintenance";
+            case RoomStatus::InUse:return "InUse";
+            case RoomStatus::NeedCleaning: return "NeedCleaning";
+            case RoomStatus::Available:
+            default: return "Available";
+        }
     }
-
-    //chuyển String -> RoomStatus
-    static RoomStatus statusFromString(const std::string& value)
-    {
-        if (value == "Maintenance") return RoomStatus::Maintenance;
+    static RoomStatus statusFromString(const std::string& value) {
+        if (value == "Maintenance")  return RoomStatus::Maintenance;
+        if (value == "InUse") return RoomStatus::InUse;
+        if (value == "NeedCleaning") return RoomStatus::NeedCleaning;
         return RoomStatus::Available;
     }
 };
