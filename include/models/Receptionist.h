@@ -7,12 +7,12 @@ class Receptionist : public User
 public:
     Receptionist() = default;
 
-    Receptionist(std::string id, std::string name, std::string email)
+    Receptionist(QString id, QString name, QString email)
         : User(std::move(id),
         std::move(name),
         std::move(email)) {}
     
-    std::string role() const override
+    QString role() const override
     {
         return "Receptionist";
     }

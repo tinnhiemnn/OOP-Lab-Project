@@ -8,16 +8,16 @@ class CustomerRepository {
 public:
     bool add(const Customer& customer);
     bool update(const Customer& customer);
-    bool remove(const std::string& id);
+    bool remove(const QString& id);
     std::vector<Customer> findAll();
-    std::vector<Customer> search(const std::string& keyword);
-    std::optional<Customer> findById(const std::string& id);
-    std::string lastError() const { 
+    std::vector<Customer> search(const QString& keyword);
+    std::optional<Customer> findById(const QString& id);
+    QString lastError() const { 
         return lastErrorMessage; 
     }
     
     static Customer mapCustomer(QSqlQuery& q);
 
 private:
-    std::string lastErrorMessage;
+    QString lastErrorMessage;
 };

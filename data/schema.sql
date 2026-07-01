@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS rooms (
     id TEXT PRIMARY KEY,
-    type TEXT NOT NULL,
     base_price REAL NOT NULL,
     status TEXT NOT NULL,
+    type TEXT NOT NULL,
     beds INTEGER NOT NULL DEFAULT 1
 );
 

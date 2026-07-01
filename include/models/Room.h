@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <QString>
 
 enum class RoomType
 {
@@ -21,21 +21,21 @@ enum class RoomStatus
 class Room
 {
 private:
-    std::string roomId;
+    QString roomId;
     double basePrice = 0.0;
     RoomStatus status = RoomStatus::Available;
     RoomType type = RoomType::Standard;
 
 public:
     Room() = default;
-    Room(std::string roomId, double basePrice, RoomStatus status, RoomType type)
+    Room(QString roomId, double basePrice, RoomStatus status, RoomType type)
         : roomId(std::move(roomId)),
           basePrice(basePrice),
           status(status),
           type(type) {}
     virtual ~Room() = default;
 
-    const std::string& getRoomId() const { return roomId; }
+    const QString& getRoomId() const { return roomId; }
     double getBasePrice() const { return basePrice; }
     RoomStatus getStatus() const { return status; }
     RoomType getRoomType() const { return type; }
@@ -56,7 +56,7 @@ public:
     virtual double calculatePrice(int days) const = 0;
 
     //chuyển RoomType -> String
-    static std::string typeToString(RoomType value)
+    static QString typeToString(RoomType value)
     {
         if (value == RoomType::Deluxe) return "Deluxe";
         if (value == RoomType::President) return "President";
@@ -64,7 +64,7 @@ public:
     }
 
     //chuyển String -> RoomType
-    static RoomType typeFromString(const std::string& value)
+    static RoomType typeFromString(const QString& value)
     {
         if (value == "Deluxe") return RoomType::Deluxe;
         if (value == "President") return RoomType::President;
@@ -72,14 +72,14 @@ public:
     }
 
     //chuyển RoomStatus -> String
-    static std::string statusToString(RoomStatus value)
+    static QString statusToString(RoomStatus value)
     {
         if (value == RoomStatus::Maintenance) return "Maintenance";
         return "Available";
     }
 
     //chuyển String -> RoomStatus
-    static RoomStatus statusFromString(const std::string& value)
+    static RoomStatus statusFromString(const QString& value)
     {
         if (value == "Maintenance") return RoomStatus::Maintenance;
         return RoomStatus::Available;

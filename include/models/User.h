@@ -5,29 +5,29 @@
 class User
 {
 private:
-    std::string id;
-    std::string name;
-    std::string email;
+    QString id;
+    QString name;
+    QString email;
 
 public:
     User() = default;
-    User(std::string id,
-         std::string name,
-         std::string email)
+    User(QString id,
+         QString name,
+         QString email)
         : id(std::move(id)),
           name(std::move(name)),
           email(std::move(email)) {}
     virtual ~User() = default;
 
-    const std::string& getId() const { return id; }
-    const std::string& getName() const { return name; }
-    const std::string& getEmail() const { return email; }
+    const QString& getId() const { return id; }
+    const QString& getName() const { return name; }
+    const QString& getEmail() const { return email; }
 
-    void setId(const std::string& value) { id = value; }
-    void setName(const std::string& value) { name = value; }
-    void setEmail(const std::string& value) { email = value; }
+    void setId(const QString& value) { id = value; }
+    void setName(const QString& value) { name = value; }
+    void setEmail(const QString& value) { email = value; }
     
-    virtual std::string role() const
+    virtual QString role() const
     {
         return "User";
     }

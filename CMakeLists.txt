@@ -19,10 +19,13 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
     src/repositories/CustomerRepository.cpp
+    src/repositories/ReceptionistRepository.cpp
+    src/repositories/RoomRepository.cpp
+    src/repositories/BookingRepository.cpp
     
 )
 
 add_executable(HotelManagement ${PROJECT_SOURCES})
 target_include_directories(HotelManagement PRIVATE ${PROJECT_INCLUDE_DIRS})
-target_link_libraries(HotelManagement PRIVATE Qt6::Widgets Qt6::Sql)
+target_link_libraries(HotelManagement PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql)
 target_compile_definitions(HotelManagement PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <algorithm>
-#include <string>
+#include <QString>
+#include <QDate>
 
 enum class BookingStatus
 {
@@ -14,26 +15,26 @@ enum class BookingStatus
 class Booking
 {
 private:
-    std::string id;
-    std::string customerId;
-    std::string receptionistId;
-    std::string roomId;
-    std::string groupCode;
+    QString id;
+    QString customerId;
+    QString receptionistId;
+    QString roomId;
+    QString groupCode;
 
-    std::string checkIn;
-    std::string checkOut;
+    QDate checkIn;
+    QDate checkOut;
 
     //dịch vụ thêm
     int buffetQuantity = 0;
     bool useLaundry = false;
     bool useDecoration = false;
-    std::string decorationNote;
+    QString decorationNote;
 
     BookingStatus status = BookingStatus::Booked;
 
 public:
     Booking() = default;
-    Booking(std::string id, std::string customerId, std::string receptionistId, std::string roomId, std::string groupCode, std::string checkIn, std::string checkOut, BookingStatus status = BookingStatus::Booked)
+    Booking(QString id, QString customerId, QString receptionistId, QString roomId, QString groupCode, QDate checkIn, QDate checkOut, BookingStatus status = BookingStatus::Booked)
         : id(std::move(id)),
           customerId(std::move(customerId)),
           receptionistId(std::move(receptionistId)),
@@ -43,21 +44,21 @@ public:
           checkOut(std::move(checkOut)),
           status(status) {}
 
-    const std::string& getId() const { return id; }
-    const std::string& getCustomerId() const { return customerId; }
-    const std::string& getReceptionistId() const { return receptionistId; }
-    const std::string& getRoomId() const { return roomId; }
-    const std::string& getGroupCode() const { return groupCode; }
+    const QString& getId() const { return id; }
+    const QString& getCustomerId() const { return customerId; }
+    const QString& getReceptionistId() const { return receptionistId; }
+    const QString& getRoomId() const { return roomId; }
+    const QString& getGroupCode() const { return groupCode; }
 
-    const std::string& getCheckIn() const { return checkIn; }
-    const std::string& getCheckOut() const { return checkOut; }
+    const QDate& getCheckIn() const { return checkIn; }
+    const QDate& getCheckOut() const { return checkOut; }
 
     BookingStatus getStatus() const { return status; }
 
     int getBuffetQuantity() const { return buffetQuantity; }
     bool isUsingLaundry() const { return useLaundry; }
     bool isUsingDecoration() const { return useDecoration; }
-    const std::string& getDecorationNote() const { return decorationNote; }
+    const QString& getDecorationNote() const { return decorationNote; }
 
     void setStatus(BookingStatus value) { status = value; }
 
@@ -76,7 +77,7 @@ public:
         useDecoration = value;
     }
 
-    void setDecorationNote(const std::string& value)
+    void setDecorationNote(const QString& value)
     {
         decorationNote = value;
     }
@@ -93,7 +94,7 @@ public:
     }
 
     //chuyển booking -> String
-    static std::string statusToString(BookingStatus value)
+    static QString statusToString(BookingStatus value)
     {
         if (value == BookingStatus::Booked) return "Booked";
         if (value == BookingStatus::CheckedIn) return "CheckedIn";
@@ -103,7 +104,7 @@ public:
     }
 
     //chuyển String -> booking
-    static BookingStatus statusFromString(const std::string& value)
+    static BookingStatus statusFromString(const QString& value)
     {
         if (value == "Booked") return BookingStatus::Booked;
         if (value == "CheckedIn") return BookingStatus::CheckedIn;
