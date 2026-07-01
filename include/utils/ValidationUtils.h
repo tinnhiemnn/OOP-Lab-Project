@@ -1,30 +1,32 @@
 #pragma once
 #include "DateUtils.h"
-#include <algorithm>
-#include <cctype>
-#include <string>
+#include <QString>
 
 class ValidationUtils {
 public:
-    static bool isNonEmpty(const std::string& value) {
-        return std::any_of(value.begin(), value.end(), [](unsigned char c) { return !std::isspace(c); });
+    static bool isNonEmpty(const QString& value) {
+        return !value.trimmed().isEmpty();
     }
 
-    static bool isValidEmail(const std::string& email) {
-        const auto at = email.find('@');
-        const auto dot = email.rfind('.');
-        return at != std::string::npos && dot != std::string::npos && at > 0 && dot > at + 1 && dot + 1 < email.size();
+    static bool isValidEmail(const QString& email) {
+        const auto at = email.indexOf('@');
+        const auto dot = email.lastIndexOf('.');
+        return at != -1 && dot != -1 && at > 0 && dot > at + 1 && dot + 1 < email.size();
     }
 
-    static bool isValidPhone(const std::string& phone) {
-        return phone.size() >= 9 && phone.size() <= 12 && std::all_of(phone.begin(), phone.end(), [](unsigned char c) { return std::isdigit(c); });
+    static bool isValidPhone(const QString& phone) {
+        if (phone.size() < 9 || phone.size() > 12) return false;
+        for (const QChar& c : phone) {
+            if (c < '0' || c > '9') return false;
+        }
+        return true;
     }
 
     static bool isPositiveMoney(double amount) {
         return amount > 0;
     }
 
-    static bool isValidBookingInput(const std::string& customerId, const std::string& roomId, const std::string& checkIn, const std::string& checkOut, std::string& error) {
+    static bool isValidBookingInput(const QString& customerId, const QString& roomId, const QString& checkIn, const QString& checkOut, QString& error) {
         if (!isNonEmpty(customerId)) {
             error = "Customer ID is required.";
             return false;

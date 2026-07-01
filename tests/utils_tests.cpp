@@ -2,6 +2,7 @@
 #include "utils/ValidationUtils.h"
 #include <iostream>
 #include <cassert>
+#include <QString>
 
 void testDateUtils() {
     //1. isValidDate
@@ -57,7 +58,7 @@ void testValidationUtils() {
     assert(ValidationUtils::isPositiveMoney(-5.0) == false);
 
     //5. isValidBookingInput
-    std::string error;
+    QString error;
     assert(ValidationUtils::isValidBookingInput("C001", "R101", "2026-06-10", "2026-06-12", error) == true);
     assert(ValidationUtils::isValidBookingInput("", "R101", "2026-06-10", "2026-06-12", error) == false);
     assert(error == "Customer ID is required.");
@@ -75,6 +76,3 @@ int main() {
     std::cout << "All utility tests passed successfully!" << std::endl;
     return 0;
 }
-
-// g++ -std=c++17 -Iinclude tests/utils_tests.cpp -o test_runner
-// .\test_runner
