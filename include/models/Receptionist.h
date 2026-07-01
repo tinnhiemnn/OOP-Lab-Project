@@ -1,14 +1,15 @@
 #pragma once
 
 #include "models/User.h"
+#include <QString>
 
 class Receptionist : public User
 {
 public:
     Receptionist() = default;
 
-    Receptionist(std::string id, std::string name, std::string email)
+    Receptionist(QString id, QString name, QString email)
         : User(std::move(id),
-        std::move(name),
-        std::move(email)) {}
+               std::move(name),
+               std::move(email)) {}
 };

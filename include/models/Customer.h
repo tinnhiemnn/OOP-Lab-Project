@@ -1,23 +1,25 @@
 #pragma once
 
 #include "models/User.h"
+#include <QString>
 
 class Customer : public User
 {
 private:
-    std::string phone;
+    QString phone;
 
 public:
     Customer() = default;
-    Customer(std::string id, std::string name, std::string email, std::string phone)
+    
+    Customer(QString id, QString name, QString email, QString phone)
         : User(std::move(id),
                std::move(name),
                std::move(email)),
           phone(std::move(phone)) {}
 
-    const std::string& getPhone() const { return phone; }
+    const QString& getPhone() const { return phone; }
 
-    void setPhone(const std::string& value)
+    void setPhone(const QString& value)
     {
         phone = value;
     }
