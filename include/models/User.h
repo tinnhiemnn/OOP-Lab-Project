@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <QString>
 
 class User
 {
@@ -26,9 +26,4 @@ public:
     void setId(const QString& value) { id = value; }
     void setName(const QString& value) { name = value; }
     void setEmail(const QString& value) { email = value; }
-    
-    virtual QString role() const
-    {
-        return "User";
-    }
 };

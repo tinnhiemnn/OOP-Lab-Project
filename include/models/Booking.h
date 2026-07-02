@@ -24,7 +24,7 @@ private:
     QDate checkIn;
     QDate checkOut;
 
-    //dịch vụ thêm
+    //dich vu them
     int buffetQuantity = 0;
     bool useLaundry = false;
     bool useDecoration = false;
@@ -40,8 +40,8 @@ public:
           receptionistId(std::move(receptionistId)),
           roomId(std::move(roomId)),
           groupCode(std::move(groupCode)),
-          checkIn(std::move(checkIn)),
-          checkOut(std::move(checkOut)),
+          checkIn(checkIn),
+          checkOut(checkOut),
           status(status) {}
 
     const QString& getId() const { return id; }
@@ -50,8 +50,8 @@ public:
     const QString& getRoomId() const { return roomId; }
     const QString& getGroupCode() const { return groupCode; }
 
-    const QDate& getCheckIn() const { return checkIn; }
-    const QDate& getCheckOut() const { return checkOut; }
+    QDate getCheckIn() const { return checkIn; }
+    QDate getCheckOut() const { return checkOut; }
 
     BookingStatus getStatus() const { return status; }
 
@@ -89,11 +89,10 @@ public:
 
     bool isActive() const
     {
-        return status == BookingStatus::Booked 
-            || status == BookingStatus::CheckedIn;
+        return status == BookingStatus::Booked || status == BookingStatus::CheckedIn;
     }
 
-    //chuyển booking -> String
+    //chuyen BookingStatus -> QString
     static QString statusToString(BookingStatus value)
     {
         if (value == BookingStatus::Booked) return "Booked";
@@ -103,7 +102,7 @@ public:
         return "Cancelled";
     }
 
-    //chuyển String -> booking
+    //chuyen QString -> BookingStatus
     static BookingStatus statusFromString(const QString& value)
     {
         if (value == "Booked") return BookingStatus::Booked;

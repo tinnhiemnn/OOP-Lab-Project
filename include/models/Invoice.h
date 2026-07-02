@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include <QString>
+#include <QDate>
 
 enum class PaymentMethod
 {
@@ -13,90 +14,71 @@ enum class PaymentMethod
 class Invoice
 {
 private:
-    std::string id;
-    std::string bookingId;
-    std::string receptionistId;
-    std::string issuedDate;
+    QString id;
+    QString bookingId;
+    QString receptionistId;
+    QDate issuedDate;
 
     double totalAmount = 0.0;
     double discountAmount = 0.0;
 
     PaymentMethod paymentMethod = PaymentMethod::Cash;
 
-    std::string discountName;
+    QString discountName;
 
 public:
     Invoice() = default;
-    Invoice(std::string id,
-            std::string bookingId,
-            std::string receptionistId,
-            std::string issuedDate,
+    
+    Invoice(QString id,
+            QString bookingId,
+            QString receptionistId,
+            QDate issuedDate,
             double totalAmount = 0,
             double discountAmount = 0,
             PaymentMethod paymentMethod = PaymentMethod::Cash,
-            std::string discountName = "")
+            QString discountName = "")
         : id(std::move(id)),
-        bookingId(std::move(bookingId)),
-        receptionistId(std::move(receptionistId)),
-        issuedDate(std::move(issuedDate)),
-        totalAmount(totalAmount),
-        discountAmount(discountAmount),
-        paymentMethod(paymentMethod),
-        discountName(std::move(discountName)) {}
+          bookingId(std::move(bookingId)),
+          receptionistId(std::move(receptionistId)),
+          issuedDate(issuedDate),
+          totalAmount(totalAmount),
+          discountAmount(discountAmount),
+          paymentMethod(paymentMethod),
+          discountName(std::move(discountName)) {}
 
-    const std::string& getId() const { return id; }
-    const std::string& getBookingId() const { return bookingId; }
-    const std::string& getReceptionistId() const { return receptionistId; }
-    const std::string& getIssuedDate() const { return issuedDate; }
+    const QString& getId() const { return id; }
+    const QString& getBookingId() const { return bookingId; }
+    const QString& getReceptionistId() const { return receptionistId; }
+    QDate getIssuedDate() const { return issuedDate; }
     double getTotalAmount() const { return totalAmount; }
     double getDiscountAmount() const { return discountAmount; }
     PaymentMethod getPaymentMethod() const { return paymentMethod; }
-    const std::string& getDiscountName() const { return discountName; }
+    const QString& getDiscountName() const { return discountName; }
 
-    void setTotalAmount(double amount)
-    {
-        totalAmount = amount;
-    }
+    void setTotalAmount(double amount) { totalAmount = amount; }
+    void setPaymentMethod(PaymentMethod method) { paymentMethod = method; }
+    void setDiscountName(const QString& value) { discountName = value; }
+    void setDiscountAmount(double amount) { discountAmount = amount; }
+    void setIssuedDate(QDate date) { issuedDate = date; }
 
-    void setPaymentMethod(PaymentMethod method)
-    {
-        paymentMethod = method;
-    }
-
-    void setDiscountName(const std::string& value)
-    {
-        discountName = value;
-    }
-
-    void setDiscountAmount(double amount)
-    {
-        discountAmount = amount;
-    }
-
-    //chuyển đổi pttt
-    static std::string paymentMethodToString(PaymentMethod method)
+    //chuyen doi PaymentMethod -> QString
+    static QString paymentMethodToString(PaymentMethod method)
     {
         switch (method)
         {
-        case PaymentMethod::CreditCard:
-            return "Credit Card";
-        case PaymentMethod::EWallet:
-            return "E-Wallet";
-        case PaymentMethod::BankTransfer:
-            return "Bank Transfer";
-        default:
-            return "Cash";
+        case PaymentMethod::CreditCard:   return "Credit Card";
+        case PaymentMethod::EWallet:      return "E-Wallet";
+        case PaymentMethod::BankTransfer: return "Bank Transfer";
+        default:                          return "Cash";
         }
     }
 
-    static PaymentMethod paymentMethodFromString(const std::string& method)
+    //chuyen doi QString -> PaymentMethod
+    static PaymentMethod paymentMethodFromString(const QString& method)
     {
-        if (method == "Credit Card")
-            return PaymentMethod::CreditCard;
-        if (method == "E-Wallet")
-            return PaymentMethod::EWallet;
-        if (method == "Bank Transfer")
-            return PaymentMethod::BankTransfer;
+        if (method == "Credit Card")   return PaymentMethod::CreditCard;
+        if (method == "E-Wallet")      return PaymentMethod::EWallet;
+        if (method == "Bank Transfer") return PaymentMethod::BankTransfer;
 
         return PaymentMethod::Cash;
     }

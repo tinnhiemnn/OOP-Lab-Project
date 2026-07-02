@@ -2,6 +2,7 @@
 
 #include "models/Room.h"
 #include <algorithm>
+#include <QString>
 
 class StandardRoom : public Room
 {
@@ -10,12 +11,13 @@ private:
 
 public:
     StandardRoom() = default;
-    StandardRoom(std::string id, double price, RoomStatus status = RoomStatus::Available, int beds = 1)
+ 
+    StandardRoom(QString id, double price, RoomStatus status = RoomStatus::Available, int beds = 1)
         : Room(std::move(id),
-        price,
-        status,
-        RoomType::Standard),
-        beds(std::max(1, beds)) {}
+               price,
+               status,
+               RoomType::Standard),
+          beds(std::max(1, beds)) {}
 
     int getBeds() const { return beds; }
 

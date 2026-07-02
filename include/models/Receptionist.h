@@ -1,6 +1,7 @@
 #pragma once
 
 #include "models/User.h"
+#include <QString>
 
 class Receptionist : public User
 {
@@ -9,11 +10,6 @@ public:
 
     Receptionist(QString id, QString name, QString email)
         : User(std::move(id),
-        std::move(name),
-        std::move(email)) {}
-    
-    QString role() const override
-    {
-        return "Receptionist";
-    }
+               std::move(name),
+               std::move(email)) {}
 };

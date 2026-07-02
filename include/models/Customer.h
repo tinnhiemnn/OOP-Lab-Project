@@ -1,6 +1,7 @@
 #pragma once
 
 #include "models/User.h"
+#include <QString>
 
 class Customer : public User
 {

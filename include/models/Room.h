@@ -9,7 +9,6 @@ enum class RoomType
     President
 };
 
-
 enum class RoomStatus
 {
     Available,
@@ -40,48 +39,53 @@ public:
     RoomStatus getStatus() const { return status; }
     RoomType getRoomType() const { return type; }
 
-    //kiểm tra phòng có sẵn hay không
+    //kiem tra phong
     bool isAvailable() const
     {
         return status == RoomStatus::Available;
     }
 
-    //thay đổi trạng thái phòng
     void changeStatus(RoomStatus value)
     {
         status = value;
     }
 
-    //tính tiền
+    //tinh tien phong
     virtual double calculatePrice(int days) const = 0;
 
-    //chuyển RoomType -> String
+    //chuyen RoomType -> QString
     static QString typeToString(RoomType value)
     {
-        if (value == RoomType::Deluxe) return "Deluxe";
-        if (value == RoomType::President) return "President";
-        return "Standard";
+        switch (value) {
+            case RoomType::Deluxe:    return "Deluxe";
+            case RoomType::President: return "President";
+            default:                  return "Standard";
+        }
     }
 
-    //chuyển String -> RoomType
+    //chuyen QString -> RoomType
     static RoomType typeFromString(const QString& value)
     {
-        if (value == "Deluxe") return RoomType::Deluxe;
+        if (value == "Deluxe")    return RoomType::Deluxe;
         if (value == "President") return RoomType::President;
         return RoomType::Standard;
     }
 
-    //chuyển RoomStatus -> String
-    static QString statusToString(RoomStatus value)
-    {
-        if (value == RoomStatus::Maintenance) return "Maintenance";
-        return "Available";
+    //chuyen RoomStatus -> QString
+    static QString statusToString(RoomStatus value) {
+        switch (value) {
+            case RoomStatus::Maintenance:  return "Maintenance";
+            case RoomStatus::InUse:        return "InUse";
+            case RoomStatus::NeedCleaning: return "NeedCleaning";
+            default:                       return "Available";
+        }
     }
 
-    //chuyển String -> RoomStatus
-    static RoomStatus statusFromString(const QString& value)
-    {
-        if (value == "Maintenance") return RoomStatus::Maintenance;
+    //chuyen QString -> RoomStatus
+    static RoomStatus statusFromString(const QString& value) {
+        if (value == "Maintenance")  return RoomStatus::Maintenance;
+        if (value == "InUse")        return RoomStatus::InUse;
+        if (value == "NeedCleaning") return RoomStatus::NeedCleaning;
         return RoomStatus::Available;
     }
 };
