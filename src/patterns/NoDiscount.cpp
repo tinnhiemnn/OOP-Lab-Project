@@ -4,7 +4,7 @@ double NoDiscount::apply(double amount) const {
     return amount;
 }
 
-std::string NoDiscount::name() const {
+QString NoDiscount::name() const {
     return "No Discount";
 }
 

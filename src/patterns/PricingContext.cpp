@@ -13,7 +13,7 @@ double PricingContext::calculateFinalAmount(double amount) const {
     return strategy ? strategy->apply(amount) : amount;
 }
 
-std::string PricingContext::currentStrategyName() const {
+QString PricingContext::currentStrategyName() const {
     return strategy ? strategy->name() : "No Discount";
 }
 

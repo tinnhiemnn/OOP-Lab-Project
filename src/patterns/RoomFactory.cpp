@@ -5,7 +5,7 @@
 #include "models/StandardRoom.h"
 
 std::unique_ptr<Room> RoomFactory::createRoom(RoomType type,
-                                              const std::string& roomId,
+                                              const Qstring& roomId,
                                               double basePrice,
                                               RoomStatus status,
                                               int numberOfBeds) {
@@ -20,8 +20,8 @@ std::unique_ptr<Room> RoomFactory::createRoom(RoomType type,
     return std::make_unique<StandardRoom>(roomId, basePrice, status, numberOfBeds);
 }
 
-std::unique_ptr<Room> RoomFactory::createRoom(const std::string& type,
-                                              const std::string& roomId,
+std::unique_ptr<Room> RoomFactory::createRoom(const QString& type,
+                                              const QString& roomId,
                                               double basePrice,
                                               RoomStatus status,
                                               int numberOfBeds) {
