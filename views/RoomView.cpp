@@ -11,8 +11,12 @@
 #include <QSpinBox>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QString>
 
-namespace { std::string text(QLineEdit* edit) { return edit->text().trimmed().toStdString(); } std::string current(QComboBox* box) { return box->currentText().toStdString(); } }
+namespace {
+    QString text(QLineEdit* edit) { return edit->text().trimmed(); }
+    QString current(QComboBox* box) { return box->currentText(); }
+}
 
 RoomView::RoomView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), typeEdit(new QComboBox(this)), priceEdit(new QDoubleSpinBox(this)),
@@ -45,8 +49,8 @@ RoomView::RoomView(QWidget* parent)
     auto* filterBtn = new QPushButton("Filter", this);
     filters->addWidget(filterType); filters->addWidget(filterStatus); filters->addWidget(filterBtn);
 
-    table->setColumnCount(5);
-    table->setHorizontalHeaderLabels({"ID", "Type", "Price", "Beds", "Status"});
+    table->setColumnCount(4);
+    table->setHorizontalHeaderLabels({"ID", "Type", "Price", "Status"});
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);

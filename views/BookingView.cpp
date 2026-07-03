@@ -10,8 +10,11 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QString>
 
-namespace { std::string text(QLineEdit* edit) { return edit->text().trimmed().toStdString(); } }
+namespace {
+    QString text(QLineEdit* edit) { return edit->text().trimmed(); }
+}
 
 BookingView::BookingView(QWidget* parent)
     : QWidget(parent), bookingIdEdit(new QLineEdit(this)), customerIdEdit(new QLineEdit(this)), roomIdEdit(new QLineEdit(this)),

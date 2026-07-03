@@ -8,8 +8,11 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QVBoxLayout>
+#include <QString>
 
-namespace { std::string text(QLineEdit* edit) { return edit->text().trimmed().toStdString(); } }
+namespace {
+    QString text(QLineEdit* edit) { return edit->text().trimmed(); }
+}
 
 CustomerView::CustomerView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
