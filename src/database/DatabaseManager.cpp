@@ -36,7 +36,7 @@ QString DatabaseManager::resolveDatabasePath(const QString& databasePath) const 
     return QDir(QStringLiteral(PROJECT_SOURCE_DIR)).absoluteFilePath("data/hotel.db");
 }
 
- bool DatabaseManager::initializeSchema() {
+bool DatabaseManager::initializeSchema() {
     const QString schemaPath = QDir(QStringLiteral(PROJECT_SOURCE_DIR)).absoluteFilePath("data/schema.sql");
     
     QFile file(schemaPath);
@@ -63,9 +63,16 @@ QString DatabaseManager::resolveDatabasePath(const QString& databasePath) const 
         return false;
     };
     return true;
- }
+}
 
- QSqlDatabase DatabaseManager::database() const {
+void DatabaseManager::closeConnection() {
+    QString connectionName = db.connectionName();
+    if (db.isOpen()) db.close();
+    db = QSqlDatabase();
+    QSqlDatabase::removeDatabase(connectionName);
+}
+ 
+QSqlDatabase DatabaseManager::database() const {
     return db;
 }
 
