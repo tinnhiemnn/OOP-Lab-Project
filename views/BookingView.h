@@ -5,6 +5,8 @@
 class QDateEdit;
 class QLineEdit;
 class QTableWidget;
+class QLabel;
+class QFrame;
 
 class BookingView : public QWidget {
 public:
@@ -27,5 +29,9 @@ private:
     QDateEdit* checkInEdit;
     QDateEdit* checkOutEdit;
     QTableWidget* table;
+
+    QFrame* formCard;
+    QFrame* tableCard;
+    QLabel* createStatusBadge(const QString &status);
 };
 
