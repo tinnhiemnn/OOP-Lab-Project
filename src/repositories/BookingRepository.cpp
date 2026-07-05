@@ -41,13 +41,13 @@ bool BookingRepository::add(const Booking& booking) {
 bool BookingRepository::update(const Booking& booking) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("UPDATE bookings SET customer_id = ?, receptionist_id = ?, room_id = ?, group_code = ?, check_in = ?, check_out = ?, status = ? WHERE id = ?");
-    q.addBindValue(booking.getCustomerId()));
-    q.addBindValue(booking.getRoomId()));
-    q.addBindValue(booking.getCheckIn()));
-    q.addBindValue(booking.getCheckOut()));
-    q.addBindValue(Booking::statusToString(booking.getStatus())));
+    q.addBindValue(booking.getCustomerId());
+    q.addBindValue(booking.getRoomId());
+    q.addBindValue(booking.getCheckIn());
+    q.addBindValue(booking.getCheckOut());
+    q.addBindValue(Booking::statusToString(booking.getStatus()));
     q.addBindValue(booking.getServiceCharge());
-    q.addBindValue(booking.getId()));
+    q.addBindValue(booking.getId());
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return false;
