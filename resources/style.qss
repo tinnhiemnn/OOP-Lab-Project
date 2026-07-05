@@ -1,0 +1,452 @@
+/* ---------------------------------------------------------------------
+   1. GLOBAL / BASE
+--------------------------------------------------------------------- */
+QWidget {
+    background-color: #111820;
+    color: #EDF3F7;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow {
+    background-color: #111820;
+}
+
+/* Section eyebrow labels (set QLabel objectName="eyebrowLabel") */
+QLabel#eyebrowLabel {
+    color: #5C6C78;
+    font-size: 10px;
+    font-weight: 600;
+    /* letter-spacing not supported by QSS; approximate by inserting
+       spaces between characters in the string itself if needed */
+}
+
+QLabel#pageTitle {
+    color: #EDF3F7;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+QLabel#pageSubtitle {
+    color: #8CA3B3;
+    font-size: 11px;
+}
+
+
+/* ---------------------------------------------------------------------
+   2. SIDEBAR NAVIGATION
+   Recommended: a QListWidget (objectName "sidebarNav") placed in a
+   QHBoxLayout next to a QStackedWidget that holds each page
+   (Customers / Rooms / Bookings / Invoices / Reports). This gives full
+   control over icons, spacing and the active-item pill — closer to the
+   mockup than repurposing QTabWidget.
+
+   Icons: QListWidgetItem::setIcon(QIcon(":/icons/calendar.svg")) in C++;
+   QSS only controls icon-size/spacing, not the icon graphic itself.
+
+   Alternative: if you'd rather keep your existing QTabWidget, calling
+   tabWidget->setTabPosition(QTabWidget::West) moves tabs to the left —
+   but Qt rotates West/East tab text 90° by default. Fixing that needs a
+   small QProxyStyle override in C++, QSS alone can't prevent the rotation.
+--------------------------------------------------------------------- */
+QListWidget#sidebarNav {
+    background-color: #1B242D;
+    border: none;
+    border-right: 1px solid #2A3640;
+    outline: 0;
+    padding: 12px 8px;
+}
+
+QListWidget#sidebarNav::item {
+    color: #8CA3B3;
+    padding: 10px 12px;
+    margin: 2px 2px;
+    border-radius: 8px;
+    icon-size: 18px 18px;
+}
+
+QListWidget#sidebarNav::item:hover {
+    background-color: #212B35;
+    color: #EDF3F7;
+}
+
+QListWidget#sidebarNav::item:selected {
+    background-color: #4FA9CE;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+/* Sidebar footer buttons (Settings / Log out) */
+QPushButton#btnSettings, QPushButton#btnLogout {
+    background-color: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #8CA3B3;
+    text-align: left;
+    padding: 10px 12px;
+}
+QPushButton#btnSettings:hover {
+    background-color: #212B35;
+    color: #EDF3F7;
+}
+QPushButton#btnLogout:hover {
+    background-color: rgba(231, 118, 138, 0.10);
+    color: #E7768A;
+}
+
+
+/* ---------------------------------------------------------------------
+   3. CARDS / PANELS
+   QSS has no box-shadow, so the "elevated card" depth from the web
+   version needs a QGraphicsDropShadowEffect applied in C++ if you want
+   the same soft glow, e.g.:
+     auto *shadow = new QGraphicsDropShadowEffect;
+     shadow->setBlurRadius(24); shadow->setOffset(0, 4);
+     shadow->setColor(QColor(0,0,0,90));
+     card->setGraphicsEffect(shadow);
+--------------------------------------------------------------------- */
+QFrame#cardPanel, QGroupBox#cardPanel {
+    background-color: #1B242D;
+    border: 1px solid #2A3640;
+    border-radius: 8px;
+}
+
+QGroupBox#cardPanel::title {
+    subcontrol-origin: margin;
+    left: 16px;
+    padding: 0 4px;
+    color: #5C6C78;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+QFrame#cardPanel QLabel {
+    background-color: transparent;
+}
+
+/* ---------------------------------------------------------------------
+   4. INPUTS — QLineEdit / QDateEdit / QComboBox
+--------------------------------------------------------------------- */
+QLineEdit, QDateEdit, QComboBox, QSpinBox, QDoubleSpinBox {
+    background-color: #212B35;
+    border: 1px solid #2A3640;
+    border-radius: 8px;
+    padding: 6px 12px;
+    color: #EDF3F7;
+    selection-background-color: #4FA9CE;
+    selection-color: #FFFFFF;
+}
+
+QLineEdit:hover, QDateEdit:hover, QComboBox:hover {
+    border: 1px solid #364552;
+}
+
+QLineEdit:focus, QDateEdit:focus, QComboBox:focus {
+    border: 1px solid #4FA9CE;
+    /* QSS has no box-shadow / focus glow ring; a 1px border color swap
+       is the closest native equivalent */
+}
+
+QLineEdit:disabled {
+    color: #5C6C78;
+    background-color: #1B242D;
+}
+
+/* Placeholder color (Qt 5.12+) */
+QLineEdit {
+    placeholder-text-color: #5C6C78;
+}
+
+QComboBox::drop-down, QDateEdit::drop-down {
+    border: none;
+    width: 26px;
+    subcontrol-position: right center;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #1B242D;
+    border: 1px solid #2A3640;
+    border-radius: 8px;
+    outline: 0;
+    selection-background-color: #4FA9CE;
+    selection-color: #FFFFFF;
+    padding: 4px;
+}
+
+QDateEdit::down-arrow, QComboBox::down-arrow {
+    width: 10px;
+    height: 10px;
+    image: url(:/icons/chevron-down.svg); /* supply a small light-gray chevron asset */
+}
+
+/* Calendar popup for QDateEdit */
+QCalendarWidget QWidget {
+    background-color: #1B242D;
+    color: #EDF3F7;
+}
+QCalendarWidget QToolButton {
+    color: #EDF3F7;
+    background-color: transparent;
+}
+QCalendarWidget QAbstractItemView:enabled {
+    background-color: #1B242D;
+    selection-background-color: #4FA9CE;
+    selection-color: #FFFFFF;
+}
+
+
+/* ---------------------------------------------------------------------
+   5. BUTTONS
+--------------------------------------------------------------------- */
+QPushButton {
+    background-color: transparent;
+    border: 1px solid #2A3640;
+    border-radius: 8px;
+    color: #8CA3B3;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+}
+QPushButton:hover {
+    color: #63BEE0;
+    border-color: #4FA9CE;
+}
+QPushButton:pressed {
+    background-color: #212B35;
+}
+QPushButton:disabled {
+    color: #5C6C78;
+    border-color: #2A3640;
+}
+
+/* Primary — "Book" */
+QPushButton#btnBook {
+    background-color: #4FA9CE;
+    border: none;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+QPushButton#btnBook:hover  { background-color: #63BEE0; }
+QPushButton#btnBook:pressed { background-color: #2D5F73; }
+
+/* Cancel — outline that turns danger-red on hover */
+QPushButton#btnCancel:hover {
+    color: #E7768A;
+    border-color: #E7768A;
+}
+
+/* Check-in / Check-out keep the shared outline style above; give them
+   a subtle accent hover to differentiate from Cancel */
+QPushButton#btnCheckin:hover, QPushButton#btnCheckout:hover {
+    color: #63BEE0;
+    border-color: #4FA9CE;
+}
+
+/* Refresh — square icon-only ghost button */
+QPushButton#btnRefresh {
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0;
+    icon-size: 18px 18px;
+}
+
+/* Search button next to the table search field */
+QPushButton#btnSearch {
+    background-color: rgba(45, 95, 115, 0.6);
+    border: 1px solid rgba(79, 169, 206, 0.2);
+    color: #EDF3F7;
+}
+QPushButton#btnSearch:hover {
+    background-color: #2D5F73;
+}
+
+/* Filters button next to the filters field */
+QPushButton#btnFilters {
+    background-color: rgba(45, 95, 115, 0.6);
+    border: 1px solid rgba(79, 169, 206, 0.2);
+    color: #EDF3F7;
+}
+QPushButton#btnFilters:hover {
+    background-color: #2D5F73;
+}
+
+/* ---------------------------------------------------------------------
+   6. TABLE — QTableWidget / QTableView
+--------------------------------------------------------------------- */
+QTableWidget#tableBookings, QTableView#tableBookings {
+    background-color: #1B242D;
+    border: 1px solid #2A3640;
+    border-radius: 8px;
+    gridline-color: #2A3640;
+    alternate-background-color: #1F2933;
+    selection-background-color: rgba(79, 169, 206, 0.15);
+    selection-color: #EDF3F7;
+}
+
+QTableWidget#tableBookings::item, QTableView#tableBookings::item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #2A3640;
+}
+
+QHeaderView::section {
+    background-color: #212B35;
+    color: #8CA3B3;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: 1px solid #2A3640;
+    font-size: 13px;
+    font-weight: 600;
+    /* Header labels are shown in Title Case here since QSS can't do
+       text-transform: uppercase — call headerItem->setText(str.toUpper())
+       in C++ if you want literal uppercase like the web version */
+}
+
+QHeaderView::section:first {
+    border-top-left-radius: 8px;
+}
+QHeaderView::section:last {
+    border-top-right-radius: 8px;
+}
+
+QTableCornerButton::section {
+    background-color: #212B35;
+    border: none;
+}
+
+/* ---- Status badges ----
+   QSS can't paint a colored pill purely via the table's own stylesheet.
+   The clean way: put a QLabel in each status cell via
+   table->setCellWidget(row, col, label), give the label a dynamic
+   property, and style by property value:
+       label->setProperty("status", "confirmed");
+   Then in C++ after setProperty, call:
+       label->style()->unpolish(label); label->style()->polish(label);
+   for the new state to take effect. */
+QLabel[status="confirmed"] {
+    background-color: rgba(79, 191, 139, 0.10);
+    color: #4FBF8B;
+    border: 1px solid rgba(79, 191, 139, 0.30);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QLabel[status="checkedin"] {
+    background-color: rgba(79, 169, 206, 0.10);
+    color: #63BEE0;
+    border: 1px solid rgba(79, 169, 206, 0.30);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QLabel[status="pending"] {
+    background-color: rgba(224, 167, 94, 0.10);
+    color: #E0A75E;
+    border: 1px solid rgba(224, 167, 94, 0.30);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QLabel[status="checkedout"] {
+    background-color: rgba(140, 163, 179, 0.10);
+    color: #8CA3B3;
+    border: 1px solid #2A3640;
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+QLabel[status="cancelled"] {
+    background-color: rgba(231, 118, 138, 0.10);
+    color: #E7768A;
+    border: 1px solid rgba(231, 118, 138, 0.30);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------------------
+   7. SCROLLBARS
+--------------------------------------------------------------------- */
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 0;
+}
+QScrollBar::handle:vertical {
+    background: #2A3640;
+    border-radius: 5px;
+    min-height: 24px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #364552;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+}
+QScrollBar::handle:horizontal {
+    background: #2A3640;
+    border-radius: 5px;
+    min-width: 24px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #364552;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0;
+}
+
+
+/* ---------------------------------------------------------------------
+   8. TOP BAR (search field + notification/avatar area, if built as a
+   QWidget strip with objectName "topBar")
+--------------------------------------------------------------------- */
+QWidget#topBar {
+    background-color: #111820;
+    border-bottom: 1px solid #2A3640;
+}
+
+QLineEdit#leQuickSearch {
+    background-color: #212B35;
+}
+
+/*-------------------------------------------------------------*/
+
+QTabWidget::pane { border: none; }
+QTabWidget::tab-bar { alignment: left; }
+
+QTabBar {
+    background-color: #1B242D;
+}
+QTabBar::tab {
+    background-color: transparent;
+    color: #8CA3B3;
+    padding: 10px 14px;
+    margin: 3px 8px;
+    border-radius: 8px;
+    min-width: 170px;
+    text-align: left;
+}
+QTabBar::tab:hover {
+    background-color: #212B35;
+    color: #EDF3F7;
+}
+QTabBar::tab:selected {
+    background-color: #4FA9CE;
+    color: #FFFFFF;
+    font-weight: 600;
+}
