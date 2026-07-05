@@ -21,6 +21,7 @@ public:
     static DatabaseManager& getInstance();
     bool openDatabase(const QString& databasePath = QString());
     bool initializeSchema();
+    void closeConnection();
     QSqlDatabase database() const;
     QString lastError() const;
 

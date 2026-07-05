@@ -5,7 +5,7 @@
 #include "models/StandardRoom.h"
 
 std::unique_ptr<Room> RoomFactory::createRoom(RoomType type,
-                                              const Qstring& roomId,
+                                              const QString& roomId,
                                               double basePrice,
                                               RoomStatus status,
                                               int numberOfBeds) {

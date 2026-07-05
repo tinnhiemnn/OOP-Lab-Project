@@ -22,7 +22,7 @@ bool RoomRepository::add(const Room& room, int beds) {
     q.prepare("INSERT INTO rooms(id, base_price, status, type, beds) VALUES(?, ?, ?, ?, ?)");
     q.addBindValue(room.getRoomId());
     q.addBindValue(room.getBasePrice());
-    q.addBindValue(Room::statusToString(room.getStatus())));
+    q.addBindValue(Room::statusToString(room.getStatus()));
     q.addBindValue(Room::typeToString(room.getRoomType()));
     q.addBindValue(beds);
     if (!q.exec()) {
@@ -77,13 +77,13 @@ std::vector<std::unique_ptr<Room>> RoomRepository::findAll() {
 std::vector<std::unique_ptr<Room>> RoomRepository::search(const QString& typeFilter, const QString& statusFilter) {
     std::vector<std::unique_ptr<Room>> rows;
     QString sql = "SELECT id, base_price, status, type, beds FROM rooms WHERE 1=1";
-    if (!typeFilter.empty() && typeFilter != "All") sql += " AND type = ?";
-    if (!statusFilter.empty() && statusFilter != "All") sql += " AND status = ?";
+    if (!typeFilter.isEmpty() && typeFilter != "All") sql += " AND type = ?";
+    if (!statusFilter.isEmpty() && statusFilter != "All") sql += " AND status = ?";
     sql += " ORDER BY id";
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare(sql);
-    if (!typeFilter.empty() && typeFilter != "All") q.addBindValue(typeFilter));
-    if (!statusFilter.empty() && statusFilter != "All") q.addBindValue(statusFilter));
+    if (!typeFilter.isEmpty() && typeFilter != "All") q.addBindValue(typeFilter);
+    if (!statusFilter.isEmpty() && statusFilter != "All") q.addBindValue(statusFilter);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return rows;
@@ -95,7 +95,7 @@ std::vector<std::unique_ptr<Room>> RoomRepository::search(const QString& typeFil
 std::unique_ptr<Room> RoomRepository::findById(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("SELECT id, base_price, status, type, beds FROM rooms WHERE id = ?");
-    q.addBindValue(id));
+    q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return nullptr;

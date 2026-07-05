@@ -18,10 +18,10 @@ set(PROJECT_INCLUDE_DIRS
 set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
+    src/patterns/RoomFactory.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
-    src/repositories/BookingRepository.cpp
     
 )
 
