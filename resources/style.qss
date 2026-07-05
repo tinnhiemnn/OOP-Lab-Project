@@ -1,42 +1,3 @@
-/* =====================================================================
-   GRANDVIEW HOTEL — QT STYLE SHEET (QSS)
-   Equivalent of the HTML/Tailwind dashboard redesign, for QApplication /
-   QMainWindow ::setStyleSheet().
-
-   HOW TO APPLY
-   ------------
-   qApp->setStyleSheet(loadedQssString);
-   // or load from resource file:
-   //   QFile f(":/styles/hotel-dashboard.qss");
-   //   f.open(QFile::ReadOnly | QFile::Text);
-   //   qApp->setStyleSheet(QTextStream(&f).readAll());
-
-   OBJECT NAMES REQUIRED
-   ----------------------
-   Several rules below target specific widgets by objectName so that only
-   THAT widget gets the special styling (e.g. the "Book" button being filled
-   while others stay outlined). Set these in Qt Designer's Property Editor,
-   or in code:
-       ui->btnBook->setObjectName("btnBook");
-
-   Expected names used below:
-     sidebarNav      -> QListWidget used as the left nav (see note further down)
-     btnBook, btnCheckin, btnCheckout, btnCancel, btnRefresh, btnSearch
-     leBookingId, leCustomerId, leRoomId   -> QLineEdit
-     deCheckin, deCheckout                -> QDateEdit
-     cbService                            -> QComboBox
-     tableBookings                        -> QTableWidget / QTableView
-
-   THINGS QSS CANNOT DO (Qt's stylesheet engine supports a subset of CSS2 —
-   these have no equivalent and are called out again inline where relevant):
-     - box-shadow            -> use QGraphicsDropShadowEffect in C++ instead
-     - transition / animation-> use QPropertyAnimation in C++ instead
-     - text-transform         -> convert strings with .toUpper() in code
-     - letter-spacing
-     - backdrop-filter / blur
-   ===================================================================== */
-
-
 /* ---------------------------------------------------------------------
    1. GLOBAL / BASE
 --------------------------------------------------------------------- */
@@ -159,11 +120,14 @@ QGroupBox#cardPanel::title {
     font-weight: 600;
 }
 
+QFrame#cardPanel QLabel {
+    background-color: transparent;
+}
 
 /* ---------------------------------------------------------------------
    4. INPUTS — QLineEdit / QDateEdit / QComboBox
 --------------------------------------------------------------------- */
-QLineEdit, QDateEdit, QComboBox, QSpinBox {
+QLineEdit, QDateEdit, QComboBox, QSpinBox, QDoubleSpinBox {
     background-color: #212B35;
     border: 1px solid #2A3640;
     border-radius: 8px;
@@ -244,7 +208,7 @@ QPushButton {
     font-weight: 500;
 }
 QPushButton:hover {
-    color: #EDF3F7;
+    color: #63BEE0;
     border-color: #4FA9CE;
 }
 QPushButton:pressed {
@@ -298,6 +262,15 @@ QPushButton#btnSearch:hover {
     background-color: #2D5F73;
 }
 
+/* Filters button next to the filters field */
+QPushButton#btnFilters {
+    background-color: rgba(45, 95, 115, 0.6);
+    border: 1px solid rgba(79, 169, 206, 0.2);
+    color: #EDF3F7;
+}
+QPushButton#btnFilters:hover {
+    background-color: #2D5F73;
+}
 
 /* ---------------------------------------------------------------------
    6. TABLE — QTableWidget / QTableView
@@ -323,7 +296,7 @@ QHeaderView::section {
     padding: 8px 12px;
     border: none;
     border-bottom: 1px solid #2A3640;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     /* Header labels are shown in Title Case here since QSS can't do
        text-transform: uppercase — call headerItem->setText(str.toUpper())
@@ -449,4 +422,31 @@ QWidget#topBar {
 
 QLineEdit#leQuickSearch {
     background-color: #212B35;
+}
+
+/*-------------------------------------------------------------*/
+
+QTabWidget::pane { border: none; }
+QTabWidget::tab-bar { alignment: left; }
+
+QTabBar {
+    background-color: #1B242D;
+}
+QTabBar::tab {
+    background-color: transparent;
+    color: #8CA3B3;
+    padding: 10px 14px;
+    margin: 3px 8px;
+    border-radius: 8px;
+    min-width: 170px;
+    text-align: left;
+}
+QTabBar::tab:hover {
+    background-color: #212B35;
+    color: #EDF3F7;
+}
+QTabBar::tab:selected {
+    background-color: #4FA9CE;
+    color: #FFFFFF;
+    font-weight: 600;
 }

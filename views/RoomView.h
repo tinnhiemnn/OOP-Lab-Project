@@ -7,6 +7,8 @@ class QDoubleSpinBox;
 class QLineEdit;
 class QSpinBox;
 class QTableWidget;
+class QLabel;
+class QFrame;
 
 class RoomView : public QWidget {
 public:
@@ -26,9 +28,12 @@ private:
     QDoubleSpinBox* priceEdit;
     QComboBox* statusEdit;
     QSpinBox* bedsEdit;
-    QLineEdit* servicesEdit;
+    QComboBox* servicesEdit;
     QComboBox* filterType;
     QComboBox* filterStatus;
     QTableWidget* table;
+
+    QFrame* formCard;
+    QFrame* tableCard;
 };
 

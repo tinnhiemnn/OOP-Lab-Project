@@ -32,6 +32,5 @@ private:
 
     QFrame* formCard;
     QFrame* tableCard;
-    QLabel* createStatusBadge(const QString &status);
 };
 

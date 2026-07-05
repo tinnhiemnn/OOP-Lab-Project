@@ -1,11 +1,11 @@
 #pragma once
 
-//#include "controllers/CustomerController.h"
-
 #include <QWidget>
 
 class QLineEdit;
 class QTableWidget;
+class QLabel;
+class QFrame;
 
 class CustomerView : public QWidget {
 public:
@@ -26,5 +26,8 @@ private:
     QLineEdit* phoneEdit;
     QLineEdit* searchEdit;
     QTableWidget* table;
+
+    QFrame* formCard;
+    QFrame* tableCard;
 };
 

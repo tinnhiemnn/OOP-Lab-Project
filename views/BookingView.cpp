@@ -4,15 +4,14 @@
 #include <QDateEdit>
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QHeaderView>
 #include <QLineEdit>
-#include <QMessageBox>
+#include <QMessageBox> 
 #include <QPushButton>
 #include <QTableWidget>
-#include <QVBoxLayout>
 #include <QString>
 #include <QFrame>
-#include <QLabel>
 #include <QGraphicsDropShadowEffect>
 
 namespace {
@@ -49,26 +48,21 @@ BookingView::BookingView(QWidget* parent)
     addBtn->setObjectName("btnBook");
 
     auto* inBtn = new QPushButton("Check-in", this);
-    inBtn->setObjectName("btnCheckin");
-
     auto* outBtn = new QPushButton("Check-out", this);
-    outBtn->setObjectName("btnCheckout");
-
     auto* cancelBtn = new QPushButton("Cancel", this);
     cancelBtn->setObjectName("btnCancel");
 
     auto* reloadBtn = new QPushButton("Refresh", this);
-    reloadBtn->setObjectName("btnRefresh");
 
-    actions->addWidget(addBtn, 1);
-    actions->addWidget(inBtn, 1);
-    actions->addWidget(outBtn, 1);
-    actions->addWidget(cancelBtn, 1);
-    actions->addStretch();          // đẩy Refresh sát bên phải, có khoảng trống trước nó
-    actions->addWidget(reloadBtn);  // không có stretch, giữ kích thước cố định
+    actions->addWidget(addBtn);
+    actions->addWidget(inBtn);
+    actions->addWidget(outBtn);
+    actions->addWidget(cancelBtn);
+    actions->addWidget(reloadBtn);
 
     // --- Card 1: form đặt phòng + các nút hành động ---
     formCard = new QFrame(this);
+    formCard->setObjectName("cardPanel");
     auto* formCardLayout = new QVBoxLayout(formCard);
     formCardLayout->addLayout(form);
     formCardLayout->addLayout(actions);
@@ -77,7 +71,8 @@ BookingView::BookingView(QWidget* parent)
     auto* searchBtn = new QPushButton("Search", this);
     searchBtn->setObjectName("btnSearch");
     searchEdit->setPlaceholderText("Search bookings");
-    searching->addWidget(searchEdit); searching->addWidget(searchBtn);
+    searching->addWidget(searchEdit);
+    searching->addWidget(searchBtn);
 
     table->setObjectName("tableBookings");
     table->setColumnCount(7);
@@ -88,30 +83,16 @@ BookingView::BookingView(QWidget* parent)
 
     // --- Card 2: ô tìm kiếm + bảng ---
     tableCard = new QFrame(this);
+    tableCard->setObjectName("cardPanel");
     auto* tableCardLayout = new QVBoxLayout(tableCard);
     tableCardLayout->addLayout(searching);
     tableCardLayout->addWidget(table);
 
+    // --- Layout tổng thể card 1 + card 2 ---
     auto* layout = new QVBoxLayout(this);
-
     layout->addWidget(formCard);
     layout->addWidget(tableCard);
 
     applyCardShadow(formCard);
     applyCardShadow(tableCard);
-}
-
-QLabel* BookingView::createStatusBadge(const QString &status)
-{
-    auto *label = new QLabel(status, this);
-    label->setAlignment(Qt::AlignCenter);
-
-    QString key = status.toLower().remove('-');   // "Checked-in" -> "checkedin"
-    label->setProperty("status", key);
-
-    // Bắt buộc — nếu thiếu 2 dòng này, QSS sẽ không nhận property mới:
-    label->style()->unpolish(label);
-    label->style()->polish(label);
-
-    return label;
 }
