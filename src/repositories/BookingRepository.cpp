@@ -70,17 +70,6 @@ bool BookingRepository::update(const Booking& booking) {
     return true;
 }
 
-bool BookingRepository::remove(const QString& id) {
-    QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("DELETE FROM bookings WHERE id = ?");
-    q.addBindValue(id);
-    if (!q.exec()) {
-        lastErrorMessage = q.lastError().text();
-        return false;
-    }
-    return true;
-}
-
 std::vector<Booking> BookingRepository::findAll() {
     std::vector<Booking> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());

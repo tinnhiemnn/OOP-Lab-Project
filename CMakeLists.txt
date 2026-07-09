@@ -26,7 +26,8 @@ set(PROJECT_SOURCES
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
     src/repositories/BookingRepository.cpp
-
+    src/repositories/InvoiceRepository.cpp
+    src/services/ReportService.cpp
     
 )
 

@@ -82,15 +82,15 @@ double InvoiceRepository::totalRevenue() {
     return q.next() ? q.value(0).toDouble() : 0;
 }
 
-std::vector<double> InvoiceRepository::getMonthlyRevenue(int year) {
+std::vector<double> InvoiceRepository::getMonthlyRevenue(const QString& year) {
     std::vector<double> monthlyRevenue(12, 0.0);
     QSqlQuery q(DatabaseManager::getInstance().database());
     // Dùng strftime('%m', ...) để trích xuất tháng từ chuỗi ngày yyyy-mm-dd
     q.prepare("SELECT strftime('%m', issued_date) as month, SUM(total_amount) as total "
               "FROM invoices "
-              "WHERE strftime('%Y', check_out) = ? "
+              "WHERE strftime('%Y', issued_date) = ? "
               "GROUP BY month");  
-    q.bindValue(QString::number(year)); 
+    q.bindValue(year); 
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return monthlyRevenue; 
@@ -121,9 +121,9 @@ double InvoiceRepository::getTotalRevenueByRoomType(const QString& roomType) {
     return 0.0;
 }
 
-std::vector<std::pair<QString, double>> InvoiceRepository::getRevenueByReceptionist() {
+std::vector<ReceptionistKPI> InvoiceRepository::getRevenueByReceptionist() {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT r.id as rec_id, SUM(i.total_amount) as total_revenue"
+    q.prepare("SELECT r.id, r.name, SUM(i.total_amount) as total_revenue"
               "FROM receptionist r "
               "LEFT JOIN invoices i ON r.id = i.receptionist_id "
               "GROUP BY rec_id "
@@ -133,9 +133,11 @@ std::vector<std::pair<QString, double>> InvoiceRepository::getRevenueByReception
         return 0.0; 
     }
     while (q.next()) {
-        QString receptionistId = q.value(0).toString();
-        double totalRevenue = q.value(1).toDouble();
-        results.push_back(std::make_pair(receptionistId, totalRevenue));
+        ReceptionistKPI rec;
+        rec.id = q.value(0).toString();
+        rec.name = q.value(1).toString();
+        rec.totalRevenue = q.value(2).toDouble();
+        results.push_back(rec);
     }
     return results;
 }

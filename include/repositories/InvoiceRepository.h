@@ -11,6 +11,11 @@ struct TopCustomer {
     QString name;
     double totalSpending;
 };
+struct ReceptionistKPI {
+    QString id;
+    QString name;
+    double totalRevenue;
+};
 
 class InvoiceRepository {
 public:
