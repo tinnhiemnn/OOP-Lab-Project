@@ -14,6 +14,7 @@ public:
     std::vector<std::unique_ptr<Room>> findAll();
     std::vector<std::unique_ptr<Room>> search(const QString& typeFilter, const QString& statusFilter);
     std::unique_ptr<Room> findById(const QString& id);
+    std::vector<std::unique_ptr<Room>> findAvailableInPeriod(const QDate& checkIn, const QDate& checkOut);
     QString lastError() const { return lastErrorMessage; }
 
 private:

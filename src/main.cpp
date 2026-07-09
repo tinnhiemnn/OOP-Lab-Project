@@ -4,18 +4,18 @@
 #include <vector>
 #include <optional>
 
-// Include các headers quản lý database và repositories của nhóm bạn
+// Include Database Manager và các Controllers mới của nhóm bạn
 #include "database/DatabaseManager.h"
-#include "repositories/CustomerRepository.h"
-#include "repositories/ReceptionistRepository.h"
-#include "repositories/RoomRepository.h"
+#include "controllers/CustomerController.h"
+#include "controllers/ReceptionistController.h"
+#include "controllers/RoomController.h"
 #include "models/StandardRoom.h"
 
 
-// Hàm tiện ích để in dòng phân cách dòng test case
+
 void printSeparator(const std::string& title) {
     std::cout << "\n========================================\n";
-    std::cout << " TEST CASE: " << title << "\n";
+    std::cout << " TEST CONTROLLER: " << title << "\n";
     std::cout << "========================================\n";
 }
 
@@ -23,137 +23,121 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
 
-    printSeparator("KHOI TAO KET NOI DATABASE");
+    printSeparator("KET NOI DATABASE");
     if (!DatabaseManager::getInstance().openDatabase()) {
-        std::cerr << "🚨 Loi khoi tao CSDL! Dung chuong trinh.\n";
+        std::cerr << "🚨 Huỷ bỏ test do loi khoi tao CSDL.\n";
         return -1;
     }
 
-    // 2. Khởi tạo các đối tượng Repository phục vụ kiểm thử
-    CustomerRepository customerRepo;
-    ReceptionistRepository receptionistRepo;
-    RoomRepository roomRepo;
+    // 2. Khởi tạo các Controller độc lập
+    CustomerController customerController;
+    ReceptionistController receptionistController;
+    RoomController roomController;
+
+    // Biến dùng chung để hứng lỗi từ các hàm của Controller
+    QString errorMsg; 
 
     // =========================================================================
-    // TEST CASE 1: KIỂM THỬ CUSTOMER REPOSITORY (CRUD)
+    // TEST CASE 1: CUSTOMER CONTROLLER
     // =========================================================================
-    printSeparator("CUSTOMER REPOSITORY (CRUD)");
+    printSeparator("CUSTOMER CONTROLLER");
 
-    // Giả định hàm khởi tạo Customer(id, name, email, phone) sử dụng QString
-    Customer c1("C001", "Nguyen Van A", "a.nguyen@gmail.com", "0901234567");
+    Customer c2("C002", "Tran Van B", "b.tran@gmail.com", "0911223344");
     
-    // Test Add
-    if (customerRepo.add(c1)) {
-        std::cout << "✅ Them khach hang C001 thanh cong.\n";
+    // Test Thêm Khách Hàng qua Controller
+    if (customerController.addCustomer(c2, errorMsg)) {
+        std::cout << "✅ [Controller] Them khach hang C002 thanh cong.\n";
     } else {
-        std::cerr << "❌ Them khach hang that bai: " << customerRepo.lastError().toStdString() << "\n";
+        std::cerr << "❌ [Controller] Them that bai. Loi: " << errorMsg.toStdString() << "\n";
     }
 
-    // Test FindById & Update
-    auto foundCustomer = customerRepo.findById("C001");
-    if (foundCustomer.has_value()) {
-        std::cout << "🔍 Tim thay khach hang: " << foundCustomer->getName().toStdString() << "\n";
-        
-        // Thay đổi thông tin để test Update
-        foundCustomer->setName("Nguyen Van A (Updated)");
-        if (customerRepo.update(*foundCustomer)) {
-            std::cout << "✅ Cap nhat thong tin khach hang C001 thanh cong.\n";
-        }
-    } else {
-        std::cerr << "❌ Khong tim thay khach hang C001!\n";
+    // Test lấy danh sách khách hàng
+    std::cout << "📋 Danh sach khach hang tu Controller:\n";
+    auto customers = customerController.listCustomers();
+    for (const auto& c : customers) {
+        std::cout << "   - " << c.getId().toStdString() << " | " << c.getName().toStdString() << "\n";
     }
 
-    // Test Search
-    std::cout << "🔎 Thu nghiem tim kiem Khach hang voi tu khoa 'Nguyen':\n";
-    auto searchResults = customerRepo.search("Nguyen");
-    for (const auto& customer : searchResults) {
-        std::cout << "   - [" << customer.getId().toStdString() << "] " << customer.getName().toStdString() << "\n";
+    // Test trường hợp lỗi (Ví dụ thêm trùng ID để xem Controller bắt lỗi thế nào)
+    printSeparator("CUSTOMER CONTROLLER - TEST BAT LOI");
+    if (!customerController.addCustomer(c2, errorMsg)) {
+        std::cout << "🎯 Thử nghiem bat loi trung ID thanh cong! Thong bao loi nhan duoc:\n";
+        std::cout << "   👉 \"" << errorMsg.toStdString() << "\"\n";
     }
 
 
     // =========================================================================
-    // TEST CASE 2: KIỂM THỬ RECEPTIONIST REPOSITORY (CRUD)
+    // TEST CASE 2: RECEPTIONIST CONTROLLER
     // =========================================================================
-    printSeparator("RECEPTIONIST REPOSITORY (CRUD)");
+    printSeparator("RECEPTIONIST CONTROLLER");
 
-    // Giả định hàm khởi tạo Receptionist(id, name, email)
-    Receptionist r1("REC01", "Tran Thi Le Tan", "letan@hotel.com");
+    Receptionist r2("REC02", "Nguyen Van Le Tan", "letan2@hotel.com");
 
     // Test Add
-    if (receptionistRepo.add(r1)) {
-        std::cout << "✅ Them le tan REC01 thanh cong.\n";
+    if (receptionistController.addReceptionist(r2, errorMsg)) {
+        std::cout << "✅ [Controller] Them le tan REC02 thanh cong.\n";
     } else {
-        std::cerr << "❌ Them le tan that bai: " << receptionistRepo.lastError().toStdString() << "\n";
+        std::cerr << "❌ [Controller] Them le tan that bai: " << errorMsg.toStdString() << "\n";
     }
 
-    // Test FindAll
-    std::cout << "📋 Danh sach tat ca le tan hien co:\n";
-    auto allReceptionists = receptionistRepo.findAll();
-    for (const auto& rec : allReceptionists) {
-        std::cout << "   - [" << rec.getId().toStdString() << "] " << rec.getName().toStdString() << "\n";
+    // Test GetById
+    auto optRec = receptionistController.getReceptionistById("REC02");
+    if (optRec.has_value()) {
+        std::cout << "🔍 [Controller] GetById tim thay: " << optRec->getName().toStdString() << "\n";
     }
 
 
     // =========================================================================
-    // TEST CASE 3: KIỂM THỬ ROOM REPOSITORY (Smart Pointer & Enum)
+    // TEST CASE 3: ROOM CONTROLLER (Xử lý Unique_Ptr và Enum)
     // =========================================================================
-    printSeparator("ROOM REPOSITORY (UNIQUE_PTR & STATUS)");
+    printSeparator("ROOM CONTROLLER");
 
-    // Giả định hàm khởi tạo Room(id, roomNumber, type, status)
-    StandardRoom room1("RM101", 100000, RoomStatus::Available, 2);
-    int bedsCount = 2;
+    StandardRoom rm202("RM202", 100000, RoomStatus::Available, 2);
+    int numBeds = 2;
 
-    // Test Add Room kèm tham số số giường (beds)
-    if (roomRepo.add(room1, bedsCount)) {
-        std::cout << "✅ Them phong 101 thanh cong.\n";
+    // Test Add Room
+    if (roomController.addRoom(rm202, numBeds, errorMsg)) {
+        std::cout << "✅ [Controller] Them phong 202 thanh cong.\n";
     } else {
-        std::cerr << "❌ Them phong that bai: " << roomRepo.lastError().toStdString() << "\n";
+        std::cerr << "❌ [Controller] Them phong that bai: " << errorMsg.toStdString() << "\n";
     }
 
-    // Test Update Status độc lập
-    if (roomRepo.updateStatus("RM101", RoomStatus::InUse)) {
-        std::cout << "✅ Da chuyen trang thai phong 101 sang [InUse].\n";
+    // Test Cập nhật trạng thái phòng qua Controller
+    if (roomController.updateRoomStatus("RM202", RoomStatus::Maintenance, errorMsg)) {
+        std::cout << "✅ [Controller] Da chuyen trang thai phong 202 sang [Maintenance].\n";
     } else {
-        std::cerr << "❌ Cap nhat trang thai that bai: " << roomRepo.lastError().toStdString() << "\n";
+        std::cerr << "❌ [Controller] Cap nhat trang thai that bai: " << errorMsg.toStdString() << "\n";
     }
 
-    // Test FindById xử lý với std::unique_ptr
-    std::unique_ptr<Room> foundRoom = roomRepo.findById("RM101");
-    if (foundRoom != nullptr) {
-        std::cout << "🔍 Tim thay phong tu DB bang Unique_Ptr.\n";
-    } else {
-        std::cerr << "❌ Khong tim thay phong RM101!\n";
-    }
-
-    // Test FindAll xử lý danh sách std::vector<std::unique_ptr<Room>>
-    std::cout << "📋 Danh sach tat ca cac phong trong he thong:\n";
-    std::vector<std::unique_ptr<Room>> allRooms = roomRepo.findAll();
+    // Test hiển thị danh sách dạng unique_ptr từ Controller
+    std::cout << "📋 Danh sach tat ca cac phong hien tai:\n";
+    auto allRooms = roomController.getAllRooms();
     for (const auto& r : allRooms) {
-        // Vì r là unique_ptr, ta truy cập qua toán tử -> thông thường
-        std::cout << "   - Phong ID: " << r->getRoomId().toStdString() 
-                  << " | Trang thai: " << Room::statusToString(r->getStatus()).toStdString()
+        std::cout << "   - Phong: " << r->getRoomId().toStdString() 
                   << " | Loai: " << Room::typeToString(r->getRoomType()).toStdString() << "\n";
     }
 
 
     // =========================================================================
-    // TEST CASE 4: DỌN DẸP DỮ LIỆU (REMOVE TESTS)
+    // TEST CASE 4: XÓA DỮ LIỆU QUA CONTROLLER
     // =========================================================================
-    printSeparator("DON DEP DU LIEU (REMOVE / DELETE)");
+    printSeparator("DON DEP DU LIEU QUA CONTROLLER");
 
-    // Xóa thử nghiệm các bản ghi vừa thêm để dọn rác database (nếu cần)
-    // Bạn có thể comment các dòng dưới này lại nếu muốn dữ liệu giữ nguyên dưới SQLite để làm GUI
-    if (customerRepo.remove("C001")) {
-        std::cout << "🗑️ Da xoa khach hang C001 khoi he thong.\n";
+    // Thực hiện xoá thông qua hàm delete của các Controller
+    // Lưu ý: Bạn có thể comment các dòng này lại nếu muốn giữ data trong file .db để làm GUI
+    if (customerController.deleteCustomer("C002", errorMsg)) {
+        std::cout << "🗑️ [Controller] Da xoa khach hang C002.\n";
     }
+    else std::cout<<errorMsg.toStdString()<<'\n';
     
-    if (roomRepo.remove("RM101")) {
-        std::cout << "🗑️ Da xoa phong RM101 khoi he thong.\n";
+    if (roomController.deleteRoom("RM202", errorMsg)) {
+        std::cout << "🗑️ [Controller] Da xoa phong RM202.\n";
     }
+    else std::cout<<errorMsg.toStdString()<<'\n';
 
-    std::cout << "\n🎉 === HOAN THANH TAT CA CAC TEST CASE KIEM TRA ===\n";
-
-    // Đóng kết nối an toàn trước khi thoát chương trình
+    std::cout << "\n🎉 === HOAN THANH KIEM THU TANG CONTROLLER ===\n";
+    
+    // Đóng kết nối an toàn
     DatabaseManager::getInstance().closeConnection();
     return 0;
 }

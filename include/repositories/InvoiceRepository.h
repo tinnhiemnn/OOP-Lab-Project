@@ -1,0 +1,31 @@
+#pragma once
+
+#include "models/Invoice.h"
+
+#include <optional>
+#include <QString>
+#include <vector>
+
+struct TopCustomer {
+    QString id;
+    QString name;
+    double totalSpending;
+};
+
+class InvoiceRepository {
+public:
+    bool add(const Invoice& invoice);
+    std::vector<Invoice> findAll();
+    std::vector<Invoice> search(const QString& keyword);
+    std::optional<Invoice> findById(const QString& id);
+    double totalRevenue();
+    std::vector<double> getMonthlyRevenue(int year);
+    double getTotalRevenueByRoomType(const QString& roomType);
+    std::vector<std::pair<QString, double>> getRevenueByReceptionist();
+    std::vector<TopCustomer> getTop5Customers();
+    QString lastError() const { return lastErrorMessage; }
+
+private:
+    QString lastErrorMessage;
+};
+

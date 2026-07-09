@@ -39,12 +39,12 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 CREATE TABLE IF NOT EXISTS invoices (
     id TEXT PRIMARY KEY,
-    group_code TEXT NOT NULL,
+    booking_id TEXT NOT NULL,
     receptionist_id TEXT,
     issued_date TEXT NOT NULL,
     payment_method TEXT NOT NULL,
     discount_name TEXT NOT NULL,
     total_amount REAL NOT NULL,
-    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL,
-    FOREIGN KEY(group_code) REFERENCES bookings(group_code)
+    FOREIGN KEY(booking_id) REFERENCES bookings(id),
+    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL
 );

@@ -13,6 +13,7 @@ public:
     std::vector<Booking> findAll();
     std::vector<Booking> search(const QString& keyword);
     std::optional<Booking> findById(const QString& id);
+    int countBookings(const QString& roomType, const QString& bookingStatus);
     QString lastError() const { return lastErrorMessage; }
 
 private:
