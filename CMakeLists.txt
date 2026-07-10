@@ -20,6 +20,9 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
     src/patterns/RoomFactory.cpp
+    src/controllers/CustomerController.cpp
+    src/controllers/ReceptionistController.cpp
+    src/controllers/RoomController.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp

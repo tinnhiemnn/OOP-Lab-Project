@@ -15,14 +15,19 @@ Booking mapBooking(QSqlQuery& q) {
                     q.value(4).toString(),
                     q.value(5).toDate(),
                     q.value(6).toDate(),
-                    Booking::statusFromString(q.value(7).toString()));
+                    Booking::statusFromString(q.value(11).toString()));
+    booking.setBuffetQuantity(q.value(7).toInt());
+    booking.setLaundry(q.value(8).toBool());
+    booking.setDecoration(q.value(9).toBool());
+    booking.setDecorationNote(q.value(10).toString());
     return booking;
 }
 }
 
 bool BookingRepository::add(const Booking& booking) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("INSERT INTO bookings(id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, status) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
+    q.prepare("INSERT INTO bookings(id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, num_buffet, " 
+              "laundry_service, decor_service, decor_note, status) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     q.addBindValue(booking.getId());
     q.addBindValue(booking.getCustomerId());
     q.addBindValue(booking.getReceptionistId());
@@ -30,6 +35,10 @@ bool BookingRepository::add(const Booking& booking) {
     q.addBindValue(booking.getGroupCode());
     q.addBindValue(booking.getCheckIn());
     q.addBindValue(booking.getCheckOut());
+    q.addBindValue(booking.getBuffetQuantity());
+    q.addBindValue(booking.isUsingLaundry());
+    q.addBindValue(booking.isUsingDecoration());
+    q.addBindValue(booking.getDecorationNote());
     q.addBindValue(Booking::statusToString(booking.getStatus()));
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -40,26 +49,20 @@ bool BookingRepository::add(const Booking& booking) {
 
 bool BookingRepository::update(const Booking& booking) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("UPDATE bookings SET customer_id = ?, receptionist_id = ?, room_id = ?, group_code = ?, check_in = ?, check_out = ?, status = ? WHERE id = ?");
+    q.prepare("UPDATE bookings SET customer_id = ?, receptionist_id = ?, room_id = ?, group_code = ?, check_in = ?, check_out = ?, "
+              "num_buffet = ?, laundry_service = ?, decor_service = ?, decor_note = ?, status = ? WHERE id = ?");
     q.addBindValue(booking.getCustomerId());
     q.addBindValue(booking.getReceptionistId());
     q.addBindValue(booking.getRoomId());
     q.addBindValue(booking.getGroupCode());
     q.addBindValue(booking.getCheckIn());
     q.addBindValue(booking.getCheckOut());
+    q.addBindValue(booking.getBuffetQuantity());
+    q.addBindValue(booking.isUsingLaundry());
+    q.addBindValue(booking.isUsingDecoration());
+    q.addBindValue(booking.getDecorationNote());
     q.addBindValue(Booking::statusToString(booking.getStatus()));
     q.addBindValue(booking.getId());
-    if (!q.exec()) {
-        lastErrorMessage = q.lastError().text();
-        return false;
-    }
-    return true;
-}
-
-bool BookingRepository::remove(const QString& id) {
-    QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("DELETE FROM bookings WHERE id = ?");
-    q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return false;
@@ -70,7 +73,8 @@ bool BookingRepository::remove(const QString& id) {
 std::vector<Booking> BookingRepository::findAll() {
     std::vector<Booking> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    if (!q.exec("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, status FROM bookings ORDER BY id")) {
+    if (!q.exec("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, " 
+                "num_buffet, laundry_service, decor_service, decor_note, status FROM bookings ORDER BY id")) {
         lastErrorMessage = q.lastError().text();
         return rows;
     }
@@ -81,9 +85,12 @@ std::vector<Booking> BookingRepository::findAll() {
 std::vector<Booking> BookingRepository::search(const QString& keyword) {
     std::vector<Booking> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, status FROM bookings WHERE id LIKE ? OR customer_id LIKE ? OR room_id LIKE ? OR status LIKE ? ORDER BY id");
+    q.prepare("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, "
+              "num_buffet, laundry_service, decor_service, decor_note, status FROM bookings "
+              "WHERE id LIKE ? OR customer_id LIKE ? OR receptionist_id LIKE ? OR room_id LIKE ? "
+              "OR group_code LIKE ? OR decor_note LIKE ? OR status LIKE ? ORDER BY id");
     const QString pattern = "%" + keyword + "%";
-    for (int i = 0; i < 4; ++i) q.addBindValue(pattern);
+    for (int i = 0; i < 7; ++i) q.addBindValue(pattern);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return rows;
@@ -94,7 +101,8 @@ std::vector<Booking> BookingRepository::search(const QString& keyword) {
 
 std::optional<Booking> BookingRepository::findById(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, status FROM bookings WHERE id = ?");
+    q.prepare("SELECT id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, " 
+              "num_buffet, laundry_service, decor_service, decor_note, status FROM bookings WHERE id = ?");
     q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -102,4 +110,25 @@ std::optional<Booking> BookingRepository::findById(const QString& id) {
     }
     if (q.next()) return mapBooking(q);
     return std::nullopt;
+}
+
+int BookingRepository::countBookings(const QString& roomType, const QString& bookingStatus) {
+    QSqlQuery q(DatabaseManager::getInstance().database());
+    
+    QString sql = "SELECT COUNT(*) FROM bookings b "
+                  "JOIN rooms r ON b.room_id = r.id "
+                  "WHERE r.type = ?";
+                  
+    if (!bookingStatus.isEmpty()) sql += " AND b.status = ?";
+    q.prepare(sql);
+    q.bindValue(roomType);
+    if (!bookingStatus.isEmpty()) q.bindValue(bookingStatus);
+    
+    if (!q.exec()) {
+        lastErrorMessage = q.lastError().text();
+        return 0; 
+    }
+    
+    if (q.next()) return q.value(0).toInt(); 
+    return 0;
 }
