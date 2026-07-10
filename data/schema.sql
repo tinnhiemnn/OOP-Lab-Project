@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS invoices (
     issued_date TEXT NOT NULL,
     payment_method TEXT NOT NULL,
     discount_name TEXT NOT NULL,
+    subtotal_amount REAL NOT NULL,
+    discount_amount REAL NOT NULL,
     total_amount REAL NOT NULL,
     FOREIGN KEY(booking_id) REFERENCES bookings(id),
     FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL

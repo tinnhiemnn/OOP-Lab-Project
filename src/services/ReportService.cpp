@@ -12,7 +12,7 @@ OverallReport ReportService::getOverallReport() {
     int totalRooms = static_cast<int>(roomRows.size());
     int inUseRooms = 0;
     for (const auto& room : roomRows) {
-        inUseRooms += (room->getStatus == RoomStatus::InUse);
+        inUseRooms += (room->getStatus() == RoomStatus::InUse);
     }
     double occupancyRate = 0.0;
     if (totalRooms > 0) occupancyRate = (inUseRooms * 100.0) / totalRooms;
@@ -35,12 +35,12 @@ std::vector<RoomTypeReport> ReportService::getRoomTypeReport() {
         item.revenue = invoices.getTotalRevenueByRoomType(item.roomType);
         totalRevenue += item.revenue;
 
-        item.totalBookings = bookings.countBookings(item.roomType);
+        item.totalBookings = bookings.countBookings(item.roomType, "All");
         item.cancelledBookings = bookings.countBookings(item.roomType, Booking::statusToString(BookingStatus::Cancelled));
         reports.push_back(item); 
     }
     for (auto& item : reports) {
-        item.percentage = (totalRevenue > 0.0 ? (item.revenue * 100.0) / totalRevenue : 0.0);
+        item.revenuePercentage = (totalRevenue > 0.0 ? (item.revenue * 100.0) / totalRevenue : 0.0);
 
         if (item.totalBookings > 0) {
             item.cancellationRate = (item.cancelledBookings * 100.0) / item.totalBookings;

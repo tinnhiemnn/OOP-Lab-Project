@@ -12,22 +12,27 @@ Invoice mapInvoice(QSqlQuery& q) {
                    q.value(1).toString(),
                    q.value(2).toString(),
                    q.value(3).toDate(),
+                   q.value(4).toDouble(),
+                   q.value(5).toDouble(),
                    q.value(6).toDouble(),
-                   q.value(5).toString(),
-                   q.value(6).toInt() == 1);
+                   Invoice::paymentMethodFromString(q.value(7).toString()),
+                   q.value(8).toString());
 }
 }
 
 bool InvoiceRepository::add(const Invoice& invoice) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("INSERT INTO invoices(id, booking_id, issued_date, total_amount, payment_method, discount_name, paid) VALUES(?, ?, ?, ?, ?, ?, ?)");
+    q.prepare("INSERT INTO invoices(id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, "
+              "discount_amount, payment_method, discount_name) VALUES(?, ?, ?, ?, ?, ?, ?, ?, )");
     q.addBindValue(invoice.getId());
     q.addBindValue(invoice.getBookingId());
+    q.addBindValue(invoice.getReceptionistId());
     q.addBindValue(invoice.getIssuedDate());
+    q.addBindValue(invoice.getSubtotalAmount());
     q.addBindValue(invoice.getTotalAmount());
-    q.addBindValue(invoice.getPaymentMethod());
+    q.addBindValue(invoice.getDiscountAmount());
+    q.addBindValue(Invoice::paymentMethodToString(invoice.getPaymentMethod()));
     q.addBindValue(invoice.getDiscountName());
-    q.addBindValue(invoice.isPaid() ? 1 : 0);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return false;
@@ -38,7 +43,7 @@ bool InvoiceRepository::add(const Invoice& invoice) {
 std::vector<Invoice> InvoiceRepository::findAll() {
     std::vector<Invoice> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    if (!q.exec("SELECT id, booking_id, issued_date, total_amount, payment_method, discount_name, paid FROM invoices ORDER BY id")) {
+    if (!q.exec("SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, payment_method, discount_name FROM invoices ORDER BY id")) {
         lastErrorMessage = q.lastError().text();
         return rows;
     }
@@ -49,8 +54,9 @@ std::vector<Invoice> InvoiceRepository::findAll() {
 std::vector<Invoice> InvoiceRepository::search(const QString& keyword) {
     std::vector<Invoice> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, booking_id, issued_date, total_amount, payment_method, discount_name, paid FROM invoices WHERE id LIKE ? OR booking_id LIKE ? ORDER BY id");
-    const QString pattern = "%" + keyword) + "%";
+    q.prepare("SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, "
+              "payment_method, discount_name FROM invoices WHERE id LIKE ? OR booking_id LIKE ? ORDER BY id");
+    const QString pattern = "%" + keyword + "%";
     q.addBindValue(pattern);
     q.addBindValue(pattern);
     if (!q.exec()) {
@@ -63,8 +69,9 @@ std::vector<Invoice> InvoiceRepository::search(const QString& keyword) {
 
 std::optional<Invoice> InvoiceRepository::findById(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, booking_id, issued_date, total_amount, payment_method, discount_name, paid FROM invoices WHERE id = ?");
-    q.addBindValue(id));
+    q.prepare("SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, "
+              "payment_method, discount_name FROM invoices WHERE id = ?");
+    q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return std::nullopt;
@@ -75,7 +82,7 @@ std::optional<Invoice> InvoiceRepository::findById(const QString& id) {
 
 double InvoiceRepository::totalRevenue() {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    if (!q.exec("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE paid = 1")) {
+    if (!q.exec("SELECT COALESCE(SUM(total_amount), 0) FROM invoices")) {
         lastErrorMessage = q.lastError().text();
         return 0;
     }
@@ -90,7 +97,7 @@ std::vector<double> InvoiceRepository::getMonthlyRevenue(const QString& year) {
               "FROM invoices "
               "WHERE strftime('%Y', issued_date) = ? "
               "GROUP BY month");  
-    q.bindValue(year); 
+    q.addBindValue(year); 
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return monthlyRevenue; 
@@ -112,7 +119,7 @@ double InvoiceRepository::getTotalRevenueByRoomType(const QString& roomType) {
               "JOIN bookings b ON i.booking_id = b.id "
               "JOIN rooms r ON b.room_id = r.id "
               "WHERE r.type = ?"); 
-    q.bindValue(roomType);
+    q.addBindValue(roomType);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return 0.0; 
@@ -123,14 +130,15 @@ double InvoiceRepository::getTotalRevenueByRoomType(const QString& roomType) {
 
 std::vector<ReceptionistKPI> InvoiceRepository::getRevenueByReceptionist() {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT r.id, r.name, SUM(i.total_amount) as total_revenue"
-              "FROM receptionist r "
+    q.prepare("SELECT r.id, r.name, SUM(i.total_amount) as total_revenue "
+              "FROM receptionists r "
               "LEFT JOIN invoices i ON r.id = i.receptionist_id "
-              "GROUP BY rec_id "
-              "ORDER BY rec_id"); 
+              "GROUP BY r.id "
+              "ORDER BY r.id"); 
+    std::vector<ReceptionistKPI> results;
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
-        return 0.0; 
+        return results;
     }
     while (q.next()) {
         ReceptionistKPI rec;

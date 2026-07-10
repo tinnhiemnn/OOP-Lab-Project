@@ -24,9 +24,9 @@ public:
     std::vector<Invoice> search(const QString& keyword);
     std::optional<Invoice> findById(const QString& id);
     double totalRevenue();
-    std::vector<double> getMonthlyRevenue(int year);
+    std::vector<double> getMonthlyRevenue(const QString& year);
     double getTotalRevenueByRoomType(const QString& roomType);
-    std::vector<std::pair<QString, double>> getRevenueByReceptionist();
+    std::vector<ReceptionistKPI> getRevenueByReceptionist();
     std::vector<TopCustomer> getTop5Customers();
     QString lastError() const { return lastErrorMessage; }
 
