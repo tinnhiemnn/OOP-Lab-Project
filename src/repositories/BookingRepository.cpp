@@ -119,10 +119,10 @@ int BookingRepository::countBookings(const QString& roomType, const QString& boo
                   "JOIN rooms r ON b.room_id = r.id "
                   "WHERE r.type = ?";
                   
-    if (!bookingStatus.isEmpty()) sql += " AND b.status = ?";
+    if (!bookingStatus.isEmpty() && bookingStatus != "All") sql += " AND b.status = ?";
     q.prepare(sql);
-    q.bindValue(roomType);
-    if (!bookingStatus.isEmpty()) q.bindValue(bookingStatus);
+    q.addBindValue(roomType);
+    if (!bookingStatus.isEmpty() && bookingStatus != "All") q.addBindValue(bookingStatus);
     
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();

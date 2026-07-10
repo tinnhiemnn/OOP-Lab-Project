@@ -1,143 +1,208 @@
 #include <QCoreApplication>
 #include <iostream>
-#include <memory>
 #include <vector>
 #include <optional>
+#include <QDate>
+#include <QString>
+#include <QLocale>
+#include <QSqlQuery>
 
-// Include Database Manager và các Controllers mới của nhóm bạn
+// Include Database Manager and the two repositories to be tested
 #include "database/DatabaseManager.h"
-#include "controllers/CustomerController.h"
-#include "controllers/ReceptionistController.h"
-#include "controllers/RoomController.h"
-#include "models/StandardRoom.h"
+#include "repositories/BookingRepository.h"
+#include "repositories/InvoiceRepository.h"
 
+// System Models
+#include "models/Booking.h"
+#include "models/Invoice.h"
 
-
-void printSeparator(const std::string& title) {
-    std::cout << "\n========================================\n";
-    std::cout << " TEST CONTROLLER: " << title << "\n";
-    std::cout << "========================================\n";
+void printHeader(const std::string& title) {
+    std::cout << "\n==================================================\n";
+    std::cout << " ▶️ TESTING REPOSITORY: " << title << "\n";
+    std::cout << "==================================================\n";
 }
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
+    // Set up Vietnamese locale for formatting currency nicely in the terminal if needed
+    QLocale viLocale(QLocale::Vietnamese, QLocale::Vietnam);
 
-    printSeparator("KET NOI DATABASE");
+    // 1. Initialize Database Connection
+    printHeader("DATABASE CONNECTION");
+
     if (!DatabaseManager::getInstance().openDatabase()) {
-        std::cerr << "🚨 Huỷ bỏ test do loi khoi tao CSDL.\n";
+        std::cerr << "🚨 Connection failed! Aborting all test scenarios.\n";
         return -1;
     }
+    std::cout << "✅ Database connection established successfully!\n";
 
-    // 2. Khởi tạo các Controller độc lập
-    CustomerController customerController;
-    ReceptionistController receptionistController;
-    RoomController roomController;
+    // 2. Database Seeding (Seed Data based on Schema)
+    printHeader("DATABASE SEEDING (SCHEMA STANDARDIZED)");
+    QSqlQuery seedQuery(DatabaseManager::getInstance().database()); 
 
-    // Biến dùng chung để hứng lỗi từ các hàm của Controller
-    QString errorMsg; 
+    // Clear old data in the correct order (Child tables first, parent tables last to avoid FK constraints)
+    seedQuery.exec("DELETE FROM invoices;");
+    seedQuery.exec("DELETE FROM bookings;");
+    seedQuery.exec("DELETE FROM rooms;");
+    seedQuery.exec("DELETE FROM customers;");
+    seedQuery.exec("DELETE FROM receptionists;");
+
+    std::cout << "🧹 Cleaned up all existing table records.\n";
+
+    // Populate 'rooms' table (id, base_price, status, type, beds)
+    seedQuery.exec("INSERT INTO rooms (id, base_price, status, type, beds) VALUES "
+                "('RM101', 500000.0, 'Available', 'Standard', 1),"
+                "('RM102', 600000.0, 'Occupied', 'Standard', 2),"
+                "('RM201', 1200000.0, 'Available', 'Deluxe', 2),"
+                "('RM301', 3500000.0, 'Occupied', 'President', 1);");
+
+    // Populate 'receptionists' table (id, name, email)
+    seedQuery.exec("INSERT INTO receptionists (id, name, email) VALUES "
+                "('REC01', 'Nguyen Le Tan A', 'a@hotel.com'),"
+                "('REC02', 'Tran Letan B', 'b@hotel.com');");
+
+    // Populate 'customers' table (id, name, phone, email)
+    seedQuery.exec("INSERT INTO customers (id, name, phone, email) VALUES "
+                "('C001', 'Khach Hang VIP A', '0901111111', 'a@gmail.com'),"
+                "('C002', 'Khach Hang VIP B', '0902222222', 'b@gmail.com'),"
+                "('C003', 'Nguyen Van C', '0903333333', 'c@gmail.com'),"
+                "('C004', 'Le Thi D', '0904444444', 'd@gmail.com'),"
+                "('C005', 'Hoang Nhat E', '0905555555', 'e@gmail.com');");
+
+    // Populate 'bookings' table
+    seedQuery.exec("INSERT INTO bookings (id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, num_buffet, laundry_service, decor_service, decor_note, status) VALUES "
+                "('B01', 'C001', 'REC01', 'RM301', 'G01', '2026-01-10', '2026-01-15', 2, 1, 1, 'Trang tri sinh nhat', 'CheckedIn'),"
+                "('B02', 'C002', 'REC01', 'RM201', 'G01', '2026-03-05', '2026-03-10', 0, 0, 0, NULL, 'CheckedIn'),"
+                "('B03', 'C001', 'REC02', 'RM101', 'G02', '2026-03-12', '2026-03-15', 1, 0, 0, NULL, 'CheckedIn'),"
+                "('B04', 'C003', 'REC02', 'RM102', 'G02', '2026-05-20', '2026-05-25', 4, 1, 0, NULL, 'CheckedIn'),"
+                "('B05', 'C004', 'REC01', 'RM301', 'G03', '2026-07-01', '2026-07-05', 2, 0, 1, 'Kỷ niệm ngày cưới', 'CheckedIn'),"
+                "('B06', 'C005', 'REC02', 'RM101', 'G03', '2026-07-08', '2026-07-10', 0, 0, 0, NULL, 'Cancelled');");
+
+    // Populate 'invoices' table
+    seedQuery.exec("INSERT INTO invoices (id, booking_id, receptionist_id, issued_date, payment_method, discount_name, subtotal_amount, discount_amount, total_amount) VALUES "
+                "('INV01', 'B01', 'REC01', '2026-01-15', 'Cash', 'None', 50000000.0, 0.0, 50000000.0),"
+                "('INV02', 'B02', 'REC01', '2026-03-10', 'Credit Card', 'None', 25000000.0, 0.0, 25000000.0),"
+                "('INV03', 'B03', 'REC02', '2026-03-15', 'Banking', 'MEMBER10', 11111111.0, 1111111.0, 10000000.0),"
+                "('INV04', 'B04', 'REC02', '2026-05-25', 'Cash', 'None', 8000000.0, 0.0, 8000000.0),"
+                "('INV05', 'B05', 'REC01', '2026-07-05', 'Banking', 'SUMMERVIBE', 40000000.0, 5000000.0, 35000000.0);");
+
+    std::cout << "🌱 Seed data successfully injected into hotel.db!\n";
+    std::cout << "--------------------------------------------------\n";
+
+    // Instantiate Repositories
+    BookingRepository bookingRepo;
+    InvoiceRepository invoiceRepo;
 
     // =========================================================================
-    // TEST CASE 1: CUSTOMER CONTROLLER
+    // BLOCK 1: TESTING BOOKING REPOSITORY (CRUD & BASIC METRICS)
     // =========================================================================
-    printSeparator("CUSTOMER CONTROLLER");
+    printHeader("BOOKING REPOSITORY - CRUD & COUNT");
 
-    Customer c2("C002", "Tran Van B", "b.tran@gmail.com", "0911223344");
+    QDate checkIn = QDate::fromString("2026-07-12", "yyyy-MM-dd");
+    QDate checkOut = QDate::fromString("2026-07-15", "yyyy-MM-dd");
     
-    // Test Thêm Khách Hàng qua Controller
-    if (customerController.addCustomer(c2, errorMsg)) {
-        std::cout << "✅ [Controller] Them khach hang C002 thanh cong.\n";
+    Booking b1("B_TEST_01", "C001", "REC01", "RM101", "GRP01", checkIn, checkOut, BookingStatus::Booked);
+
+    // Test 1.1: Add New Booking
+    if (bookingRepo.add(b1)) {
+        std::cout << "✅ Add Booking [B_TEST_01] succeeded.\n";
     } else {
-        std::cerr << "❌ [Controller] Them that bai. Loi: " << errorMsg.toStdString() << "\n";
+        std::cerr << "❌ Add Booking failed: " << bookingRepo.lastError().toStdString() << "\n";
     }
 
-    // Test lấy danh sách khách hàng
-    std::cout << "📋 Danh sach khach hang tu Controller:\n";
-    auto customers = customerController.listCustomers();
-    for (const auto& c : customers) {
-        std::cout << "   - " << c.getId().toStdString() << " | " << c.getName().toStdString() << "\n";
-    }
-
-    // Test trường hợp lỗi (Ví dụ thêm trùng ID để xem Controller bắt lỗi thế nào)
-    printSeparator("CUSTOMER CONTROLLER - TEST BAT LOI");
-    if (!customerController.addCustomer(c2, errorMsg)) {
-        std::cout << "🎯 Thử nghiem bat loi trung ID thanh cong! Thong bao loi nhan duoc:\n";
-        std::cout << "   👉 \"" << errorMsg.toStdString() << "\"\n";
-    }
-
-
-    // =========================================================================
-    // TEST CASE 2: RECEPTIONIST CONTROLLER
-    // =========================================================================
-    printSeparator("RECEPTIONIST CONTROLLER");
-
-    Receptionist r2("REC02", "Nguyen Van Le Tan", "letan2@hotel.com");
-
-    // Test Add
-    if (receptionistController.addReceptionist(r2, errorMsg)) {
-        std::cout << "✅ [Controller] Them le tan REC02 thanh cong.\n";
+    // Test 1.2: Find by ID and Update Status
+    auto optBooking = bookingRepo.findById("B_TEST_01");
+    if (optBooking.has_value()) {
+        std::cout << "🔍 Found Booking B_TEST_01. Updating status to 'CheckedIn'...\n";
+        
+        optBooking->setStatus(Booking::statusFromString("CheckedIn")); 
+        
+        if (bookingRepo.update(*optBooking)) {
+            std::cout << "✅ Update Booking status succeeded.\n";
+        } else {
+            std::cerr << "❌ Update failed: " << bookingRepo.lastError().toStdString() << "\n";
+        }
     } else {
-        std::cerr << "❌ [Controller] Them le tan that bai: " << errorMsg.toStdString() << "\n";
+        std::cout << "⚠️ Booking ID [B_TEST_01] not found for Update test.\n";
     }
 
-    // Test GetById
-    auto optRec = receptionistController.getReceptionistById("REC02");
-    if (optRec.has_value()) {
-        std::cout << "🔍 [Controller] GetById tim thay: " << optRec->getName().toStdString() << "\n";
+    // Test 1.3: Retrieve All Records (findAll)
+    std::cout << "\n📋 Comprehensive Booking List (findAll):\n";
+    auto allBookings = bookingRepo.findAll();
+    for (const auto& b : allBookings) {
+        std::cout << "   - ID: " << b.getId().toStdString() 
+                  << " | Room: " << b.getRoomId().toStdString() 
+                  << " | Status: " << Booking::statusToString(b.getStatus()).toStdString() << "\n";
     }
+
+    // Test 1.4: Count Bookings by Room Type and Status
+    QString testRoomType = "President";
+    QString testStatus = "Booked";
+    int count = bookingRepo.countBookings(testRoomType, testStatus);
+    std::cout << "📊 Booking count for room type [" << testRoomType.toStdString() 
+              << "] with status [" << testStatus.toStdString() << "]: " << count << "\n";
 
 
     // =========================================================================
-    // TEST CASE 3: ROOM CONTROLLER (Xử lý Unique_Ptr và Enum)
+    // BLOCK 2: TESTING INVOICE REPOSITORY (FINANCIAL STATS & REPORTS)
     // =========================================================================
-    printSeparator("ROOM CONTROLLER");
+    printHeader("INVOICE REPOSITORY - REVENUE REPORTS");
 
-    StandardRoom rm202("RM202", 100000, RoomStatus::Available, 2);
-    int numBeds = 2;
+    Invoice inv1("INV_TEST_01", "B_TEST_01", "REC01", QDate::fromString("2026-07-15", "yyyy-MM-dd"), 4500000.0, 4000000, 500000, PaymentMethod::Cash, "MemberDiscount");
 
-    // Test Add Room
-    if (roomController.addRoom(rm202, numBeds, errorMsg)) {
-        std::cout << "✅ [Controller] Them phong 202 thanh cong.\n";
+    // Test 2.1: Add New Invoice
+    if (invoiceRepo.add(inv1)) {
+        std::cout << "✅ Add Invoice [INV_TEST_01] succeeded.\n";
     } else {
-        std::cerr << "❌ [Controller] Them phong that bai: " << errorMsg.toStdString() << "\n";
+        std::cerr << "❌ Add Invoice failed: " << invoiceRepo.lastError().toStdString() << "\n";
     }
 
-    // Test Cập nhật trạng thái phòng qua Controller
-    if (roomController.updateRoomStatus("RM202", RoomStatus::Maintenance, errorMsg)) {
-        std::cout << "✅ [Controller] Da chuyen trang thai phong 202 sang [Maintenance].\n";
-    } else {
-        std::cerr << "❌ [Controller] Cap nhat trang thai that bai: " << errorMsg.toStdString() << "\n";
+    // Test 2.2: Total Accumulated System Revenue
+    double totalRev = invoiceRepo.totalRevenue();
+    std::cout << "💰 TOTAL SYSTEM REVENUE: " 
+              << viLocale.toString(totalRev, 'f', 0).toStdString() << " VND\n";
+
+    // Test 2.3: Monthly Revenue Breakdown
+    int targetYear = 2026;
+    std::cout << "\n📈 Monthly Revenue Breakdown for Year " << targetYear << ":\n";
+    std::vector<double> monthlyData = invoiceRepo.getMonthlyRevenue(QString::number(targetYear));
+    for (size_t i = 0; i < monthlyData.size(); ++i) {
+        std::cout << "   - Month " << (i + 1) << ": " 
+                  << viLocale.toString(monthlyData[i], 'f', 0).toStdString() << " VND\n";
     }
 
-    // Test hiển thị danh sách dạng unique_ptr từ Controller
-    std::cout << "📋 Danh sach tat ca cac phong hien tai:\n";
-    auto allRooms = roomController.getAllRooms();
-    for (const auto& r : allRooms) {
-        std::cout << "   - Phong: " << r->getRoomId().toStdString() 
-                  << " | Loai: " << Room::typeToString(r->getRoomType()).toStdString() << "\n";
+    // Test 2.4: Revenue by Specific Room Type
+    QString roomTypeCheck = "Standard";
+    double roomRev = invoiceRepo.getTotalRevenueByRoomType(roomTypeCheck);
+    std::cout << "\n🏨 Revenue segment for room type [" << roomTypeCheck.toStdString() << "]: "
+              << viLocale.toString(roomRev, 'f', 0).toStdString() << " VND\n";
+
+    // Test 2.5: Receptionist Performance Ranking (KPI)
+    std::cout << "\n👔 Receptionist Revenue Generation Ranking (KPI):\n";
+    auto recRevenueList = invoiceRepo.getRevenueByReceptionist();
+    if (recRevenueList.empty()) std::cout << invoiceRepo.lastError().toStdString() << '\n';
+    for (const auto& rec : recRevenueList) {
+        std::cout << "   - Receptionist ID: " << rec.id.toStdString() << " | Name: " << rec.name.toStdString()
+                  << " ➔ Generated: " << viLocale.toString(rec.totalRevenue, 'f', 0).toStdString() << " VND\n";
     }
 
+    // Test 2.6: Top 5 Highest Spending Customers for Dashboard
+    std::cout << "\n👑 TOP 5 HIGHEST SPENDING CUSTOMERS:\n";
+    auto topCustomers = invoiceRepo.getTop5Customers();
+    int rank = 1;
+    for (const auto& cust : topCustomers) {
+        std::cout << "   " << rank++ << ". ID: " << cust.id.toStdString()
+                  << " | Name: " << cust.name.toStdString()
+                  << " | Total Spent: " << viLocale.toString(cust.totalSpending, 'f', 0).toStdString() << " VND\n";
+    }
 
     // =========================================================================
-    // TEST CASE 4: XÓA DỮ LIỆU QUA CONTROLLER
+    // RESOURCE CLEANUP ON EXIT
     // =========================================================================
-    printSeparator("DON DEP DU LIEU QUA CONTROLLER");
-
-    // Thực hiện xoá thông qua hàm delete của các Controller
-    // Lưu ý: Bạn có thể comment các dòng này lại nếu muốn giữ data trong file .db để làm GUI
-    if (customerController.deleteCustomer("C002", errorMsg)) {
-        std::cout << "🗑️ [Controller] Da xoa khach hang C002.\n";
-    }
-    else std::cout<<errorMsg.toStdString()<<'\n';
+    std::cout << "\n--------------------------------------------------\n";
+    std::cout << "🎉 Repository test pipeline execution completed successfully!\n";
     
-    if (roomController.deleteRoom("RM202", errorMsg)) {
-        std::cout << "🗑️ [Controller] Da xoa phong RM202.\n";
-    }
-    else std::cout<<errorMsg.toStdString()<<'\n';
-
-    std::cout << "\n🎉 === HOAN THANH KIEM THU TANG CONTROLLER ===\n";
-    
-    // Đóng kết nối an toàn
     DatabaseManager::getInstance().closeConnection();
     return 0;
 }

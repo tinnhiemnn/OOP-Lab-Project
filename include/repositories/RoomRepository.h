@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <vector>
+#include <QDate>
 
 class RoomRepository {
 public:

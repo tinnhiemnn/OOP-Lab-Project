@@ -19,7 +19,7 @@ struct RoomTypeReport {
     int cancelledBookings = 0;
     double cancellationRate = 0.0;
     double successRate = 0.0;   
-}
+};
 
 
 class ReportService {

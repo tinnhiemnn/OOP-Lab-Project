@@ -115,12 +115,12 @@ std::vector<std::unique_ptr<Room>> RoomRepository::findAvailableInPeriod(const Q
                 "WHERE b.check_in < ? AND b.check_out > ? AND b.status != 'Cancelled' AND b.status != 'CheckedOut' " 
               ");");
         
-    q.bindValue(checkOut);
-    q.bindValue(checkIn);
+    q.addBindValue(checkOut);
+    q.addBindValue(checkIn);
 
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
-        return results;
+        return rows;
     }
 
     while (q.next()) rows.push_back(mapRoom(q));
