@@ -1,4 +1,4 @@
-#include "ReceptionistController.h"
+#include "controllers/ReceptionistController.h"
 
 ReceptionistController::ReceptionistController() {}
 

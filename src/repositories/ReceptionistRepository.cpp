@@ -5,10 +5,12 @@
 #include <QSqlQuery>
 #include <QVariant>
 
-Receptionist ReceptionistRepository::mapReceptionist(QSqlQuery& q) {
-    return Receptionist(q.value(0).toString(),
-                    q.value(1).toString(),
-                    q.value(2).toString());
+namespace {
+    Receptionist mapReceptionist(QSqlQuery& q) {
+        return Receptionist(q.value(0).toString(),
+                        q.value(1).toString(),
+                        q.value(2).toString());
+    }
 }
 
 bool ReceptionistRepository::add(const Receptionist& Receptionist) {

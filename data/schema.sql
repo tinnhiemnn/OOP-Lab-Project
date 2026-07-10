@@ -45,6 +45,5 @@ CREATE TABLE IF NOT EXISTS invoices (
     payment_method TEXT NOT NULL,
     discount_name TEXT NOT NULL,
     total_amount REAL NOT NULL,
-    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL,
-    FOREIGN KEY(group_code) REFERENCES bookings(group_code)
+    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL
 );

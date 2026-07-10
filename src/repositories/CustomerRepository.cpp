@@ -5,11 +5,13 @@
 #include <QSqlQuery>
 #include <QVariant>
 
-Customer CustomerRepository::mapCustomer(QSqlQuery& q) {
-    return Customer(q.value(0).toString(),
-                    q.value(1).toString(),
-                    q.value(2).toString(),
-                    q.value(3).toString());
+namespace {
+    Customer mapCustomer(QSqlQuery& q) {
+        return Customer(q.value(0).toString(),
+                        q.value(1).toString(),
+                        q.value(2).toString(),
+                        q.value(3).toString());
+    }
 }
 
 bool CustomerRepository::add(const Customer& customer) {

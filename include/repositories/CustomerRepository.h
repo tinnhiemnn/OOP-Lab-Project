@@ -16,8 +16,6 @@ public:
         return lastErrorMessage; 
     }
     
-    static Customer mapCustomer(QSqlQuery& q);
-
 private:
     QString lastErrorMessage;
 };

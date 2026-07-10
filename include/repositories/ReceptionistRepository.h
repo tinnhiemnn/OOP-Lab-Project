@@ -16,8 +16,6 @@ public:
         return lastErrorMessage; 
     }
     
-    static Receptionist mapReceptionist(QSqlQuery& q);
-
 private:
     QString lastErrorMessage;
 };

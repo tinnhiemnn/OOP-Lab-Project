@@ -13,19 +13,28 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
 set(PROJECT_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/views
 )
 
 set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
+    src/patterns/RoomFactory.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
-    src/repositories/BookingRepository.cpp
-    
+    src/controllers/CustomerController.cpp
+    src/controllers/ReceptionistController.cpp
+    src/controllers/RoomController.cpp
+    views/BookingView.cpp
+    views/CustomerView.cpp
+    views/MainWindow.cpp
+    views/RoomView.cpp
 )
 
-add_executable(HotelManagement ${PROJECT_SOURCES})
+add_executable(HotelManagement ${PROJECT_SOURCES}
+    resources/resources.qrc
+)
 target_include_directories(HotelManagement PRIVATE ${PROJECT_INCLUDE_DIRS})
 target_link_libraries(HotelManagement PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql)
 target_compile_definitions(HotelManagement PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
