@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cassert>
 #include <QString>
-#include <QCoreApplication>
 
 void testDateUtils() {
     //1. isValidDate
@@ -71,8 +70,7 @@ void testValidationUtils() {
     std::cout << "ValidationUtils tests passed!" << std::endl;
 }
 
-int main(int argc, char* argv[]) {
-    QCoreApplication app(argc, argv);
+int main() {
     testDateUtils();
     testValidationUtils();
     std::cout << "All utility tests passed successfully!" << std::endl;
