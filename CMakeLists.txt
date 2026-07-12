@@ -23,12 +23,16 @@ set(PROJECT_SOURCES
     src/controllers/CustomerController.cpp
     src/controllers/ReceptionistController.cpp
     src/controllers/RoomController.cpp
+    src/controllers/BookingController.cpp
+    src/controllers/InvoiceController.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
-    src/controllers/CustomerController.cpp
-    src/controllers/ReceptionistController.cpp
-    src/controllers/RoomController.cpp
+    src/repositories/BookingRepository.cpp
+    src/repositories/InvoiceRepository.cpp
+    src/services/BookingService.cpp
+    src/services/ReportService.cpp
+    src/services/InvoiceService.cpp
     views/BookingView.cpp
     views/CustomerView.cpp
     views/MainWindow.cpp

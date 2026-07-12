@@ -204,5 +204,7 @@ int main(int argc, char *argv[]) {
     std::cout << "🎉 Repository test pipeline execution completed successfully!\n";
     
     DatabaseManager::getInstance().closeConnection();
+    std::cout << "\nNhan Enter de thoat...";
+    std::cin.get();
     return 0;
 }

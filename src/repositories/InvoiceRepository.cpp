@@ -23,7 +23,7 @@ Invoice mapInvoice(QSqlQuery& q) {
 bool InvoiceRepository::add(const Invoice& invoice) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("INSERT INTO invoices(id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, "
-              "discount_amount, payment_method, discount_name) VALUES(?, ?, ?, ?, ?, ?, ?, ?, )");
+              "discount_amount, payment_method, discount_name) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)");
     q.addBindValue(invoice.getId());
     q.addBindValue(invoice.getBookingId());
     q.addBindValue(invoice.getReceptionistId());
