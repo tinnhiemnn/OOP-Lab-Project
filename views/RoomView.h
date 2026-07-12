@@ -28,7 +28,6 @@ private:
     QDoubleSpinBox* priceEdit;
     QComboBox* statusEdit;
     QSpinBox* bedsEdit;
-    QComboBox* servicesEdit;
     QComboBox* filterType;
     QComboBox* filterStatus;
     QGridLayout* roomGrid;
@@ -36,4 +35,3 @@ private:
     DashboardCard* formCard;
     DashboardCard* tableCard;
 };
-

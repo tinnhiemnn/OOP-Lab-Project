@@ -22,13 +22,12 @@ namespace {
 
 RoomView::RoomView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), typeEdit(new QComboBox(this)), priceEdit(new QDoubleSpinBox(this)),
-      statusEdit(new QComboBox(this)), bedsEdit(new QSpinBox(this)), servicesEdit(new QComboBox(this)),
+      statusEdit(new QComboBox(this)), bedsEdit(new QSpinBox(this)),
       filterType(new QComboBox(this)), filterStatus(new QComboBox(this)) {
     typeEdit->addItems({"Standard", "Deluxe", "President"});
     statusEdit->addItems({"Available", "Out of Order", "InUse", "NeedCleaning"});
     filterType->addItems({"All", "Standard", "Deluxe", "President"});
     filterStatus->addItems({"All", "Available", "Booked", "InUse", "NeedCleaning"});
-    servicesEdit->addItems({"None", "Bike Rental", "Decoration service", "Laundry service", "Express Room Cleaning", "Extra Bed"});
     priceEdit->setRange(1, 100000000);
     priceEdit->setDecimals(0);
     bedsEdit->setRange(1, 6);
@@ -39,17 +38,19 @@ RoomView::RoomView(QWidget* parent)
     form->addRow("Price", priceEdit);
     form->addRow("Status", statusEdit);
     form->addRow("Beds", bedsEdit);
-    form->addRow("Services", servicesEdit);
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
     addBtn->setProperty("variant", "primary");
 
     auto* updateBtn = new QPushButton("Update", this);
+    updateBtn->setProperty("variant", "ghost");
+
     auto* deleteBtn = new QPushButton("Delete", this);
-    deleteBtn->setObjectName("btnCancel");
+    deleteBtn->setProperty("variant", "danger");
 
     auto* reloadBtn = new QPushButton("Refresh", this);
+    reloadBtn->setProperty("variant", "ghost");
 
     actions->addWidget(addBtn);
     actions->addWidget(updateBtn);
@@ -77,6 +78,8 @@ RoomView::RoomView(QWidget* parent)
     tableCard->addContent(gridContainer);
 
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(28, 20, 28, 20);
+    layout->setSpacing(10);
     layout->addWidget(formCard);
-    layout->addWidget(tableCard);
+    layout->addWidget(tableCard, /*stretch=*/1);
 }

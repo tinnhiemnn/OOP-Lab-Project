@@ -31,4 +31,3 @@ private:
     DashboardCard* formCard;
     DashboardCard* tableCard;
 };
-

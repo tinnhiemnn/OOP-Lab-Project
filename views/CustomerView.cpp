@@ -38,11 +38,16 @@ CustomerView::CustomerView(QWidget* parent)
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
+    addBtn->setProperty("variant", "primary");
+
     auto* updateBtn = new QPushButton("Update", this);
+    updateBtn->setProperty("variant", "ghost");
+
     auto* deleteBtn = new QPushButton("Delete", this);
-    deleteBtn->setObjectName("btnCancel");
+    deleteBtn->setProperty("variant", "danger");
 
     auto* reloadBtn = new QPushButton("Refresh", this);
+    reloadBtn->setProperty("variant", "ghost");
 
     actions->addWidget(addBtn);
     actions->addWidget(updateBtn);
@@ -75,7 +80,8 @@ CustomerView::CustomerView(QWidget* parent)
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);
-    searchBtn->setObjectName("btnSearch");
+    searchBtn->setProperty("variant", "primary");
+
     searchEdit->setPlaceholderText("Search customers");
     searching->addWidget(searchEdit);
     searching->addWidget(searchBtn);

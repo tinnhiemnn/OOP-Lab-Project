@@ -28,8 +28,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
-    // ------------------------ 11/07/2026 ------------------------------
-
     // Bọc sidebar trong 1 widget cha để gắn thêm brand header phía trên
     auto* sidebarWrap = new QWidget(this);
     sidebarWrap->setObjectName("sidebarWrap");
@@ -63,8 +61,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     brandLayout->addLayout(brandTextCol);
     brandLayout->addStretch();
 
-    // ------------------------ 11/07/2026 ------------------------------
-
     // Tạo thanh điều hướng
     auto* sidebarNav = new QListWidget(this);
     sidebarNav->setObjectName("sidebarNav");   // dat object name cho thanh sidebar
@@ -81,13 +77,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     sidebarWrap->setGraphicsEffect(shadow);
 
     // Khởi tạo các trang giao diện con
-    auto* customerView = new CustomerView(this);
-    auto* roomView = new RoomView(this);
     auto* bookingView = new BookingView(this);
+    auto* customerView = new CustomerView(this);
+    auto* receptionistView = new ReceptionistView(this);
+    auto* roomView = new RoomView(this);
     auto* invoiceView = new InvoiceView(this);
     auto* reportView = new ReportView(this);
-    auto* receptionistView = new ReceptionistView(this);
-
 
     auto* mainCol = new QWidget(this);
     auto* mainColLayout = new QVBoxLayout(mainCol);
@@ -107,25 +102,25 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
 
     auto* pages = new QStackedWidget(this);
-    pages->addWidget(customerView);
-    pages->addWidget(roomView);
     pages->addWidget(bookingView);
+    pages->addWidget(customerView);
+    pages->addWidget(receptionistView);
+    pages->addWidget(roomView);
     pages->addWidget(invoiceView);
     pages->addWidget(reportView);
-    pages->addWidget(receptionistView);
 
     mainColLayout->addWidget(topbar);
     mainColLayout->addWidget(pages, /*stretch=*/1);
 
-    QStringList menuTitles = {"Customers", "Rooms", "Bookings", "Invoices", "Reports","Receptionists"};
+    QStringList menuTitles = {"Bookings", "Customers", "Receptionists", "Rooms", "Invoices", "Reports"};
     for (const QString& title : menuTitles) {
         auto* item = new QListWidgetItem(title);
         item->setTextAlignment(Qt::AlignCenter); // Tất cả các tab đều được căn giữa đồng đều
         sidebarNav->addItem(item);
     }
 
-    sidebarNav->setCurrentRow(2);      // "Bookings" active mặc định
-    pages->setCurrentIndex(2);
+    sidebarNav->setCurrentRow(0);      // "Bookings" active mặc định
+    pages->setCurrentIndex(0);
 
     connect(sidebarNav, &QListWidget::currentRowChanged, this, [this, sidebarNav, pages](int row) {
         pages->setCurrentIndex(row);

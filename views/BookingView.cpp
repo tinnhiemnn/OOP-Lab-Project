@@ -1,6 +1,7 @@
 #include "BookingView.h"
 
 #include <QDate>
+#include <QComboBox>
 #include <QDateEdit>
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -22,29 +23,46 @@ namespace {
 BookingView::BookingView(QWidget* parent)
     : QWidget(parent), bookingIdEdit(new QLineEdit(this)), customerIdEdit(new QLineEdit(this)), roomIdEdit(new QLineEdit(this)),
       searchEdit(new QLineEdit(this)), checkInEdit(new QDateEdit(QDate::currentDate(), this)),
-      checkOutEdit(new QDateEdit(QDate::currentDate().addDays(1), this)){
+      checkOutEdit(new QDateEdit(QDate::currentDate().addDays(1), this)), servicesEdit(new QComboBox(this)){
     checkInEdit->setCalendarPopup(true);
     checkOutEdit->setCalendarPopup(true);
     checkInEdit->setDisplayFormat("yyyy-MM-dd");
     checkOutEdit->setDisplayFormat("yyyy-MM-dd");
+    servicesEdit->addItems({"None", "Bike Rental", "Decoration service", "Laundry service", "Express Room Cleaning", "Extra Bed"});
 
-    auto* form = new QFormLayout;
-    form->addRow("Booking ID", bookingIdEdit);
-    form->addRow("Customer ID", customerIdEdit);
-    form->addRow("Room ID", roomIdEdit);
-    form->addRow("Check-in", checkInEdit);
-    form->addRow("Check-out", checkOutEdit);
+    auto* form = new QGridLayout;
+    form->setHorizontalSpacing(16);
+    form->setVerticalSpacing(10 );
+    form->addWidget(new QLabel("Booking ID", this), 0, 0);
+    form->addWidget(bookingIdEdit, 0, 1);
+    form->addWidget(new QLabel("Customer ID", this), 1, 0);
+    form->addWidget(customerIdEdit, 1, 1);
+    form->addWidget(new QLabel("Room ID", this), 2, 0);
+    form->addWidget(roomIdEdit, 2, 1);
+    form->addWidget(new QLabel("Check-in", this), 0, 2);
+    form->addWidget(checkInEdit, 0, 3);
+    form->addWidget(new QLabel("Check-out", this), 1, 2);
+    form->addWidget(checkOutEdit, 1, 3);
+    form->addWidget(new QLabel("Services", this), 2, 2);
+    form->addWidget(servicesEdit, 2, 3);
+    form->setColumnStretch(1, 1);
+    form->setColumnStretch(3, 1);
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Book", this);
-    addBtn->setObjectName("btnBook");
+    addBtn->setProperty("variant", "primary");
 
     auto* inBtn = new QPushButton("Check-in", this);
+    inBtn->setProperty("variant","ghost");
+
     auto* outBtn = new QPushButton("Check-out", this);
+    outBtn->setProperty("variant", "ghost");
+
     auto* cancelBtn = new QPushButton("Cancel", this);
-    cancelBtn->setObjectName("btnCancel");
+    cancelBtn->setProperty("variant", "danger");
 
     auto* reloadBtn = new QPushButton("Refresh", this);
+    reloadBtn->setProperty("variant", "ghost");
 
     actions->addWidget(addBtn);
     actions->addWidget(inBtn);
@@ -59,7 +77,8 @@ BookingView::BookingView(QWidget* parent)
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);
-    searchBtn->setObjectName("btnSearch");
+    searchBtn->setProperty("variant", "primary");
+
     searchEdit->setPlaceholderText("Search bookings");
     searching->addWidget(searchEdit);
     searching->addWidget(searchBtn);
@@ -96,8 +115,10 @@ BookingView::BookingView(QWidget* parent)
 
     // --- Layout tổng thể card 1 + card 2 ---
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(28, 20, 28, 20);
+    layout->setSpacing(10);
     layout->addWidget(formCard);
-    layout->addWidget(tableCard);
+    layout->addWidget(tableCard, /*stretch=*/1);
 }
 
 QFrame* BookingView::createBookingCard(const QString& id, const QString& customerId,

@@ -44,8 +44,13 @@ namespace {
 
     auto* actions = new QHBoxLayout;
     auto* createBtn = new QPushButton("Create Invoice", this);
+    createBtn->setProperty("variant","primary");
+
     auto* reloadBtn = new QPushButton("Refresh", this);
-    actions->addWidget(createBtn); actions->addWidget(reloadBtn);
+    reloadBtn->setProperty("variant", "ghost");
+
+    actions->addWidget(createBtn);
+    actions->addWidget(reloadBtn);
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);

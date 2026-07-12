@@ -39,7 +39,7 @@ QLabel* ReceptionistView::makeKpiBadge(const QString& tier) const {
 ReceptionistView::ReceptionistView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
     phoneEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
-    
+
     auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
     form->setVerticalSpacing(10 );
@@ -56,11 +56,16 @@ ReceptionistView::ReceptionistView(QWidget* parent)
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
+    addBtn->setProperty("variant", "primary");
+
     auto* updateBtn = new QPushButton("Update", this);
+    updateBtn->setProperty("variant", "ghost");
+
     auto* deleteBtn = new QPushButton("Delete", this);
-    deleteBtn->setObjectName("btnCancel");
+    deleteBtn->setProperty("variant", "danger");
 
     auto* reloadBtn = new QPushButton("Refresh", this);
+    reloadBtn->setProperty("variant", "ghost");
 
     actions->addWidget(addBtn);
     actions->addWidget(updateBtn);
@@ -93,7 +98,8 @@ ReceptionistView::ReceptionistView(QWidget* parent)
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);
-    searchBtn->setObjectName("btnSearch");
+    searchBtn->setProperty("variant", "primary");
+
     searchEdit->setPlaceholderText("Search receptionists");
     searching->addWidget(searchEdit);
     searching->addWidget(searchBtn);
@@ -115,4 +121,25 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     layout->addLayout(statsRow);
     layout->addWidget(formCard);
     layout->addWidget(tableCard, /*stretch=*/1);
+
+    // --- du lieu mau tam thoi, khop voi tab Receptionists trong mockup,
+    //     xoa khoi day khi da noi controller/repository that ---
+    /*struct SeedRow { QString id, name, email, bookings, revenue, tier; };
+    const QVector<SeedRow> seed = {
+                                   {"E03", "Hoai Thu",   "thu.hoai@luxestay.vn",   "34", "52.000.000 VND", "excellent"},
+                                   {"E01", "Mai Anh",    "anh.mai@luxestay.vn",    "29", "45.000.000 VND", "excellent"},
+                                   {"E05", "Ngoc Ha",    "ha.ngoc@luxestay.vn",    "26", "41.000.000 VND", "good"},
+                                   {"E02", "Thanh Tung", "tung.thanh@luxestay.vn", "22", "38.000.000 VND", "good"},
+                                   {"E04", "Quoc Bao",   "bao.quoc@luxestay.vn",   "18", "30.000.000 VND", "average"},
+                                   };
+    table->setRowCount(seed.size());
+    for (int row = 0; row < seed.size(); ++row) {
+        const auto& r = seed[row];
+        table->setItem(row, 0, new QTableWidgetItem(r.id));
+        table->setItem(row, 1, new QTableWidgetItem(r.name));
+        table->setItem(row, 2, new QTableWidgetItem(r.email));
+        table->setItem(row, 3, new QTableWidgetItem(r.bookings));
+        table->setItem(row, 4, new QTableWidgetItem(r.revenue));
+        table->setCellWidget(row, 5, makeKpiBadge(r.tier));
+    }*/
 }

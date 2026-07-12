@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "controllers/ReceptionistController.h"
 #include <DashboardCard.h>
 #include <QWidget>
 

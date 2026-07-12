@@ -1,4 +1,7 @@
 /* =====================================================================
+   LuxeStay HMS — LIGHT THEME (chuyển thể từ hotel_dashboard_mockup_light.html)
+   Dán/replace nội dung này vào: resources/style.qss
+   ---------------------------------------------------------------------
    Bảng màu gốc (biến CSS trong mockup -> giá trị hex dùng lại ở đây):
      --bg        #F5F7FA   nền cửa sổ
      --card      #FFFFFF   nền card
@@ -11,6 +14,9 @@
      --blue      #2563EB   --purple  #7C3AED
      --teal      #0D9488   --orange  #EA580C
      --gold      #D97706   --red     #E11D48
+   Qt Style Sheets KHÔNG hỗ trợ box-shadow / border-radius theo %.
+   Đổ bóng cho card -> dùng QGraphicsDropShadowEffect trong code (xem
+   HUONG_DAN_TICH_HOP_QT.md, mục 4).
    ===================================================================== */
 
 * {
@@ -320,3 +326,22 @@ QLabel[status="Maintenance"] { background-color: #FEF1F3; color: #BE123C; border
 QLabel[status="Cancelled"]   { background-color: #FEF1F3; color: #BE123C; border-radius: 10px; padding: 3px 10px; font-weight: 700; font-size: 11px; }
 QLabel[status="Checked-in"]  { background-color: #EFF4FF; color: #2563EB; border-radius: 10px; padding: 3px 10px; font-weight: 700; font-size: 11px; }
 QLabel[status="Checked-out"] { background-color: #F1F5F9; color: #64748B; border-radius: 10px; padding: 3px 10px; font-weight: 700; font-size: 11px; }
+
+/ ----------------------------------------
+/ ReceptionistView
+/ -----------------------------------------
+QLabel[tier="excellent"] { background:#ECFDF5; color:#047857; border-radius:10px; padding:3px 10px; font-weight:700; }
+QLabel[tier="good"]      { background:#EFF6FF; color:#1D4ED8; border-radius:10px; padding:3px 10px; font-weight:700; }
+QLabel[tier="average"]   { background:#FFF7ED; color:#C2410C; border-radius:10px; padding:3px 10px; font-weight:700; }
+
+
+// -----------------------------------------
+// ReportView
+// --------------------------------------
+QFrame[rankItem="true"] { background:#F1F5F9; border-radius:12px; }
+QFrame[rankItem="true"][topRank="true"] { background:qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #FFF7E6, stop:1 #FFF1E0); border:1px solid #F3D28A; }
+QLabel[role="rankNumber"] { background:#FFFFFF; border-radius:8px; font-weight:700; color:#64748B; }
+QFrame[rankItem="true"][topRank="true"] QLabel[role="rankNumber"] { background:qlineargradient(x1:0,y1:0,x2:1,y2:1, stop:0 #F59E0B, stop:1 #EA580C); color:#fff; }
+QLabel[role="rankName"] { font-weight:600; font-size:13px; }
+QLabel[role="rankId"] { color:#94A3B8; font-size:10.5px; }
+QLabel[role="rankAmount"] { font-weight:700; color:#0F766E; }
