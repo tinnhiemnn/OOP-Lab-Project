@@ -2,7 +2,10 @@
 
 #include "BookingView.h"
 #include "CustomerView.h"
+#include "InvoiceView.h"
+#include "ReportView.h"
 #include "RoomView.h"
+#include "ReceptionistView.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QListWidget>
@@ -81,6 +84,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     auto* customerView = new CustomerView(this);
     auto* roomView = new RoomView(this);
     auto* bookingView = new BookingView(this);
+    auto* invoiceView = new InvoiceView(this);
+    auto* reportView = new ReportView(this);
+    auto* receptionistView = new ReceptionistView(this);
 
 
     auto* mainCol = new QWidget(this);
@@ -104,11 +110,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     pages->addWidget(customerView);
     pages->addWidget(roomView);
     pages->addWidget(bookingView);
+    pages->addWidget(invoiceView);
+    pages->addWidget(reportView);
+    pages->addWidget(receptionistView);
 
     mainColLayout->addWidget(topbar);
     mainColLayout->addWidget(pages, /*stretch=*/1);
 
-    QStringList menuTitles = {"Customers", "Rooms", "Bookings"};
+    QStringList menuTitles = {"Customers", "Rooms", "Bookings", "Invoices", "Reports","Receptionists"};
     for (const QString& title : menuTitles) {
         auto* item = new QListWidgetItem(title);
         item->setTextAlignment(Qt::AlignCenter); // Tất cả các tab đều được căn giữa đồng đều
