@@ -1,1 +1,47 @@
-build/
+# CMake build directories
+/build/
+/out/
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Qt Creator settings and temporary files
+*.user
+*.user.*
+
+# VS Code settings
+.vscode/
+# Note: if you want to share specific tasks or launch configurations, you can commit them,
+# but usually it's better for each developer to configure their own.
+
+# JetBrains (CLion, etc.) settings
+.idea/
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
