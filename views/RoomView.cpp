@@ -1,3 +1,4 @@
+#include "DashboardCard.h"
 #include "RoomView.h"
 
 #include <QComboBox>
@@ -11,27 +12,18 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QString>
-#include <QFrame>
+#include <QGridLayout>
 #include <QGraphicsDropShadowEffect>
 
 namespace {
     QString text(QLineEdit* edit) { return edit->text().trimmed(); }
     QString current(QComboBox* box) { return box->currentText(); }
-
-    void applyCardShadow(QWidget *card)
-    {
-        auto *shadow = new QGraphicsDropShadowEffect(card);
-        shadow->setBlurRadius(24);
-        shadow->setOffset(0, 4);
-        shadow->setColor(QColor(0, 0, 0, 90));
-        card->setGraphicsEffect(shadow);
-    }
 }
 
 RoomView::RoomView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), typeEdit(new QComboBox(this)), priceEdit(new QDoubleSpinBox(this)),
       statusEdit(new QComboBox(this)), bedsEdit(new QSpinBox(this)), servicesEdit(new QComboBox(this)),
-      filterType(new QComboBox(this)), filterStatus(new QComboBox(this)), table(new QTableWidget(this)) {
+      filterType(new QComboBox(this)), filterStatus(new QComboBox(this)) {
     typeEdit->addItems({"Standard", "Deluxe", "President"});
     statusEdit->addItems({"Available", "Out of Order", "InUse", "NeedCleaning"});
     filterType->addItems({"All", "Standard", "Deluxe", "President"});
@@ -51,6 +43,7 @@ RoomView::RoomView(QWidget* parent)
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
+    addBtn->setProperty("variant", "primary");
 
     auto* updateBtn = new QPushButton("Update", this);
     auto* deleteBtn = new QPushButton("Delete", this);
@@ -63,11 +56,9 @@ RoomView::RoomView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new QFrame(this);
-    formCard->setObjectName("cardPanel");
-    auto* formCardLayout = new QVBoxLayout(formCard);
-    formCardLayout->addLayout(form);
-    formCardLayout->addLayout(actions);
+    formCard = new DashboardCard("Room", "blue", this);
+    formCard->addContentLayout(form);
+    formCard->addContentLayout(actions);
 
     auto* filters = new QHBoxLayout;
     auto* filterBtn = new QPushButton("Filter", this);
@@ -76,22 +67,16 @@ RoomView::RoomView(QWidget* parent)
     filters->addWidget(filterStatus);
     filters->addWidget(filterBtn);
 
-    table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"ID", "Type", "Price", "Status"});
-    table->horizontalHeader()->setStretchLastSection(true);
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    // --- Grid phòng 4 cột ---
+    auto* gridContainer = new QWidget(this);
+    roomGrid = new QGridLayout(gridContainer);
+    roomGrid->setSpacing(16);
 
-    tableCard = new QFrame(this);
-    tableCard->setObjectName("cardPanel");
-    auto* tableCardLayout = new QVBoxLayout(tableCard);
-    tableCardLayout->addLayout(filters);
-    tableCardLayout->addWidget(table);
+    tableCard = new DashboardCard("Room List", "purple", this);
+    tableCard->addContentLayout(filters);
+    tableCard->addContent(gridContainer);
 
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(formCard);
     layout->addWidget(tableCard);
-
-    applyCardShadow(formCard);
-    applyCardShadow(tableCard);
 }

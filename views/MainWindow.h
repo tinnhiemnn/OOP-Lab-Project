@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QLabel>
 
 class MainWindow : public QMainWindow {
+private:
+    QLabel* m_pageTitle = nullptr;
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 };

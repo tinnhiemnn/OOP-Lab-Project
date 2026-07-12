@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DashboardCard.h>
 #include <QWidget>
 
 class QLineEdit;
@@ -18,7 +19,7 @@ private:
     void update();
     void remove();
     void search();
-    void error(const std::string& message);
+    void error(const QString& message);
 
     QLineEdit* idEdit;
     QLineEdit* nameEdit;
@@ -27,7 +28,7 @@ private:
     QLineEdit* searchEdit;
     QTableWidget* table;
 
-    QFrame* formCard;
-    QFrame* tableCard;
+    DashboardCard* formCard;
+    DashboardCard* tableCard;
 };
 

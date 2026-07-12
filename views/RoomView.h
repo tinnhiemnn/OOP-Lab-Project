@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DashboardCard.h>
 #include <QWidget>
 
 class QComboBox;
@@ -7,8 +8,7 @@ class QDoubleSpinBox;
 class QLineEdit;
 class QSpinBox;
 class QTableWidget;
-class QLabel;
-class QFrame;
+class QGridLayout;
 
 class RoomView : public QWidget {
 public:
@@ -21,7 +21,7 @@ private:
     void update();
     void remove();
     void search();
-    void error(const std::string& message);
+    void error(const QString& message);
 
     QLineEdit* idEdit;
     QComboBox* typeEdit;
@@ -31,9 +31,9 @@ private:
     QComboBox* servicesEdit;
     QComboBox* filterType;
     QComboBox* filterStatus;
-    QTableWidget* table;
+    QGridLayout* roomGrid;
 
-    QFrame* formCard;
-    QFrame* tableCard;
+    DashboardCard* formCard;
+    DashboardCard* tableCard;
 };
 

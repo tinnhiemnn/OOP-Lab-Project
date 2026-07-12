@@ -1,3 +1,4 @@
+#include "DashboardCard.h"
 #include "CustomerView.h"
 
 #include <QFormLayout>
@@ -15,15 +16,6 @@
 
 namespace {
     QString text(QLineEdit* edit) { return edit->text().trimmed(); }
-
-    void applyCardShadow(QWidget *card)
-    {
-        auto *shadow = new QGraphicsDropShadowEffect(card);
-        shadow->setBlurRadius(24);
-        shadow->setOffset(0, 4);
-        shadow->setColor(QColor(0, 0, 0, 90));
-        card->setGraphicsEffect(shadow);
-    }
 }
 
 CustomerView::CustomerView(QWidget* parent)
@@ -49,11 +41,29 @@ CustomerView::CustomerView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new QFrame(this);
-    formCard->setObjectName("cardPanel");
-    auto* formCardLayout = new QVBoxLayout(formCard);
-    formCardLayout->addLayout(form);
-    formCardLayout->addLayout(actions);
+    // --- 3 ô thống kê mini phía trên ---
+    auto* statsRow = new QHBoxLayout;
+
+    auto makeStat = [this](const QString& label, const QString& value) {
+        auto* box = new QFrame(this);
+        box->setProperty("statMini", true);
+        auto* boxLayout = new QVBoxLayout(box);
+        auto* lbl = new QLabel(label, this);
+        lbl->setProperty("role", "statLabel");
+        auto* val = new QLabel(value, this);
+        val->setProperty("role", "statValue");
+        boxLayout->addWidget(lbl);
+        boxLayout->addWidget(val);
+        return box;
+    };
+
+    statsRow->addWidget(makeStat("Tổng khách hàng", "128"));
+    statsRow->addWidget(makeStat("Khách thân thiết", "42"));
+    statsRow->addWidget(makeStat("Chi tiêu TB", "1.250.000 ₫"));
+
+    formCard = new DashboardCard("Customer", "blue", this);
+    formCard->addContentLayout(form);
+    formCard->addContentLayout(actions);
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);
@@ -69,16 +79,13 @@ CustomerView::CustomerView(QWidget* parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new QFrame(this);
-    tableCard->setObjectName("cardPanel");
-    auto* tableCardLayout = new QVBoxLayout(tableCard);
-    tableCardLayout->addLayout(searching);
-    tableCardLayout->addWidget(table);
+    tableCard = new DashboardCard("Customer List", "purple", this);
+    tableCard->addContentLayout(searching);
+    tableCard->addContent(table);
 
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(28, 24, 28, 24);
+    layout->addLayout(statsRow);
     layout->addWidget(formCard);
     layout->addWidget(tableCard);
-
-    applyCardShadow(formCard);
-    applyCardShadow(tableCard);
 }
