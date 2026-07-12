@@ -22,11 +22,19 @@ CustomerView::CustomerView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
       phoneEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
-    auto* form = new QFormLayout;
-    form->addRow("Customer ID", idEdit);
-    form->addRow("Name", nameEdit);
-    form->addRow("Email", emailEdit);
-    form->addRow("Phone Number", phoneEdit);
+    auto* form = new QGridLayout;
+    form->setHorizontalSpacing(16);
+    form->setVerticalSpacing(10 );
+    form->addWidget(new QLabel("Customer ID", this), 0, 0);
+    form->addWidget(idEdit, 0, 1);
+    form->addWidget(new QLabel("Name", this), 0, 2);
+    form->addWidget(nameEdit, 0, 3);
+    form->addWidget(new QLabel("Email", this), 1, 0);
+    form->addWidget(emailEdit, 1, 1);
+    form->addWidget(new QLabel("Phone Number", this), 1, 2);
+    form->addWidget(phoneEdit, 1, 3);
+    form->setColumnStretch(1, 1);
+    form->setColumnStretch(3, 1);
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
@@ -84,8 +92,9 @@ CustomerView::CustomerView(QWidget* parent)
     tableCard->addContent(table);
 
     auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(28, 24, 28, 24);
+    layout->setContentsMargins(28, 20, 28, 20);
+    layout->setSpacing(10);
     layout->addLayout(statsRow);
     layout->addWidget(formCard);
-    layout->addWidget(tableCard);
+    layout->addWidget(tableCard, /*stretch=*/1);
 }
