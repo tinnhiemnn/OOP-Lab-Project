@@ -21,6 +21,7 @@ DatabaseManager& DatabaseManager::getInstance() {
 
 bool DatabaseManager::openDatabase(const QString& databasePath) {
     if (db.isOpen()) return true;
+    if (!db.isValid()) db = QSqlDatabase::addDatabase("QSQLITE", "hotel_connection");
     const QString resolved = resolveDatabasePath(databasePath);
     QDir().mkpath(QFileInfo(resolved).absolutePath());
     db.setDatabaseName(resolved);
