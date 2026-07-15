@@ -1,4 +1,7 @@
 #include "controllers/CustomerController.h"
+#include "utils/ValidationUtils.h"
+#include "repositories/CustomerRepository.h"
+#include "repositories/BookingRepository.h"
 
 CustomerController::CustomerController() {}
 
@@ -15,6 +18,21 @@ std::optional<Customer> CustomerController::getCustomerById(const QString& id) {
 }
 
 bool CustomerController::addCustomer(const Customer& customer, QString& error) {
+    if (!ValidationUtils::isNonEmpty(customer.getName())) {
+        error = "Customer name cannot be empty.";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidEmail(customer.getEmail())) {
+        error = "Invalid email format!";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidPhone(customer.getPhone())) {
+        error = "Invalid phone number!";
+        return false;
+    }
+
     if (repository.add(customer)) {
         return true;
     }
@@ -23,6 +41,21 @@ bool CustomerController::addCustomer(const Customer& customer, QString& error) {
 }
 
 bool CustomerController::updateCustomer(const Customer& customer, QString& error) {
+    if (!ValidationUtils::isNonEmpty(customer.getName())) {
+        error = "Customer name cannot be empty.";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidEmail(customer.getEmail())) {
+        error = "Invalid email format!";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidPhone(customer.getPhone())) {
+        error = "Invalid phone number!";
+        return false;
+    }
+    
     if (repository.update(customer)) {
         return true;
     }
@@ -31,10 +64,33 @@ bool CustomerController::updateCustomer(const Customer& customer, QString& error
 }
 
 bool CustomerController::deleteCustomer(const QString& id, QString& error) {
-    if (id.isEmpty()) {
-        error = "ID Customer Invalid!";
+    //Check co phai customerID rong khong
+    if (!ValidationUtils::isNonEmpty(id)) {
+        error = "Customer ID cannot be empty.";
         return false;
     }
+
+    //Check customer co ton tai khong
+    auto customer = repository.findById(id);
+    if (!customer) {
+        error = "Customer does not exist.";
+        return false;
+    }
+
+    BookingRepository bookingRepo;
+    std::vector<Booking> allBookings = bookingRepo.findAll();
+
+    //Check xem customer co dang dat phong/o khong
+    for (const auto& booking : allBookings) {
+        if (booking.getCustomerId() == id) {
+            if (booking.getStatus() == BookingStatus::Booked || 
+                booking.getStatus() == BookingStatus::CheckedIn) {
+                
+                error = "Cannot delete a customer who currently has active Booked or Checked In bookings.";
+                return false;
+                }
+            }
+        }
 
     if (repository.remove(id)) {
         return true;
