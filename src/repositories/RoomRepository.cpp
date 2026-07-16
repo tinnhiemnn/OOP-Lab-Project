@@ -104,3 +104,25 @@ std::unique_ptr<Room> RoomRepository::findById(const QString& id) {
     return nullptr;
 }
 
+std::vector<std::unique_ptr<Room>> RoomRepository::findAvailableInPeriod(const QDate& checkIn, const QDate& checkOut) {
+    std::vector<std::unique_ptr<Room>> rows;
+    QSqlQuery q(DatabaseManager::getInstance().database());
+
+    q.prepare("SELECT r.id, r.base_price, 'Available' as calculated_status, r.type. r.beds "
+              "FROM rooms r "
+              "WHERE r.id NOT IN ( "
+                "SELECT b.room_id FROM bookings b "
+                "WHERE b.check_in < ? AND b.check_out > ? AND b.status != 'Cancelled' AND b.status != 'CheckedOut' " 
+              ");");
+        
+    q.addBindValue(checkOut);
+    q.addBindValue(checkIn);
+
+    if (!q.exec()) {
+        lastErrorMessage = q.lastError().text();
+        return rows;
+    }
+
+    while (q.next()) rows.push_back(mapRoom(q));
+    return rows;
+}
