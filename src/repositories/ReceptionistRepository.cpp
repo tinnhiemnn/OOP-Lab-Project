@@ -15,7 +15,7 @@ namespace {
 
 bool ReceptionistRepository::add(const Receptionist& Receptionist) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("INSERT INTO Receptionists(id, name, email) VALUES(?, ?, ?)");
+    q.prepare("INSERT INTO receptionists(id, name, email) VALUES(?, ?, ?)");
     q.addBindValue(Receptionist.getId());
     q.addBindValue(Receptionist.getName());
     q.addBindValue(Receptionist.getEmail());
@@ -28,7 +28,7 @@ bool ReceptionistRepository::add(const Receptionist& Receptionist) {
 
 bool ReceptionistRepository::update(const Receptionist& Receptionist) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("UPDATE Receptionists SET name = ?, email = ? WHERE id = ?");
+    q.prepare("UPDATE receptionists SET name = ?, email = ? WHERE id = ?");
     q.addBindValue(Receptionist.getName());
     q.addBindValue(Receptionist.getEmail());
     q.addBindValue(Receptionist.getId());
@@ -41,7 +41,7 @@ bool ReceptionistRepository::update(const Receptionist& Receptionist) {
 
 bool ReceptionistRepository::remove(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("DELETE FROM Receptionists WHERE id = ?");
+    q.prepare("UPDATE receptionists SET status = 'Inactive' WHERE id = ?");
     q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -53,7 +53,7 @@ bool ReceptionistRepository::remove(const QString& id) {
 std::vector<Receptionist> ReceptionistRepository::findAll() {
     std::vector<Receptionist> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    if (!q.exec("SELECT id, name, email FROM Receptionists ORDER BY id")) {
+    if (!q.exec("SELECT id, name, email FROM receptionists WHERE status = 'Active' ORDER BY id")) {
         lastErrorMessage = q.lastError().text();
         return rows;
     }
@@ -64,7 +64,9 @@ std::vector<Receptionist> ReceptionistRepository::findAll() {
 std::vector<Receptionist> ReceptionistRepository::search(const QString& keyword) {
     std::vector<Receptionist> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, name, email FROM Receptionists WHERE id LIKE ? OR name LIKE ? OR email LIKE ? ORDER BY id");
+    q.prepare("SELECT id, name, email FROM receptionists "
+              "WHERE (id LIKE ? OR name LIKE ? OR email LIKE ?) AND status = 'Active' "
+              "ORDER BY id");
     const QString pattern = "%" + keyword + "%";
     for (int i = 0; i < 3; ++i) q.addBindValue(pattern);
     if (!q.exec()) {
@@ -77,7 +79,7 @@ std::vector<Receptionist> ReceptionistRepository::search(const QString& keyword)
 
 std::optional<Receptionist> ReceptionistRepository::findById(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, name, email FROM Receptionists WHERE id = ?");
+    q.prepare("SELECT id, name, email FROM receptionists WHERE id = ? AND status = 'Active'");
     q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -87,4 +89,18 @@ std::optional<Receptionist> ReceptionistRepository::findById(const QString& id) 
     return std::nullopt;
 }
 
+QString ReceptionistRepository::generateNextId() {
+    QSqlQuery q(DatabaseManager::getInstance().database());
+    q.prepare("SELECT MAX(CAST(SUBSTR(id, 4) AS INTEGER)) "
+              "FROM receptionists");
+    if (!q.exec()) {
+        lastErrorMessage = q.lastError().text();
+        return "";
+    }
+    if (q.next()) {
+        int maxId = q.value(0).toInt();
+        return QString("REC%1").arg(maxId + 1, 3, 10, QChar('0'));
+    }
+    return "REC001";
+}
 

@@ -44,7 +44,9 @@ bool CustomerRepository::update(const Customer& customer) {
 
 bool CustomerRepository::remove(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("DELETE FROM customers WHERE id = ?");
+    q.prepare("UPDATE customers "
+              "SET name = 'Deleted Customer', email = 'N/A', "
+              "phone = 'N/A', status = 'Inactive' WHERE id = ?");
     q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -56,7 +58,7 @@ bool CustomerRepository::remove(const QString& id) {
 std::vector<Customer> CustomerRepository::findAll() {
     std::vector<Customer> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    if (!q.exec("SELECT id, name, email, phone FROM customers ORDER BY id")) {
+    if (!q.exec("SELECT id, name, email, phone FROM customers WHERE status = 'Active' ORDER BY id")) {
         lastErrorMessage = q.lastError().text();
         return rows;
     }
@@ -67,7 +69,9 @@ std::vector<Customer> CustomerRepository::findAll() {
 std::vector<Customer> CustomerRepository::search(const QString& keyword) {
     std::vector<Customer> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, name, email, phone FROM customers WHERE id LIKE ? OR name LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY id");
+    q.prepare("SELECT id, name, email, phone FROM customers "
+              "WHERE (id LIKE ? OR name LIKE ? OR email LIKE ? OR phone LIKE ?) AND status = 'Active' "
+              "ORDER BY id");
     const QString pattern = "%" + keyword + "%";
     for (int i = 0; i < 4; ++i) q.addBindValue(pattern);
     if (!q.exec()) {
@@ -80,7 +84,7 @@ std::vector<Customer> CustomerRepository::search(const QString& keyword) {
 
 std::optional<Customer> CustomerRepository::findById(const QString& id) {
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, name, email, phone FROM customers WHERE id = ?");
+    q.prepare("SELECT id, name, email, phone FROM customers WHERE id = ? AND status = 'Active'");
     q.addBindValue(id);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
@@ -90,4 +94,16 @@ std::optional<Customer> CustomerRepository::findById(const QString& id) {
     return std::nullopt;
 }
 
-
+QString CustomerRepository::generateNextId() {
+    QSqlQuery q(DatabaseManager::getInstance().database());
+    q.prepare("SELECT MAX(CAST(SUBSTR(id, 4) AS INTEGER)) FROM customers");
+    if (!q.exec()) {
+        lastErrorMessage = q.lastError().text();
+        return "";
+    }
+    if (q.next()) {
+        int maxId = q.value(0).toInt();
+        return QString("CUS%1").arg(maxId + 1, 3, 10, QChar('0'));
+    }
+    return "CUS001";
+}
