@@ -21,6 +21,10 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
     src/patterns/RoomFactory.cpp
+    src/patterns/PricingContext.cpp
+    src/patterns/MemberDiscount.cpp
+    src/patterns/NoDiscount.cpp
+    src/patterns/SeasonalDiscount.cpp
     src/controllers/CustomerController.cpp
     src/controllers/ReceptionistController.cpp
     src/controllers/RoomController.cpp
@@ -61,6 +65,8 @@ add_executable(DatabaseTests
     src/repositories/CustomerRepository.cpp
     src/repositories/RoomRepository.cpp
     src/repositories/BookingRepository.cpp
+    src/controllers/CustomerController.cpp
+    src/controllers/RoomController.cpp
 )
 target_include_directories(DatabaseTests PRIVATE ${PROJECT_INCLUDE_DIRS})
 target_link_libraries(DatabaseTests PRIVATE Qt6::Core Qt6::Sql)
@@ -72,11 +78,30 @@ target_include_directories(RoomFactoryTests PRIVATE ${PROJECT_INCLUDE_DIRS})
 target_link_libraries(RoomFactoryTests PRIVATE Qt6::Core)
 target_compile_definitions(RoomFactoryTests PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
+# Build target ModelTests
+add_executable(ModelTests tests/model_tests.cpp src/patterns/RoomFactory.cpp)
+target_include_directories(ModelTests PRIVATE ${PROJECT_INCLUDE_DIRS})
+target_link_libraries(ModelTests PRIVATE Qt6::Core)
+target_compile_definitions(ModelTests PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Build target RepositoryTests
+add_executable(RepositoryTests 
+    tests/repository_tests.cpp
+    src/database/DatabaseManager.cpp
+    src/repositories/CustomerRepository.cpp
+    src/repositories/RoomRepository.cpp
+    src/patterns/RoomFactory.cpp
+)
+target_include_directories(RepositoryTests PRIVATE ${PROJECT_INCLUDE_DIRS})
+target_link_libraries(RepositoryTests PRIVATE Qt6::Core Qt6::Sql)
+target_compile_definitions(RepositoryTests PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+
 # Build target ControllerTests
 add_executable(ControllerTests 
     tests/controller_tests.cpp
     src/database/DatabaseManager.cpp
     src/repositories/CustomerRepository.cpp
+    src/repositories/BookingRepository.cpp
     src/controllers/CustomerController.cpp
 )
 target_include_directories(ControllerTests PRIVATE ${PROJECT_INCLUDE_DIRS})
@@ -89,3 +114,5 @@ add_test(NAME UtilsTest COMMAND UtilsTests)
 add_test(NAME DatabaseTest COMMAND DatabaseTests)
 add_test(NAME RoomFactoryTest COMMAND RoomFactoryTests)
 add_test(NAME ControllerTest COMMAND ControllerTests)
+add_test(NAME ModelTest COMMAND ModelTests)
+add_test(NAME RepositoryTest COMMAND RepositoryTests)

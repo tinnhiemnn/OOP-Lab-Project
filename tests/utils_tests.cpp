@@ -47,6 +47,15 @@ void testValidationUtils() {
     assert(ValidationUtils::isValidEmail("@example.com") == false);
     assert(ValidationUtils::isValidEmail("test@.com") == false);
 
+    // Strict email checking validations:
+    // Email contains spaces - must return false
+    assert(ValidationUtils::isValidEmail("test @example.com") == false); 
+    // Email contains multiple @ signs - must return false
+    assert(ValidationUtils::isValidEmail("test@example.com@com") == false);
+    // Email contains double dots - must return false
+    assert(ValidationUtils::isValidEmail("test@ex..com") == false);
+    std::cout << "Strict email check tests passed!" << std::endl;
+
     //3. isValidPhone
     assert(ValidationUtils::isValidPhone("0987654321") == true);
     assert(ValidationUtils::isValidPhone("12345678") == false);
