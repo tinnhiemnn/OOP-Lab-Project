@@ -19,6 +19,7 @@ private:
     QString receptionistId;
     QDate issuedDate;
 
+    double subtotalAmount = 0.0;
     double totalAmount = 0.0;
     double discountAmount = 0.0;
 
@@ -33,6 +34,7 @@ public:
             QString bookingId,
             QString receptionistId,
             QDate issuedDate,
+            double subtotalAmount = 0,
             double totalAmount = 0,
             double discountAmount = 0,
             PaymentMethod paymentMethod = PaymentMethod::Cash,
@@ -41,6 +43,7 @@ public:
           bookingId(std::move(bookingId)),
           receptionistId(std::move(receptionistId)),
           issuedDate(issuedDate),
+          subtotalAmount(subtotalAmount),
           totalAmount(totalAmount),
           discountAmount(discountAmount),
           paymentMethod(paymentMethod),
@@ -50,11 +53,13 @@ public:
     const QString& getBookingId() const { return bookingId; }
     const QString& getReceptionistId() const { return receptionistId; }
     QDate getIssuedDate() const { return issuedDate; }
+    double getSubtotalAmount() const { return subtotalAmount; }
     double getTotalAmount() const { return totalAmount; }
     double getDiscountAmount() const { return discountAmount; }
     PaymentMethod getPaymentMethod() const { return paymentMethod; }
     const QString& getDiscountName() const { return discountName; }
 
+    void setSubtotalAmount(double amount) { subtotalAmount = amount; }
     void setTotalAmount(double amount) { totalAmount = amount; }
     void setPaymentMethod(PaymentMethod method) { paymentMethod = method; }
     void setDiscountName(const QString& value) { discountName = value; }

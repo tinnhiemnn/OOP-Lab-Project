@@ -1,4 +1,5 @@
 #include "controllers/ReceptionistController.h"
+#include "utils/ValidationUtils.h"
 
 ReceptionistController::ReceptionistController() {}
 
@@ -19,6 +20,16 @@ std::optional<Receptionist> ReceptionistController::getReceptionistById(const QS
 
 bool ReceptionistController::addReceptionist(const Receptionist& receptionist, QString& error) 
 {
+    if (!ValidationUtils::isNonEmpty(receptionist.getName())) {
+        error = "Receptionist name cannot be empty.";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidEmail(receptionist.getEmail())) {
+        error = "Invalid email format!";
+        return false;
+    }
+
     if (repository.add(receptionist)) return true;
     error = repository.lastError();
     return false;
