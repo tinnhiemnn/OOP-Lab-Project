@@ -1,5 +1,6 @@
 #pragma once
 
+#include "controllers/CustomerController.h"
 #include <DashboardCard.h>
 #include <QWidget>
 
@@ -13,6 +14,7 @@ public:
     explicit CustomerView(QWidget* parent = nullptr);
 
 private:
+    void refresh(const std::vector<Customer>& rows);
     void reload();
     void selected();
     void add();
@@ -21,6 +23,7 @@ private:
     void search();
     void error(const QString& message);
 
+    CustomerController controller;
     QLineEdit* idEdit;
     QLineEdit* nameEdit;
     QLineEdit* emailEdit;
@@ -31,3 +34,4 @@ private:
     DashboardCard* formCard;
     DashboardCard* tableCard;
 };
+

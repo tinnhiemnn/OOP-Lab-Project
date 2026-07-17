@@ -22,6 +22,7 @@ CustomerView::CustomerView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
       phoneEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
+    idEdit->setReadOnly(true); //idCustomer -> no-edit
     auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
     form->setVerticalSpacing(10 );
@@ -54,26 +55,6 @@ CustomerView::CustomerView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    // --- 3 ô thống kê mini phía trên ---
-    auto* statsRow = new QHBoxLayout;
-
-    auto makeStat = [this](const QString& label, const QString& value) {
-        auto* box = new QFrame(this);
-        box->setProperty("statMini", true);
-        auto* boxLayout = new QVBoxLayout(box);
-        auto* lbl = new QLabel(label, this);
-        lbl->setProperty("role", "statLabel");
-        auto* val = new QLabel(value, this);
-        val->setProperty("role", "statValue");
-        boxLayout->addWidget(lbl);
-        boxLayout->addWidget(val);
-        return box;
-    };
-
-    statsRow->addWidget(makeStat("Tổng khách hàng", "128"));
-    statsRow->addWidget(makeStat("Khách thân thiết", "42"));
-    statsRow->addWidget(makeStat("Chi tiêu TB", "1.250.000 ₫"));
-
     formCard = new DashboardCard("Customer", "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
@@ -100,7 +81,92 @@ CustomerView::CustomerView(QWidget* parent)
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(28, 20, 28, 20);
     layout->setSpacing(10);
-    layout->addLayout(statsRow);
+    //layout->addLayout(statsRow);
     layout->addWidget(formCard);
     layout->addWidget(tableCard, /*stretch=*/1);
+    connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
+    connect(updateBtn, &QPushButton::clicked, this, [this] { update(); });
+    connect(deleteBtn, &QPushButton::clicked, this, [this] { remove(); });
+    connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
+    connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
+    connect(table, &QTableWidget::itemSelectionChanged, this, [this] { selected(); });
+    reload();
 }
+
+void CustomerView::refresh(const std::vector<Customer>& rows) {
+    table->setRowCount(static_cast<int>(rows.size()));
+    for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
+        const auto& c = rows[static_cast<size_t>(row)];
+        table->setItem(row, 0, new QTableWidgetItem(c.getId()));
+        table->setItem(row, 1, new QTableWidgetItem(c.getName()));
+        table->setItem(row, 2, new QTableWidgetItem(c.getEmail()));
+        table->setItem(row, 3, new QTableWidgetItem(c.getPhone()));
+    }
+}
+
+void CustomerView::reload() { 
+    refresh(controller.listCustomers()); 
+}
+
+void CustomerView::selected() {
+    const int row = table->currentRow();
+    if (row < 0) return;
+    idEdit->setText(table->item(row, 0)->text());
+    nameEdit->setText(table->item(row, 1)->text());
+    emailEdit->setText(table->item(row, 2)->text());
+    phoneEdit->setText(table->item(row, 3)->text());
+}
+
+void CustomerView::add() { 
+    QString e;
+    const Customer c(idEdit->text(), 
+               nameEdit->text(), 
+               emailEdit->text(), 
+               phoneEdit->text());
+
+    if (!controller.addCustomer(c, e))
+        error(e); 
+    else {
+        reload();
+        idEdit->clear();
+        nameEdit->clear();
+        emailEdit->clear();
+        phoneEdit->clear();
+    }
+}
+
+void CustomerView::update() { 
+    QString e;
+    const Customer c(idEdit->text(), 
+               nameEdit->text(), 
+               emailEdit->text(), 
+               phoneEdit->text());
+
+    if (!controller.updateCustomer(c, e))
+        error(e); 
+    else {
+        reload();
+        idEdit->clear();
+        nameEdit->clear();
+        emailEdit->clear();
+        phoneEdit->clear();
+    }
+}
+
+void CustomerView::remove() { 
+    QString e;
+    if (!controller.deleteCustomer(idEdit->text(), e))
+        error(e); 
+    else {
+        reload();
+        idEdit->clear();
+        nameEdit->clear();
+        emailEdit->clear();
+        phoneEdit->clear();
+    }
+}
+
+void CustomerView::search() { 
+    refresh(controller.searchCustomers(searchEdit->text())); 
+}
+void CustomerView::error(const QString& message) { QMessageBox::warning(this, "Customer Error", message); }

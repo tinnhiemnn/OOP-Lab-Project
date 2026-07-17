@@ -33,10 +33,16 @@ set(PROJECT_SOURCES
     src/services/BookingService.cpp
     src/services/ReportService.cpp
     src/services/InvoiceService.cpp
+
     views/BookingView.cpp
     views/CustomerView.cpp
     views/MainWindow.cpp
     views/RoomView.cpp
+    views/ReportView.cpp 
+    views/ReceptionistView.cpp 
+    views/InvoiceView.cpp 
+
+    views/DashboardCard.h 
 )
 
 add_executable(HotelManagement ${PROJECT_SOURCES}
