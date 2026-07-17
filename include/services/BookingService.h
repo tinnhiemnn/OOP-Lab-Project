@@ -25,7 +25,7 @@ public:
 
     bool checkIn(const QString& bookingId, QString& error);
 
-    bool checkOut(const QString& bookingId, double& finalAmountOut, QString& error);                     
+    bool checkOut(const QString& bookingId, QString& error);                     
 
     bool cancelBooking(const QString& bookingId, QString& error);
 };

@@ -27,26 +27,6 @@ QString BookingService::makeBookingId() const {
     return "BK_" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
-//Tính toán chi phí đơn đặt phòng (gồm ngày ở và dịch vụ đi kèm)
-double BookingService::calculateBookingCost(const Booking& booking, double pricePerNight) const {
-    qint64 nights = booking.getCheckIn().daysTo(booking.getCheckOut());
-    if (nights <= 0) nights = 1; // Tối thiểu 1 đêm
-
-    double baseRoomCost = nights * pricePerNight;
-
-    // Bảng giá dịch vụ mẫu
-    const double PRICE_PER_BUFFET = 120000.0;    
-    const double PRICE_LAUNDRY = 50000.0;        
-    const double PRICE_DECORATION = 250000.0;    
-
-    double extraServiceCost = 0.0;
-    extraServiceCost += booking.getBuffetQuantity() * PRICE_PER_BUFFET;
-    if (booking.isUsingLaundry()) extraServiceCost += PRICE_LAUNDRY;
-    if (booking.isUsingDecoration()) extraServiceCost += PRICE_DECORATION;
-
-    return baseRoomCost + extraServiceCost;
-}
-
 bool BookingService::createBooking(const QString& customerId,
                                    const QString& roomId,
                                    const QDate& checkIn,
@@ -60,28 +40,28 @@ bool BookingService::createBooking(const QString& customerId,
                                    QString& error) 
 {
     if (checkIn >= checkOut) {
-        error = "Ngày Check-out phải sau ngày Check-in!";
+        error = "The check-out date must be after the check-in date!";
         return false;
     }
     if (checkIn < QDate::currentDate()) {
-        error = "Không thể tạo đơn đặt phòng cho ngày trong quá khứ!";
+        error = "It is not possible to create a booking for a past date!";
         return false;
     }
 
     // Kiểm tra phòng có tồn tại không
     auto roomPtr = rooms.findById(roomId);
     if (!roomPtr) {
-        error = "Không tìm thấy thông tin phòng!";
+        error = "Room information not found!";
         return false;
     }
     if (roomPtr->getStatus() == RoomStatus::Maintenance) {
-        error = "Phòng đang bảo trì, không thể đặt phòng!";
+        error = "The room is under maintenance and cannot be booked!";
         return false;
     }
 
     // Kiểm tra trùng lịch phòng
     if (hasConflict(roomId, checkIn, checkOut)) {
-        error = "Phòng đã có người đặt hoặc đang sử dụng trong khoảng thời gian này!";
+        error = "The room has already been booked or is in use during this period!";
         return false;
     }
 
@@ -99,7 +79,7 @@ bool BookingService::createBooking(const QString& customerId,
 
     // Lưu vào database
     if (!bookings.add(newBooking)) {
-        error = "Lỗi Database khi lưu Booking: " + bookings.lastError();
+        error = "Database error when saving the booking: " + bookings.lastError();
         return false;
     }
 
@@ -146,7 +126,7 @@ bool BookingService::checkIn(const QString& bookingId, QString& error) {
     return true;
 }
 
-bool BookingService::checkOut(const QString& bookingId, double& finalAmountOut, QString& error) {
+bool BookingService::checkOut(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
     if (!target.has_value()) {
         error = "Không tìm thấy mã đặt phòng!";
@@ -166,19 +146,16 @@ bool BookingService::checkOut(const QString& bookingId, double& finalAmountOut, 
         return false;
     }
 
-    // Tính tổng chi phí (Ngày ở * Giá phòng + Tiền dịch vụ phát sinh)
-    finalAmountOut = calculateBookingCost(booking, roomPtr->getBasePrice());
-
     // Đổi trạng thái đơn thành CheckedOut
     booking.markCheckedOut();
     if (!bookings.update(booking)) {
-        error = "Lỗi cập nhật trạng thái đơn sang CheckedOut: " + bookings.lastError();
+        error = "Error updating order status to CheckedOut: " + bookings.lastError();
         return false;
     }
 
     // Đổi trạng thái phòng sang NeedCleaning
     if (!rooms.updateStatus(booking.getRoomId(), RoomStatus::NeedCleaning)) {
-        error = "Lỗi cập nhật trạng thái phòng sang NeedCleaning: " + rooms.lastError();
+        error = "Error updating order status to NeedCleaning: " + rooms.lastError();
         return false;
     }
 
@@ -188,28 +165,28 @@ bool BookingService::checkOut(const QString& bookingId, double& finalAmountOut, 
 bool BookingService::cancelBooking(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
     if (!target.has_value()) {
-        error = "Không tìm thấy mã đặt phòng!";
+        error = "Booking ID not found!";
         return false;
     }
 
     Booking booking = target.value();
     if (booking.getStatus() == BookingStatus::CheckedOut || booking.getStatus() == BookingStatus::Cancelled) {
-        error = "Đơn đặt phòng này đã hoàn thành hoặc đã hủy trước đó!";
+        error = "This reservation has already been completed or canceled previously!";
         return false;
     }
 
     // Đổi trạng thái đơn thành Cancelled
     booking.cancelBooking();
     if (!bookings.update(booking)) {
-        error = "Hủy đơn thất bại trong cơ sở dữ liệu!";
+        error = "Cancellation of the order failed in the database!";
         return false;
     }
 
-    // Nếu phòng hiện tại đang được sử dụng (InUse) bởi chính đơn đặt phòng bị hủy này, trả trạng thái về Available
+    // Nếu phòng hiện tại đang được sử dụng bởi chính đơn đặt phòng bị hủy này, trả trạng thái về Available
     auto roomPtr = rooms.findById(booking.getRoomId());
     if (roomPtr && roomPtr->getStatus() == RoomStatus::InUse) {
         if (!rooms.updateStatus(booking.getRoomId(), RoomStatus::Available)) {
-            error = "Lỗi cập nhật trạng thái phòng về Available: " + rooms.lastError();
+            error = "Error updating order status to Available: " + rooms.lastError();
             return false;
         }
     }

@@ -1,31 +1,23 @@
 #include "controllers/InvoiceController.h"
+#include "utils/ValidationUtils.h"
 
 InvoiceController::InvoiceController(InvoiceService& service)
     : invoiceService(service) {}
 
-bool InvoiceController::processCreateInvoice(const QString& bookingId, const QString& receptionistId, double subtotalAmount, double discountAmount, const QString& discountName, const QString& paymentMethodStr, QString& error)
+bool InvoiceController::createInvoice(const QString& bookingId, const QString& receptionistId,  const QString& discountName, const QString& paymentMethodStr, QString& error)
 {
-    if (bookingId.trimmed().isEmpty()) {
-        error = "Mã đặt phòng không được để trống khi xuất hóa đơn!";
+    if (!ValidationUtils::isNonEmpty(bookingId)) {
+        error = "Booking ID cannot be empty!";
         return false;
     }
-    if (receptionistId.trimmed().isEmpty()) {
-        error = "Không xác định được mã lễ tân lập hóa đơn!";
-        return false;
-    }
-    if (subtotalAmount < 0) {
-        error = "Số tiền gốc (Subtotal) trên giao diện không hợp lệ!";
-        return false;
-    }
-    if (discountAmount < 0) {
-        error = "Số tiền giảm giá không được là số âm!";
+    if (!ValidationUtils::isNonEmpty(receptionistId)) {
+        error = "Unable to determine the receptionist ID for billing!";
         return false;
     }
 
     PaymentMethod method = Invoice::paymentMethodFromString(paymentMethodStr);
 
-    return invoiceService.createInvoice(bookingId, receptionistId, subtotalAmount, 
-                                        discountAmount, discountName, method, error);
+    return invoiceService.createInvoice(bookingId, receptionistId, discountName, method, error);
 }
 
 // Lấy danh sách hóa đơn
