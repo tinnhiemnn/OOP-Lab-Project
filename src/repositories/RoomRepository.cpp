@@ -108,7 +108,7 @@ std::vector<std::unique_ptr<Room>> RoomRepository::findAvailableInPeriod(const Q
     std::vector<std::unique_ptr<Room>> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
 
-    q.prepare("SELECT r.id, r.base_price, 'Available' as calculated_status, r.type. r.beds "
+    q.prepare("SELECT r.id, r.base_price, 'Available' as calculated_status, r.type, r.beds "
               "FROM rooms r "
               "WHERE r.id NOT IN ( "
                 "SELECT b.room_id FROM bookings b "

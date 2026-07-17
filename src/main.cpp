@@ -26,7 +26,6 @@ int main(int argc, char* argv[]) {
         QMessageBox::critical(nullptr, "Database Error", QString("Cannot open database:\n") + database.lastError());
         return 1;
     }
-
     MainWindow window;
     window.show();
     return app.exec();
