@@ -1,53 +1,53 @@
 #include "controllers/BookingController.h"
+#include "utils/ValidationUtils.h"
 
 BookingController::BookingController(BookingService& service)
     : bookingService(service) {}
 
-bool BookingController::processCreateBooking(const QString& customerId, const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const QString& groupCode, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
+bool BookingController::createBooking(const QString& customerId, const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const QString& groupCode, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
 {
-    if (customerId.trimmed().isEmpty()) {
-        error = "Vui lòng chọn hoặc nhập thông tin Khách hàng!";
+    if (!ValidationUtils::isNonEmpty(customerId)) {
+        error = "Please select or enter the Customer ID!";
         return false;
     }
-    if (roomId.trimmed().isEmpty()) {
-        error = "Vui lòng chọn phòng cần đặt!";
+    
+    if (!ValidationUtils::isNonEmpty(roomId)) {
+        error = "Please select the room!";
         return false;
     }
-    if (receptionistId.trimmed().isEmpty()) {
-        error = "Không xác định được ID Lễ tân đang thực hiện!";
+    if (!ValidationUtils::isNonEmpty(receptionistId)) {
+        error = "Receptionist ID cannot be empty!";
         return false;
     }
     if (buffetQty < 0) {
-        error = "Số lượng suất Buffet không được là số âm!";
+        error = "The number of buffet tickets cannot be negative!";
         return false;
     }
 
-    return bookingService.createBooking(customerId, roomId, checkIn, checkOut,
-                                        receptionistId, groupCode, buffetQty,
-                                        laundry, decoration, decorationNote, error);
+    return bookingService.createBooking(customerId, roomId, checkIn, checkOut, receptionistId, groupCode, buffetQty, laundry, decoration, decorationNote, error);
 }
 
 bool BookingController::processCheckIn(const QString& bookingId, QString& error) {
-    if (bookingId.trimmed().isEmpty()) {
-        error = "Mã đặt phòng trống, không thể thực hiện Check-in!";
+    if (!ValidationUtils::isNonEmpty(bookingId)){
+        error ="Booking ID cannot be empty!";
         return false;
     }
 
     return bookingService.checkIn(bookingId, error);
 }
 
-bool BookingController::processCheckOut(const QString& bookingId, double& finalAmountOut, QString& error) {
-    if (bookingId.trimmed().isEmpty()) {
-        error = "Mã đặt phòng trống, không thể thực hiện Check-out!";
+bool BookingController::processCheckOut(const QString& bookingId, QString& error) {
+    if(!ValidationUtils::isNonEmpty(bookingId)) {
+        error = "Booking ID cannot be empty!";
         return false;
     }
 
-    return bookingService.checkOut(bookingId, finalAmountOut, error);
+    return bookingService.checkOut(bookingId, error);
 }
 
 bool BookingController::processCancelBooking(const QString& bookingId, QString& error) {
     if (bookingId.trimmed().isEmpty()) {
-        error = "Mã đặt phòng không hợp lệ để hủy đơn!";
+        error = "Invalid Booking ID!";
         return false;
     }
 

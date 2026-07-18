@@ -12,8 +12,10 @@ private:
 public:
     explicit InvoiceController(InvoiceService& service);
 
-    bool processCreateInvoice(const QString& bookingId, const QString& receptionistId, double subtotalAmount, double discountAmount, const QString& discountName, const QString& paymentMethodStr, QString& error);
+    bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error);
 
+    bool createAllInvoice();
+    
     // Lấy toàn bộ danh sách hóa đơn để hiển thị
     std::vector<Invoice> handleGetAllInvoices() const;
     
