@@ -23,6 +23,11 @@ CustomerView::CustomerView(QWidget* parent)
       phoneEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
     idEdit->setReadOnly(true); //idCustomer -> no-edit
+    
+    idEdit->setPlaceholderText("Customer ID");
+    emailEdit->setPlaceholderText("abc@gmail.com");
+    phoneEdit->setPlaceholderText("0*********");
+
     auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
     form->setVerticalSpacing(10 );

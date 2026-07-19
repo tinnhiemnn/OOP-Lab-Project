@@ -1,14 +1,14 @@
 #include "BookingView.h"
 
 #include <QDate>
-#include <QComboBox>
 #include <QDateEdit>
-#include <QFormLayout>
+#include <QDateTime>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
 #include <QCheckBox>
@@ -16,48 +16,64 @@
 #include <QString>
 #include <QFrame>
 #include <QLabel>
-#include <QGraphicsDropShadowEffect>
 
 namespace {
-    QString text(QLineEdit* edit) { return edit->text().trimmed(); }
+QString text(QLineEdit* edit) { return edit->text().trimmed(); }
 }
 
 BookingView::BookingView(QWidget* parent)
-    : QWidget(parent), groupCodeEdit(new QLineEdit(this)), customerIdEdit(new QLineEdit(this)),
-      searchEdit(new QLineEdit(this)), checkInEdit(new QDateEdit(QDate::currentDate(), this)),
-      checkOutEdit(new QDateEdit(QDate::currentDate().addDays(1), this)), addRoomBtn(new QPushButton("+", this)),
-      buffetQtyEdit(new QSpinBox(this)), laundryCheck(new QCheckBox("Laundry service", this)),
-      decorCheck(new QCheckBox("Decoration service", this)), decorNotesEdit(new QLineEdit(this)) {
+    : QWidget(parent),
+    repository(),
+    roomRepository(),
+    service(repository, roomRepository),
+    controller(service),
+    bookingIdEdit(new QLineEdit(this)),
+    groupCodeEdit(new QLineEdit(this)),
+    customerIdEdit(new QLineEdit(this)),
+    receptionistIdEdit(new QLineEdit(this)),
+    searchEdit(new QLineEdit(this)),
+    checkInEdit(new QDateEdit(QDate::currentDate(), this)),
+    checkOutEdit(new QDateEdit(QDate::currentDate().addDays(1), this)),
+    addRoomBtn(new QPushButton("+", this)) {
+
     checkInEdit->setCalendarPopup(true);
     checkOutEdit->setCalendarPopup(true);
     checkInEdit->setDisplayFormat("yyyy-MM-dd");
     checkOutEdit->setDisplayFormat("yyyy-MM-dd");
 
-    groupCodeEdit->setPlaceholderText("Group ID");
+    // Booking ID chỉ được set khi chọn 1 dòng trên table (dùng cho Check-in/Check-out/Cancel),
+    // không cho sửa tay để tránh gõ nhầm sang booking khác.
+    bookingIdEdit->setPlaceholderText("Booking ID (chọn từ Booking List)");
+    bookingIdEdit->setReadOnly(true);
+    
+    groupCodeEdit->setPlaceholderText("Group ID (để trống nếu muốn hệ thống tự sinh)");
+    customerIdEdit->setPlaceholderText("Customer ID");
+    receptionistIdEdit->setPlaceholderText("Receptionist ID");
 
-    // --- Dịch vụ đi kèm booking (trước đây gắn ở Room) ---
-    buffetQtyEdit->setRange(0, 50);
-    buffetQtyEdit->setSuffix(" ticket");
 
-    decorNotesEdit->setPlaceholderText("Decoration notes (flowers, balloons, banners...)");
-    decorNotesEdit->setEnabled(false);
-    connect(decorCheck, &QCheckBox::toggled, decorNotesEdit, &QLineEdit::setEnabled);
-
+    // --- Nhóm thông tin cố định: Booking ID, Group ID, Customer ID, Receptionist ID, Check-in, Check-out ---
     auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
-    form->setVerticalSpacing(8);
-    form->addWidget(new QLabel("Group ID", this), 0, 0);
-    form->addWidget(groupCodeEdit, 0, 1);
-    form->addWidget(new QLabel("Customer ID", this), 1, 0);
-    form->addWidget(customerIdEdit, 1, 1);
+    form->setVerticalSpacing(6); // giảm để card Booking gọn hơn, nhường chỗ cho Booking List
+    form->addWidget(new QLabel("Booking ID", this), 0, 0);
+    form->addWidget(bookingIdEdit, 0, 1);
     form->addWidget(new QLabel("Check-in", this), 0, 2);
     form->addWidget(checkInEdit, 0, 3);
+
+    form->addWidget(new QLabel("Group ID", this), 1, 0);
+    form->addWidget(groupCodeEdit, 1, 1);
     form->addWidget(new QLabel("Check-out", this), 1, 2);
     form->addWidget(checkOutEdit, 1, 3);
+
+    form->addWidget(new QLabel("Customer ID", this), 2, 0);
+    form->addWidget(customerIdEdit, 2, 1);
+    form->addWidget(new QLabel("Receptionist ID", this), 2, 2);
+    form->addWidget(receptionistIdEdit, 2, 3);
+
     form->setColumnStretch(1, 1);
     form->setColumnStretch(3, 1);
 
-    // --- Danh sách phòng trong nhóm booking, bấm "+" để thêm phòng ---
+    // --- Danh sách phòng trong nhóm booking, mỗi phòng có dịch vụ riêng, bấm "+" để thêm phòng ---
     auto* roomsHeader = new QHBoxLayout;
     roomsHeader->addWidget(new QLabel("Room List", this));
     roomsHeader->addStretch();
@@ -67,7 +83,7 @@ BookingView::BookingView(QWidget* parent)
     roomsHeader->addWidget(addRoomBtn);
 
     roomsLayout = new QVBoxLayout();
-    roomsLayout->setSpacing(6);
+    roomsLayout->setSpacing(4); // giảm để mỗi dòng Room sát nhau hơn, card gọn lại
 
     auto* roomsBox = new QVBoxLayout;
     roomsBox->addLayout(roomsHeader);
@@ -75,25 +91,12 @@ BookingView::BookingView(QWidget* parent)
 
     connect(addRoomBtn, &QPushButton::clicked, this, [this] { addRoomRow(); });
 
-    auto* services = new QGridLayout;
-    services->setHorizontalSpacing(16);
-    services->setVerticalSpacing(8); // Tăng khoảng cách dòng một chút cho thoáng và dễ nhìn
-
-    services->addWidget(new QLabel("Buffet:", this), 0, 0);
-    services->addWidget(buffetQtyEdit, 0, 1);
-    services->addWidget(laundryCheck, 1, 0, 1, 2); 
-    services->addWidget(decorCheck, 2, 0);
-    services->addWidget(decorNotesEdit, 2, 1);
-
-    services->setColumnStretch(0, 0);
-    services->setColumnStretch(1, 1);
-
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Book", this);
     addBtn->setProperty("variant", "primary");
 
     auto* inBtn = new QPushButton("Check-in", this);
-    inBtn->setProperty("variant","ghost");
+    inBtn->setProperty("variant", "ghost");
 
     auto* outBtn = new QPushButton("Check-out", this);
     outBtn->setProperty("variant", "ghost");
@@ -110,14 +113,13 @@ BookingView::BookingView(QWidget* parent)
     actions->addWidget(cancelBtn);
     actions->addWidget(reloadBtn);
 
-    // --- Card 1: form đặt phòng (nhóm phòng + dịch vụ) + các nút hành động ---
+    // --- Card 1: form đặt phòng (thông tin cố định + danh sách phòng kèm dịch vụ) + các nút hành động ---
     formCard = new DashboardCard("Booking", "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(roomsBox);
-    formCard->addContentLayout(services);
     formCard->addContentLayout(actions);
 
-    addRoomRow(); // luôn có sẵn 1 dòng Room ID đầu tiên khi mở form
+    addRoomRow(); // luôn có sẵn 1 dòng Room đầu tiên khi mở form
 
     auto* searching = new QHBoxLayout;
     auto* searchBtn = new QPushButton("Search", this);
@@ -127,116 +129,226 @@ BookingView::BookingView(QWidget* parent)
     searching->addWidget(searchEdit);
     searching->addWidget(searchBtn);
 
+    // --- Booking List: table thay cho 4 cột kanban trước đây ---
+    bookingTable = new QTableWidget(0, 7, this);
+    bookingTable->setHorizontalHeaderLabels(
+        {"Booking ID", "Customer ID", "Receptionist ID", "Group Code", "Room ID", "Services", "Status"});
+    bookingTable->horizontalHeader()->setStretchLastSection(true);
+    bookingTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    bookingTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    bookingTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    bookingTable->verticalHeader()->setVisible(false);
 
-    // --- Kanban board: 4 cột trạng thái ---
-    auto buildColumn = [this](const QString& title, QVBoxLayout*& colRef) {
-        auto* colFrame = new QFrame(this);
-        colFrame->setObjectName("kanbanColumn");
-        auto* outer = new QVBoxLayout(colFrame);
+    auto* tableLayout = new QVBoxLayout;
+    tableLayout->addWidget(bookingTable);
 
-        auto* colTitle = new QLabel(title, this);
-        colTitle->setProperty("role", "columnTitle");
-        outer->addWidget(colTitle);
-
-        colRef = new QVBoxLayout();
-        colRef->setSpacing(10);
-        colRef->addStretch(); // giữ thẻ dồn lên trên
-        outer->addLayout(colRef);
-
-        return colFrame;
-    };
-
-    auto* kanbanRow = new QHBoxLayout();
-    kanbanRow->addWidget(buildColumn("Booked", colBooked));
-    kanbanRow->addWidget(buildColumn("Checked-in", colCheckedIn));
-    kanbanRow->addWidget(buildColumn("Checked-out", colCheckedOut));
-    kanbanRow->addWidget(buildColumn("Cancelled", colCancelled));
-
-    // --- Card 2: ô tìm kiếm + kanban board ---
+    // --- Card 2: ô tìm kiếm + Booking List table ---
     tableCard = new DashboardCard("Booking List", "purple", this);
     tableCard->addContentLayout(searching);
-    tableCard->addContentLayout(kanbanRow);
+    tableCard->addContentLayout(tableLayout);
 
     // --- Layout tổng thể card 1 + card 2 ---
     auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(28, 20, 28, 20);
-    layout->setSpacing(10);
-    layout->addWidget(formCard);
-    layout->addWidget(tableCard, /*stretch=*/1);
+    layout->setContentsMargins(24, 16, 24, 16);
+    layout->setSpacing(8);
+    layout->addWidget(formCard, /*stretch=*/0);   // card Booking giữ nguyên kích thước cần thiết, không giãn thêm
+    layout->addWidget(tableCard, /*stretch=*/1);  // Booking List chiếm hết phần còn lại -> to hơn
+
+    connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
+    connect(inBtn, &QPushButton::clicked, this, [this] { checkIn(); });
+    connect(outBtn, &QPushButton::clicked, this, [this] { checkOut(); });
+    connect(cancelBtn, &QPushButton::clicked, this, [this] { cancel(); });
+    connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
+    connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
+    connect(bookingTable, &QTableWidget::cellClicked, this, [this](int row, int col) { selected(row, col); });
+
+    reload();
 }
 
 void BookingView::addRoomRow(const QString& roomId) {
-    // Mỗi dòng gồm 1 ô nhập Room ID + 1 nút "×" để xoá dòng đó khỏi nhóm booking
-    auto* rowWidget = new QWidget(this);
-    auto* row = new QHBoxLayout(rowWidget);
-    row->setContentsMargins(0, 0, 0, 0);
+    // Mỗi dòng gồm: Room ID + Buffet qty + Laundry + Decoration (riêng cho từng phòng)
+    // + 1 nút "×" để xoá dòng đó khỏi nhóm booking.
+    RoomServiceRow r;
 
-    auto* roomEdit = new QLineEdit(this);
-    roomEdit->setPlaceholderText("Room ID");
-    if (!roomId.isEmpty()) roomEdit->setText(roomId);
+    r.rowWidget = new QWidget(this);
+    auto* row = new QHBoxLayout(r.rowWidget);
+    row->setContentsMargins(0, 0, 0, 0);
+    row->setSpacing(8);
+
+    r.roomIdEdit = new QLineEdit(this);
+    r.roomIdEdit->setPlaceholderText("Room ID");
+    r.roomIdEdit->setMaximumWidth(110); // thu nhỏ ô Room ID lại, không cần chiếm nhiều chỗ
+    if (!roomId.isEmpty()) r.roomIdEdit->setText(roomId);
+
+    auto* buffetLbl = new QLabel("Buffet:", this);
+
+    r.buffetQtyEdit = new QSpinBox(this);
+    r.buffetQtyEdit->setRange(0, 50);
+    r.buffetQtyEdit->setSuffix(" ticket");
+
+    r.laundryCheck = new QCheckBox("Laundry", this);
+    r.decorCheck = new QCheckBox("Decor", this);
+
+    r.decorNotesEdit = new QLineEdit(this);
+    r.decorNotesEdit->setPlaceholderText("Decoration notes");
+    r.decorNotesEdit->setEnabled(false);
+    connect(r.decorCheck, &QCheckBox::toggled, r.decorNotesEdit, &QLineEdit::setEnabled);
 
     auto* removeBtn = new QPushButton("×", this);
     removeBtn->setProperty("variant", "ghost");
     removeBtn->setFixedWidth(28);
     removeBtn->setToolTip("Bỏ phòng này khỏi nhóm");
 
-    row->addWidget(roomEdit, /*stretch=*/1);
+    row->addWidget(r.roomIdEdit, /*stretch=*/0);
+    row->addWidget(buffetLbl, /*stretch=*/0);
+    row->addWidget(r.buffetQtyEdit, /*stretch=*/0);
+    row->addWidget(r.laundryCheck);
+    row->addWidget(r.decorCheck);
+    row->addWidget(r.decorNotesEdit, /*stretch=*/1);
     row->addWidget(removeBtn);
 
-    roomIdEdits.append(roomEdit);
-    roomsLayout->addWidget(rowWidget);
+    roomRows.append(r);
+    roomsLayout->addWidget(r.rowWidget);
 
-    connect(removeBtn, &QPushButton::clicked, this, [this, roomEdit, rowWidget] {
-        if (roomIdEdits.size() <= 1) return; // luôn giữ ít nhất 1 phòng trong nhóm
-        roomIdEdits.removeOne(roomEdit);
-        rowWidget->deleteLater();
+    connect(removeBtn, &QPushButton::clicked, this, [this, r] {
+        if (roomRows.size() <= 1) return; // luôn giữ ít nhất 1 phòng trong nhóm
+        for (int i = 0; i < roomRows.size(); ++i) {
+            if (roomRows[i].rowWidget == r.rowWidget) {
+                roomRows.removeAt(i);
+                break;
+            }
+        }
+        r.rowWidget->deleteLater();
     });
 }
 
-void BookingView::payGroup(const QString& groupCode) {
-    groupCodeEdit->setText(groupCode);
-}
-
-QFrame* BookingView::createBookingCard(const QString& groupCode, const QString& customerId,
-                                       const QString& roomIds, const QString& checkIn,
-                                       const QString& checkOut, const QString& status) {
-    auto* card = new QFrame(this);
-    card->setObjectName("bookingCard");
-
-    auto* layout = new QVBoxLayout(card);
-    layout->setSpacing(4);
-
-    auto* idLbl = new QLabel("Nhóm #" + groupCode, this);
-    idLbl->setProperty("role", "cardId");
-
-    auto* customerLbl = new QLabel("Khách: " + customerId, this);
-    auto* roomLbl = new QLabel("Phòng: " + roomIds, this);
-    auto* dateLbl = new QLabel(checkIn + " → " + checkOut, this);
-
-    auto* statusLbl = new QLabel(status, this);
-    QString key = status.toLower().remove('-');
-    statusLbl->setProperty("status", key);
-    statusLbl->style()->unpolish(statusLbl);
-    statusLbl->style()->polish(statusLbl);
-
-    auto* payBtn = new QPushButton("Thanh toán", this);
-    payBtn->setProperty("variant", "primary");
-    connect(payBtn, &QPushButton::clicked, this, [this, groupCode] { payGroup(groupCode); });
-
-    layout->addWidget(idLbl);
-    layout->addWidget(customerLbl);
-    layout->addWidget(roomLbl);
-    layout->addWidget(dateLbl);
-    layout->addWidget(statusLbl);
-    layout->addWidget(payBtn);
-
-    return card;
-}
-
-void BookingView::clearColumn(QVBoxLayout* col) {
-    while (col->count() > 1) {
-        QLayoutItem* item = col->takeAt(0);
-        if (item->widget()) delete item->widget();
-        delete item;
+void BookingView::clearExtraRoomRows() {
+    // Giữ lại đúng 1 dòng Room, xoá hết các dòng còn lại — dùng khi đổ dữ liệu
+    // của 1 booking (1 phòng) lên form sau khi chọn từ table.
+    while (roomRows.size() > 1) {
+        RoomServiceRow last = roomRows.last();
+        roomRows.removeLast();
+        last.rowWidget->deleteLater();
     }
 }
+
+void BookingView::refresh(const std::vector<Booking>& rows) {
+    currentRows = rows;
+
+    bookingTable->setRowCount(0);
+    bookingTable->setRowCount(static_cast<int>(rows.size()));
+
+    int r = 0;
+    for (const auto& b : rows) {
+        QStringList services;
+        if (b.getBuffetQuantity() > 0) services << QString("Buffet x%1").arg(b.getBuffetQuantity());
+        if (b.isUsingLaundry()) services << "Laundry";
+        if (b.isUsingDecoration()) {
+            QString decor = "Decoration";
+            if (!b.getDecorationNote().isEmpty()) decor += ": " + b.getDecorationNote();
+            services << decor;
+        }
+
+        auto setCell = [this, r](int c, const QString& v) {
+            bookingTable->setItem(r, c, new QTableWidgetItem(v));
+        };
+        setCell(0, b.getId());
+        setCell(1, b.getCustomerId());
+        setCell(2, b.getReceptionistId());
+        setCell(3, b.getGroupCode());
+        setCell(4, b.getRoomId());
+        setCell(5, services.isEmpty() ? "-" : services.join(", "));
+        setCell(6, Booking::statusToString(b.getStatus()));
+        ++r;
+    }
+}
+
+void BookingView::reload() {
+    // TODO (backend): BookingController hiện CHƯA có hàm getAllBookings(). Khi được thêm
+    // (chỉ cần forward xuống bookingService.getAllBookings() -> repository.findAll()),
+    // đổi dòng dưới thành: refresh(controller.getAllBookings());
+    // Tạm thời gọi thẳng repository (đã có sẵn findAll(), không cần sửa file nào khác) để View chạy được ngay.
+    refresh(repository.findAll());
+}
+
+void BookingView::selected(int row, int /*column*/) {
+    if (row < 0 || row >= static_cast<int>(currentRows.size())) return;
+    const Booking& b = currentRows[row];
+
+    bookingIdEdit->setText(b.getId());
+    groupCodeEdit->setText(b.getGroupCode());
+    customerIdEdit->setText(b.getCustomerId());
+    receptionistIdEdit->setText(b.getReceptionistId());
+    checkInEdit->setDate(b.getCheckIn());
+    checkOutEdit->setDate(b.getCheckOut());
+
+    clearExtraRoomRows();
+    auto& r = roomRows.first();
+    r.roomIdEdit->setText(b.getRoomId());
+    r.buffetQtyEdit->setValue(b.getBuffetQuantity());
+    r.laundryCheck->setChecked(b.isUsingLaundry());
+    r.decorCheck->setChecked(b.isUsingDecoration());
+    r.decorNotesEdit->setText(b.getDecorationNote());
+}
+
+void BookingView::add() {
+    // Nếu Group ID để trống, tự sinh 1 mã theo timestamp để gộp các phòng lại cùng 1 nhóm.
+    QString groupCode = text(groupCodeEdit);
+    if (groupCode.isEmpty()) {
+        groupCode = "GRP" + QDateTime::currentDateTime().toString("yyMMddhhmmsszzz");
+        groupCodeEdit->setText(groupCode);
+    }
+
+    const QString customerId = text(customerIdEdit);
+    const QString receptionistId = text(receptionistIdEdit);
+    const QDate checkIn = checkInEdit->date();
+    const QDate checkOut = checkOutEdit->date();
+
+    bool anyRoom = false;
+    for (const auto& r : roomRows) {
+        const QString roomId = text(r.roomIdEdit);
+        if (roomId.isEmpty()) continue;
+        anyRoom = true;
+
+        QString e;
+        // createBooking đã tồn tại sẵn trong BookingController, đúng signature (customerId, roomId,
+        // checkIn, checkOut, receptionistId, groupCode, buffetQty, laundry, decoration, decorationNote, error).
+        if (!controller.createBooking(customerId, roomId, checkIn, checkOut, receptionistId, groupCode,
+                                       r.buffetQtyEdit->value(), r.laundryCheck->isChecked(),
+                                       r.decorCheck->isChecked(), text(r.decorNotesEdit), e)) {
+            error(e);
+            return; // dừng ngay khi có phòng lỗi, tránh tạo nửa vời
+            // TODO (backend): nếu muốn rollback các phòng đã tạo thành công trước đó khi 1 phòng
+            // giữa chừng bị lỗi, cần transaction ở BookingService (ngoài phạm vi sửa của View).
+        }
+    }
+
+    if (!anyRoom) {
+        error("Please enter at least one Room ID!");
+        return;
+    }
+
+    reload();
+}
+
+void BookingView::checkIn() {
+    QString e;
+    if (!controller.processCheckIn(text(bookingIdEdit), e)) error(e); else reload();
+}
+void BookingView::checkOut() {
+    QString e;
+    if (!controller.processCheckOut(text(bookingIdEdit), e)) error(e); else reload();
+}
+void BookingView::cancel() {
+    QString e;
+    if (!controller.processCancelBooking(text(bookingIdEdit), e)) error(e); else reload();
+}
+
+void BookingView::search() {
+    // TODO (backend): BookingController hiện CHƯA có hàm searchBookings(keyword). Khi được thêm
+    // (forward xuống bookingService.searchBookings() -> repository.search()), đổi dòng dưới thành:
+    // refresh(controller.searchBookings(text(searchEdit)));
+    refresh(repository.search(text(searchEdit)));
+}
+
+void BookingView::error(const QString& message) { QMessageBox::warning(this, "Booking Error", message); }

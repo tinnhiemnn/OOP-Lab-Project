@@ -1,8 +1,11 @@
 #pragma once
 
-//#include "controllers/InvoiceController.h"
+#include "controllers/InvoiceController.h"
+#include "services/InvoiceService.h"
+#include "repositories/InvoiceRepository.h"
 #include "DashboardCard.h"
 #include <QWidget>
+#include <vector>
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -15,18 +18,35 @@ public:
     explicit InvoiceView(QWidget* parent = nullptr);
 
 private:
+    void refresh(const std::vector<Invoice>& rows);
     void reload();
     void selected();
     void add();
+    void addGroup();          // NEW: "Create All Invoices in Group"
     void search();
+    void applyFilters();      // NEW: client-side filter by discount/payment
     void error(const QString& message);
 
+    // Order matters: invoiceRepo must be constructed before invoiceService
+    // (InvoiceService keeps a reference to it), and invoiceService before
+    // controller (InvoiceController keeps a reference to it).
+    InvoiceRepository invoiceRepo;
+    InvoiceService invoiceService;
+    InvoiceController controller;
+
+    // Cache of the last loaded/searched list, so filters can be applied
+    // without re-querying the backend every time.
+    std::vector<Invoice> currentInvoices;
+
     QLineEdit* bookingIdEdit;
+    QLineEdit* receptionistIdEdit;
     QDoubleSpinBox* serviceChargeEdit;
     QComboBox* discountEdit;
     QComboBox* paymentEdit;
     QLineEdit* searchEdit;
-    QVBoxLayout* invoiceList;
+    QComboBox* discountFilter;   // NEW
+    QComboBox* paymentFilter;    // NEW
+    QTableWidget* table;
     DashboardCard* formCard;
     DashboardCard* tableCard;
 };

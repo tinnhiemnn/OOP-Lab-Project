@@ -1,5 +1,6 @@
 #pragma once
 
+#include "controllers/ReceptionistController.h"
 #include <DashboardCard.h>
 #include <QWidget>
 
@@ -13,6 +14,7 @@ public:
     explicit ReceptionistView(QWidget* parent = nullptr);
 
 private:
+    void refresh(const std::vector<Receptionist>& rows);
     void reload();
     void selected();
     void add();
@@ -23,6 +25,7 @@ private:
 
     QLabel* makeKpiBadge(const QString& tier) const;
 
+    ReceptionistController controller;
     QLineEdit* idEdit;
     QLineEdit* nameEdit;
     QLineEdit* emailEdit;
