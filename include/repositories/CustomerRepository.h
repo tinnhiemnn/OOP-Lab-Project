@@ -12,6 +12,7 @@ public:
     std::vector<Customer> findAll();
     std::vector<Customer> search(const QString& keyword);
     std::optional<Customer> findById(const QString& id);
+    QString generateNextId();
     QString lastError() const { 
         return lastErrorMessage; 
     }

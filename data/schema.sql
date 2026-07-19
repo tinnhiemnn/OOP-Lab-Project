@@ -10,13 +10,15 @@ CREATE TABLE IF NOT EXISTS customers (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     phone TEXT NOT NULL,
-    email TEXT NOT NULL
+    email TEXT NOT NULL,
+    status TEXT DEFAULT 'Active'
 );
 
 CREATE TABLE IF NOT EXISTS receptionists (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    email TEXT NOT NULL
+    email TEXT NOT NULL,
+    status TEXT DEFAULT 'Active'
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
@@ -32,8 +34,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     decor_service BOOLEAN NOT NULL DEFAULT 0, 
     decor_note TEXT,
     status TEXT NOT NULL,
-    FOREIGN KEY(customer_id) REFERENCES customers(id) ON DELETE SET NULL,
-    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL,
+    FOREIGN KEY(customer_id) REFERENCES customers(id),
+    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id),
     FOREIGN KEY(room_id) REFERENCES rooms(id) ON DELETE SET NULL
 );
 
@@ -48,5 +50,5 @@ CREATE TABLE IF NOT EXISTS invoices (
     discount_amount REAL NOT NULL,
     total_amount REAL NOT NULL,
     FOREIGN KEY(booking_id) REFERENCES bookings(id),
-    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id) ON DELETE SET NULL
+    FOREIGN KEY(receptionist_id) REFERENCES receptionists(id)
 );

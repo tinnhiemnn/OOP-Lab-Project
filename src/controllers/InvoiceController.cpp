@@ -20,6 +20,9 @@ bool InvoiceController::createInvoice(const QString& bookingId, const QString& r
     return invoiceService.createInvoice(bookingId, receptionistId, discountName, method, error);
 }
 
+bool createAllInvoice (const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error) {
+    
+}
 // Lấy danh sách hóa đơn
 std::vector<Invoice> InvoiceController::handleGetAllInvoices() const {
     return invoiceService.getAllInvoices();

@@ -17,7 +17,7 @@ std::optional<Customer> CustomerController::getCustomerById(const QString& id) {
     return repository.findById(id);
 }
 
-bool CustomerController::addCustomer(const Customer& customer, QString& error) {
+bool CustomerController::addCustomer (Customer& customer, QString& error) {
     if (!ValidationUtils::isNonEmpty(customer.getName())) {
         error = "Customer name cannot be empty.";
         return false;
@@ -32,6 +32,8 @@ bool CustomerController::addCustomer(const Customer& customer, QString& error) {
         error = "Invalid phone number!";
         return false;
     }
+
+    customer.setId(repository.generateNextId());
 
     if (repository.add(customer)) {
         return true;
@@ -77,7 +79,6 @@ bool CustomerController::deleteCustomer(const QString& id, QString& error) {
         return false;
     }
 
-    BookingRepository bookingRepo;
     std::vector<Booking> allBookings = bookingRepo.findAll();
 
     //Check xem customer co dang dat phong/o khong
