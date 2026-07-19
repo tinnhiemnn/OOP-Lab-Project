@@ -1,4 +1,5 @@
 #include "services/BookingService.h"
+#include "utils/DateUtils.h"
 #include <QDateTime>
 #include <algorithm>
 
@@ -192,4 +193,49 @@ bool BookingService::cancelBooking(const QString& bookingId, QString& error) {
     }
 
     return true;
+}
+
+std::vector<std::unique_ptr<Room>> BookingService::checkAvailability(
+    const QDate& checkIn,
+    const QDate& checkOut,
+    RoomType roomType,
+    QString& error)
+{
+    std::vector<std::unique_ptr<Room>> availableRooms;
+
+    auto rooms = this->rooms.findAll();
+    auto bookings = this->bookings.findAll();
+
+    for (auto& room : rooms)
+    {
+        if (room->getRoomType() != roomType) continue;
+
+        bool occupied = false;
+
+        for (const auto& booking : bookings)
+        {
+            if (booking.getRoomId() != room->getRoomId()) continue;
+
+            // Chỉ xét các booking còn hiệu lực
+            if (booking.getStatus() != BookingStatus::Booked && booking.getStatus() != BookingStatus::CheckedIn) continue;
+
+            // Kiểm tra có trùng khoảng ngày
+            if (DateUtils::datesOverlap(
+                    checkIn.toString("yyyy-MM-dd"),
+                    checkOut.toString("yyyy-MM-dd"),
+                    booking.getCheckIn().toString("yyyy-MM-dd"),
+                    booking.getCheckOut().toString("yyyy-MM-dd")))
+            {
+                occupied = true;
+                break;
+            }
+        }
+
+        if (!occupied)
+        {
+            availableRooms.push_back(std::move(room));
+        }
+    }
+
+    return availableRooms;
 }

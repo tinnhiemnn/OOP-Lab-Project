@@ -7,6 +7,7 @@
 class BookingController {
 private:
     BookingService& bookingService;
+    BookingRepository bookingRepo;
 
 public:
     // Nhận vào Service thông qua cơ chế Dependency Injection (tham chiếu)
@@ -19,4 +20,8 @@ public:
     bool processCheckOut(const QString& bookingId, QString& error);
 
     bool processCancelBooking(const QString& bookingId, QString& error);
+
+    std::vector<Booking> getAllBookings() const;
+
+    std::vector<Booking> searchBookings(const QString& keyword);
 };
