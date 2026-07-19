@@ -9,7 +9,7 @@
 class InvoiceService {
 private:
     QString generateInvoiceId() const;
-    InvoiceRepository invoiceRepo;
+    InvoiceRepository& invoiceRepo;
     BookingRepository bookingRepo;
     RoomRepository roomRepo;
     

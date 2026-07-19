@@ -20,8 +20,22 @@ bool InvoiceController::createInvoice(const QString& bookingId, const QString& r
     return invoiceService.createInvoice(bookingId, receptionistId, discountName, method, error);
 }
 
-bool createAllInvoice (const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error) {
+bool InvoiceController::createAllInvoice( const QString& groupcode, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error){
+    if (!ValidationUtils::isNonEmpty(groupcode))
+    {
+        error = "Group code cannot be empty.";
+        return false;
+    }
+
+    if (!ValidationUtils::isNonEmpty(receptionistId))
+    {
+        error = "Receptionist ID cannot be empty.";
+        return false;
+    }
+
+    PaymentMethod method = Invoice::paymentMethodFromString(paymentMethodStr);
     
+    return invoiceService.createAllInvoice(groupcode, receptionistId, discountName,method, error);
 }
 // Lấy danh sách hóa đơn
 std::vector<Invoice> InvoiceController::handleGetAllInvoices() const {
