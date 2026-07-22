@@ -28,7 +28,7 @@ BookingView::BookingView(QWidget* parent)
     service(repository, roomRepository),
     controller(service),
     bookingIdEdit(new QLineEdit(this)),
-    groupCodeEdit(new QLineEdit(this)),
+    //groupCodeEdit(new QLineEdit(this)),
     customerIdEdit(new QLineEdit(this)),
     receptionistIdEdit(new QLineEdit(this)),
     searchEdit(new QLineEdit(this)),
@@ -46,7 +46,7 @@ BookingView::BookingView(QWidget* parent)
     bookingIdEdit->setPlaceholderText("Booking ID (chọn từ Booking List)");
     bookingIdEdit->setReadOnly(true);
     
-    groupCodeEdit->setPlaceholderText("Group ID (để trống nếu muốn hệ thống tự sinh)");
+    //groupCodeEdit->setPlaceholderText("Group ID (để trống nếu muốn hệ thống tự sinh)");
     customerIdEdit->setPlaceholderText("Customer ID");
     receptionistIdEdit->setPlaceholderText("Receptionist ID");
 
@@ -60,15 +60,15 @@ BookingView::BookingView(QWidget* parent)
     form->addWidget(new QLabel("Check-in", this), 0, 2);
     form->addWidget(checkInEdit, 0, 3);
 
-    form->addWidget(new QLabel("Group ID", this), 1, 0);
-    form->addWidget(groupCodeEdit, 1, 1);
+    //form->addWidget(new QLabel("Group ID", this), 1, 0);
+    //form->addWidget(groupCodeEdit, 1, 1);
     form->addWidget(new QLabel("Check-out", this), 1, 2);
     form->addWidget(checkOutEdit, 1, 3);
 
-    form->addWidget(new QLabel("Customer ID", this), 2, 0);
-    form->addWidget(customerIdEdit, 2, 1);
-    form->addWidget(new QLabel("Receptionist ID", this), 2, 2);
-    form->addWidget(receptionistIdEdit, 2, 3);
+    form->addWidget(new QLabel("Customer ID", this), 1, 0);
+    form->addWidget(customerIdEdit, 1, 1);
+    form->addWidget(new QLabel("Receptionist ID", this), 2, 0);
+    form->addWidget(receptionistIdEdit, 2, 1);
 
     form->setColumnStretch(1, 1);
     form->setColumnStretch(3, 1);
@@ -154,7 +154,7 @@ BookingView::BookingView(QWidget* parent)
     layout->addWidget(formCard, /*stretch=*/0);   // card Booking giữ nguyên kích thước cần thiết, không giãn thêm
     layout->addWidget(tableCard, /*stretch=*/1);  // Booking List chiếm hết phần còn lại -> to hơn
 
-    connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
+    //connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
     connect(inBtn, &QPushButton::clicked, this, [this] { checkIn(); });
     connect(outBtn, &QPushButton::clicked, this, [this] { checkOut(); });
     connect(cancelBtn, &QPushButton::clicked, this, [this] { cancel(); });
@@ -264,11 +264,7 @@ void BookingView::refresh(const std::vector<Booking>& rows) {
 }
 
 void BookingView::reload() {
-    // TODO (backend): BookingController hiện CHƯA có hàm getAllBookings(). Khi được thêm
-    // (chỉ cần forward xuống bookingService.getAllBookings() -> repository.findAll()),
-    // đổi dòng dưới thành: refresh(controller.getAllBookings());
-    // Tạm thời gọi thẳng repository (đã có sẵn findAll(), không cần sửa file nào khác) để View chạy được ngay.
-    refresh(repository.findAll());
+    refresh(controller.getAllBookings());
 }
 
 void BookingView::selected(int row, int /*column*/) {
@@ -292,42 +288,42 @@ void BookingView::selected(int row, int /*column*/) {
 }
 
 void BookingView::add() {
-    // Nếu Group ID để trống, tự sinh 1 mã theo timestamp để gộp các phòng lại cùng 1 nhóm.
-    QString groupCode = text(groupCodeEdit);
-    if (groupCode.isEmpty()) {
-        groupCode = "GRP" + QDateTime::currentDateTime().toString("yyMMddhhmmsszzz");
-        groupCodeEdit->setText(groupCode);
-    }
+    MultiBookingRequest request;
+    request.customerId = text(customerIdEdit);
+    request.receptionistId = text(receptionistIdEdit);
+    request.checkIn = checkInEdit->date();
+    request.checkOut = checkOutEdit->date();
 
-    const QString customerId = text(customerIdEdit);
-    const QString receptionistId = text(receptionistIdEdit);
-    const QDate checkIn = checkInEdit->date();
-    const QDate checkOut = checkOutEdit->date();
+    request.groupCode = text(groupCodeEdit);
 
-    bool anyRoom = false;
     for (const auto& r : roomRows) {
         const QString roomId = text(r.roomIdEdit);
         if (roomId.isEmpty()) continue;
-        anyRoom = true;
 
-        QString e;
-        // createBooking đã tồn tại sẵn trong BookingController, đúng signature (customerId, roomId,
-        // checkIn, checkOut, receptionistId, groupCode, buffetQty, laundry, decoration, decorationNote, error).
-        if (!controller.createBooking(customerId, roomId, checkIn, checkOut, receptionistId, groupCode,
-                                       r.buffetQtyEdit->value(), r.laundryCheck->isChecked(),
-                                       r.decorCheck->isChecked(), text(r.decorNotesEdit), e)) {
-            error(e);
-            return; // dừng ngay khi có phòng lỗi, tránh tạo nửa vời
-            // TODO (backend): nếu muốn rollback các phòng đã tạo thành công trước đó khi 1 phòng
-            // giữa chừng bị lỗi, cần transaction ở BookingService (ngoài phạm vi sửa của View).
-        }
+        SingleRoomRequest room;
+        room.roomId = roomId;
+        room.buffetQty = r.buffetQtyEdit->value();
+        room.laundryService = r.laundryCheck->isChecked();
+        room.decorService = r.decorCheck->isChecked();
+        room.decorNote = text(r.decorNotesEdit);
+        request.rooms.push_back(room);
     }
 
-    if (!anyRoom) {
+    if (request.rooms.empty()) {
         error("Please enter at least one Room ID!");
         return;
     }
 
+    QString e;
+    // TODO (backend): BookingController hiện CHƯA có hàm createMultiBookings(). Cần bổ sung
+    // (forward xuống BookingService -> BookingRepository, chạy trong 1 transaction, tự sinh
+    // groupCode nếu request.groupCode rỗng, tự sinh từng bookingId cho mỗi phòng).
+    /*if (!controller.createMultiBookings(request, e)) {
+        error(e);
+        return;
+    }*/
+
+    groupCodeEdit->clear();
     reload();
 }
 
@@ -345,10 +341,7 @@ void BookingView::cancel() {
 }
 
 void BookingView::search() {
-    // TODO (backend): BookingController hiện CHƯA có hàm searchBookings(keyword). Khi được thêm
-    // (forward xuống bookingService.searchBookings() -> repository.search()), đổi dòng dưới thành:
-    // refresh(controller.searchBookings(text(searchEdit)));
-    refresh(repository.search(text(searchEdit)));
+    refresh(controller.searchBookings(text(searchEdit)));
 }
 
 void BookingView::error(const QString& message) { QMessageBox::warning(this, "Booking Error", message); }
