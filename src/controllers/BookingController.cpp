@@ -53,3 +53,27 @@ bool BookingController::processCancelBooking(const QString& bookingId, QString& 
 
     return bookingService.cancelBooking(bookingId, error);
 }
+
+std::vector<Booking> BookingController::getAllBookings() const
+{
+    BookingRepository repo;
+    return repo.findAll();
+}
+
+std::vector<Booking> BookingController::searchBookings (const QString& keyword){
+    std::vector<Booking> result;
+
+    auto bookings = bookingRepo.findAll();
+
+    for (const auto& booking : bookings)
+    {
+        if (booking.getId().contains(keyword, Qt::CaseInsensitive) ||
+            booking.getCustomerId().contains(keyword, Qt::CaseInsensitive) ||
+            booking.getRoomId().contains(keyword, Qt::CaseInsensitive) ||
+            booking.getGroupCode().contains(keyword, Qt::CaseInsensitive))
+        {
+            result.push_back(booking);
+        }
+    }
+    return result;
+}

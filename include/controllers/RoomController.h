@@ -1,14 +1,15 @@
 #pragma once
 
 #include "repositories/RoomRepository.h"
-
+#include "services/BookingService.h"
 class RoomController
 {
 private:
     RoomRepository repository;
-    
+    BookingService& bookingService;
+
 public:
-    RoomController();
+    explicit RoomController(BookingService& service);
 
     std::vector<std::unique_ptr<Room>> getAllRooms();
     std::vector<std::unique_ptr<Room>> searchRooms(const QString& type, const QString& status);
@@ -18,4 +19,10 @@ public:
     bool updateRoom(const Room& room, int beds, QString& error);
     bool updateRoomStatus(const QString& id, RoomStatus status, QString& error);
     bool deleteRoom(const QString& id, QString& error);
+
+    std::vector<std::unique_ptr<Room>> checkAvailability(
+        const QDate& checkIn,
+        const QDate& checkOut,
+        RoomType roomType,
+        QString& error);
 };

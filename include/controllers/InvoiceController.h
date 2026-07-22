@@ -14,7 +14,7 @@ public:
 
     bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error);
 
-    bool createAllInvoice();
+    bool createAllInvoice(const QString& groupcode, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error);
     
     // Lấy toàn bộ danh sách hóa đơn để hiển thị
     std::vector<Invoice> handleGetAllInvoices() const;

@@ -3,8 +3,8 @@
 #include "repositories/BookingRepository.h"
 #include "models/Booking.h"
 
-
-RoomController::RoomController() {}
+RoomController::RoomController(BookingService& service)
+    : bookingService(service) {}
 
 std::vector<std::unique_ptr<Room>> RoomController::getAllRooms() {
     return repository.findAll();
@@ -90,4 +90,24 @@ bool RoomController::deleteRoom(const QString& id, QString& error) {
     }
     error = repository.lastError();
     return false;
+}
+
+std::vector<std::unique_ptr<Room>> RoomController::checkAvailability(
+    const QDate& checkIn,
+    const QDate& checkOut,
+    RoomType roomType,
+    QString& error)
+{
+    if (checkIn >= checkOut)
+    {
+        error = "Checkout date must be after checkin date.";
+        return {};
+    }
+
+    return bookingService.checkAvailability(
+        checkIn,
+        checkOut,
+        roomType,
+        error
+    );
 }

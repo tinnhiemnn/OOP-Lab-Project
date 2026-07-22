@@ -48,14 +48,12 @@ double InvoiceService::servicesTotal(const QString& bookingId) {
 
 bool InvoiceService::createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) 
 {
-    BookingRepository bookingRepo;
     auto booking = bookingRepo.findById(bookingId);
     if (!booking) {
         error = "Booking does not exist.";
         return false;
     }
 
-    RoomRepository roomRepo;
     auto room = roomRepo.findById(booking->getRoomId());
     if (!room) {
         error = "Room does not exist.";
@@ -94,6 +92,40 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
         return false;
     }
 
+    return true;
+}
+
+bool InvoiceService::createAllInvoice(const QString& groupcode,
+                       const QString& receptionistId,
+                       const QString& discountName,
+                       PaymentMethod paymentMethod,
+                       QString& error) {
+    auto bookings = bookingRepo.findAll();
+             
+    bool found = false;
+
+    for (const auto& booking : bookings)
+    {
+        if (booking.getGroupCode() != groupcode)
+            continue;
+
+        found = true;
+
+        if (!createInvoice(booking.getId(),
+                           receptionistId,
+                           discountName,
+                           paymentMethod,
+                           error))
+        {
+            return false;
+        }
+    }
+
+    if (!found)
+    {
+        error = "No bookings found for this group.";
+        return false;
+    }
     return true;
 }
 
