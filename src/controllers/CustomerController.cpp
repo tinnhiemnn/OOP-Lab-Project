@@ -79,7 +79,7 @@ bool CustomerController::deleteCustomer(const QString& id, QString& error) {
         return false;
     }
 
-    std::vector<Booking> allBookings = bookingRepo.findAll();
+    std::vector<Booking> allBookings = bookingRepo.search(id);
 
     //Check xem customer co dang dat phong/o khong
     for (const auto& booking : allBookings) {

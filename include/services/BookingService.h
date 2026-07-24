@@ -28,10 +28,4 @@ public:
     bool checkOut(const QString& bookingId, QString& error);                     
 
     bool cancelBooking(const QString& bookingId, QString& error);
-
-    std::vector<std::unique_ptr<Room>> checkAvailability(
-    const QDate& checkIn,
-    const QDate& checkOut,
-    RoomType roomType,
-    QString& error);
 };

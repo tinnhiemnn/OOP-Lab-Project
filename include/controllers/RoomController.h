@@ -1,11 +1,14 @@
 #pragma once
 
 #include "repositories/RoomRepository.h"
+#include "repositories/BookingRepository.h"
 #include "services/BookingService.h"
+
 class RoomController
 {
 private:
     RoomRepository repository;
+    BookingRepository bookingRepo;
     BookingService& bookingService;
 
 public:

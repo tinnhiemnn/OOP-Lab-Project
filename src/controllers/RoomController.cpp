@@ -1,7 +1,11 @@
 #include "controllers/RoomController.h"
-#include "utils/ValidationUtils.h"
-#include "repositories/BookingRepository.h"
+
 #include "models/Booking.h"
+
+#include "repositories/BookingRepository.h"
+#include "repositories/RoomRepository.h"
+
+#include "utils/ValidationUtils.h"
 
 RoomController::RoomController(BookingService& service)
     : bookingService(service) {}
@@ -71,8 +75,7 @@ bool RoomController::deleteRoom(const QString& id, QString& error) {
         return false;
     }
     
-    BookingRepository bookingRepo;
-    std::vector<Booking> allBookings = bookingRepo.findAll();
+    std::vector<Booking> allBookings = bookingRepo.search(id);
 
     //Check xem co booking nao dang Booked hoac CheckedIn voi room nay hay khong
     for (const auto& booking : allBookings) {
@@ -104,10 +107,5 @@ std::vector<std::unique_ptr<Room>> RoomController::checkAvailability(
         return {};
     }
 
-    return bookingService.checkAvailability(
-        checkIn,
-        checkOut,
-        roomType,
-        error
-    );
+    return repository.findAvailableInPeriod(checkIn, checkOut);
 }

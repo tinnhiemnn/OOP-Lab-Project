@@ -1,14 +1,15 @@
 #include "services/BookingService.h"
 #include "utils/DateUtils.h"
+
 #include <QDateTime>
-#include <algorithm>
 
 BookingService::BookingService(BookingRepository& bookings, RoomRepository& rooms)
     : bookings(bookings), rooms(rooms) {}
 
 //Kiểm tra đè lịch phòng
 bool BookingService::hasConflict(const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& excludeBookingId) const {
-    auto allBookings = bookings.findAll();
+    auto allBookings = bookings.search(roomId);
+
     for (const auto& existing : allBookings) {
         if (!excludeBookingId.isEmpty() && existing.getId() == excludeBookingId) continue;
         if (existing.getRoomId() != roomId) continue;
@@ -41,9 +42,10 @@ bool BookingService::createBooking(const QString& customerId,
                                    QString& error) 
 {
     if (checkIn >= checkOut) {
-        error = "The check-out date must be after the check-in date!";
+        error = "Check-out date must be after check-in date.";
         return false;
     }
+
     if (checkIn < QDate::currentDate()) {
         error = "It is not possible to create a booking for a past date!";
         return false;
@@ -55,6 +57,7 @@ bool BookingService::createBooking(const QString& customerId,
         error = "Room information not found!";
         return false;
     }
+
     if (roomPtr->getStatus() == RoomStatus::Maintenance) {
         error = "The room is under maintenance and cannot be booked!";
         return false;
@@ -89,38 +92,38 @@ bool BookingService::createBooking(const QString& customerId,
 
 bool BookingService::checkIn(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
-    if (!target.has_value()) {
-        error = "Không tìm thấy mã đặt phòng!";
+    if (!target) {
+        error = "Booking id not found!";
         return false;
     }
 
     Booking booking = target.value();
     if (booking.getStatus() != BookingStatus::Booked) {
-        error = "Đơn đặt phòng này không ở trạng thái có thể Check-in!";
+        error = "This reservation is not in a check-in ready status!";
         return false;
     }
 
     // Kiểm tra trạng thái phòng hiện tại có Available
     auto roomPtr = rooms.findById(booking.getRoomId());
     if (!roomPtr) {
-        error = "Không tìm thấy thông tin phòng liên kết với đơn này!";
+        error = "Room not found.";
         return false;
     }
     if (roomPtr->getStatus() != RoomStatus::Available) {
-        error = "Phòng hiện tại không sẵn sàng để Check-in (Trạng thái: " + Room::statusToString(roomPtr->getStatus()) + ")!";
+        error = "The current room is not ready for check-in (Status: " + Room::statusToString(roomPtr->getStatus()) + ")!";
         return false;
     }
 
     // Cập nhật trạng thái đơn đặt phòng sang CheckedIn
     booking.markCheckedIn();
     if (!bookings.update(booking)) {
-        error = "Lỗi cập nhật trạng thái đơn đặt phòng: " + bookings.lastError();
+        error = "Error updating reservation status: " + bookings.lastError();
         return false;
     }
 
     // Đồng bộ trạng thái phòng sang "InUse" (Đang sử dụng)
     if (!rooms.updateStatus(booking.getRoomId(), RoomStatus::InUse)) {
-        error = "Lỗi cập nhật trạng thái phòng: " + rooms.lastError();
+        error = "Room status update error: " + rooms.lastError();
         return false;
     }
 
@@ -129,21 +132,20 @@ bool BookingService::checkIn(const QString& bookingId, QString& error) {
 
 bool BookingService::checkOut(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
-    if (!target.has_value()) {
-        error = "Không tìm thấy mã đặt phòng!";
+    if (!target) {
+        error = "Booking id not found!";
         return false;
     }
 
     Booking booking = target.value();
     if (booking.getStatus() != BookingStatus::CheckedIn) {
-        error = "Phòng này chưa được Check-in, không thể Check-out!";
+        error = "This room has not been checked in, so it cannot be checked out!";
         return false;
     }
 
-    // Lấy thông tin phòng để lấy đơn giá phòng/đêm
     auto roomPtr = rooms.findById(booking.getRoomId());
     if (!roomPtr) {
-        error = "Không tìm thấy thông tin phòng liên kết với đơn này!";
+        error = "Room not found.";
         return false;
     }
 
@@ -165,7 +167,7 @@ bool BookingService::checkOut(const QString& bookingId, QString& error) {
 
 bool BookingService::cancelBooking(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
-    if (!target.has_value()) {
+    if (!target) {
         error = "Booking ID not found!";
         return false;
     }
@@ -193,49 +195,4 @@ bool BookingService::cancelBooking(const QString& bookingId, QString& error) {
     }
 
     return true;
-}
-
-std::vector<std::unique_ptr<Room>> BookingService::checkAvailability(
-    const QDate& checkIn,
-    const QDate& checkOut,
-    RoomType roomType,
-    QString& error)
-{
-    std::vector<std::unique_ptr<Room>> availableRooms;
-
-    auto rooms = this->rooms.findAll();
-    auto bookings = this->bookings.findAll();
-
-    for (auto& room : rooms)
-    {
-        if (room->getRoomType() != roomType) continue;
-
-        bool occupied = false;
-
-        for (const auto& booking : bookings)
-        {
-            if (booking.getRoomId() != room->getRoomId()) continue;
-
-            // Chỉ xét các booking còn hiệu lực
-            if (booking.getStatus() != BookingStatus::Booked && booking.getStatus() != BookingStatus::CheckedIn) continue;
-
-            // Kiểm tra có trùng khoảng ngày
-            if (DateUtils::datesOverlap(
-                    checkIn.toString("yyyy-MM-dd"),
-                    checkOut.toString("yyyy-MM-dd"),
-                    booking.getCheckIn().toString("yyyy-MM-dd"),
-                    booking.getCheckOut().toString("yyyy-MM-dd")))
-            {
-                occupied = true;
-                break;
-            }
-        }
-
-        if (!occupied)
-        {
-            availableRooms.push_back(std::move(room));
-        }
-    }
-
-    return availableRooms;
 }

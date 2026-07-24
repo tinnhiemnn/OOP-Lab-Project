@@ -26,8 +26,9 @@ struct servicePrice {
 double InvoiceService::servicesTotal(const QString& bookingId) {
     servicePrice prices;
 
-    BookingRepository bookingRepo;
     auto booking = bookingRepo.findById(bookingId);
+
+    if (!booking) return 0.0;
 
     const int days = DateUtils::daysBetween(booking->getCheckIn().toString(), booking->getCheckOut().toString());
 
@@ -64,7 +65,7 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
     if (discountName == "Seasonal") {
         pricing.setStrategy(std::make_unique<SeasonalDiscount>());
     }
-    if (discountName == "Member") {
+    else if (discountName == "Member") {
         pricing.setStrategy(std::make_unique<MemberDiscount>());
     }
 
@@ -77,7 +78,7 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
         totalAmount = 0.0; //Tránh giảm giá nhiều hơn tiền phòng
     }
 
-    double discountAmount = totalAmount - subtotalAmount;
+    double discountAmount = subtotalAmount - totalAmount;
 
     // Tự sinh mã hóa đơn duy nhất và lấy ngày hiện tại
     QString invoiceId = generateInvoiceId();
@@ -88,7 +89,7 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
 
     // Lưu vào database
     if (!invoiceRepo.add(newInvoice)) {
-        error = "Lỗi Database khi lưu hóa đơn: " + invoiceRepo.lastError();
+        error = "Database error when saving the invoice: " + invoiceRepo.lastError();
         return false;
     }
 
@@ -100,14 +101,13 @@ bool InvoiceService::createAllInvoice(const QString& groupcode,
                        const QString& discountName,
                        PaymentMethod paymentMethod,
                        QString& error) {
-    auto bookings = bookingRepo.findAll();
+    auto bookings = bookingRepo.search(groupcode);
              
     bool found = false;
 
     for (const auto& booking : bookings)
     {
-        if (booking.getGroupCode() != groupcode)
-            continue;
+        if (booking.getGroupCode() != groupcode) continue;
 
         found = true;
 
