@@ -4,7 +4,7 @@
 InvoiceController::InvoiceController(InvoiceService& service)
     : invoiceService(service) {}
 
-bool InvoiceController::createInvoice(const QString& bookingId, const QString& receptionistId,  const QString& discountName, const QString& paymentMethodStr, QString& error)
+bool InvoiceController::createInvoice(const QString& bookingId, const QString& receptionistId,  const QString& discountName, const QString& invoiceId, const QString& paymentMethodStr, QString& error)
 {
     if (!ValidationUtils::isNonEmpty(bookingId)) {
         error = "Booking ID cannot be empty!";
@@ -17,7 +17,7 @@ bool InvoiceController::createInvoice(const QString& bookingId, const QString& r
 
     PaymentMethod method = Invoice::paymentMethodFromString(paymentMethodStr);
 
-    return invoiceService.createInvoice(bookingId, receptionistId, discountName, method, error);
+    return invoiceService.createInvoice(bookingId, receptionistId, discountName, invoiceId, method, error);
 }
 
 bool InvoiceController::createAllInvoice( const QString& groupcode, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error){
@@ -35,7 +35,7 @@ bool InvoiceController::createAllInvoice( const QString& groupcode, const QStrin
 
     PaymentMethod method = Invoice::paymentMethodFromString(paymentMethodStr);
     
-    return invoiceService.createAllInvoice(groupcode, receptionistId, discountName,method, error);
+    return invoiceService.createAllInvoice(groupcode, receptionistId, discountName, method, error);
 }
 // Lấy danh sách hóa đơn
 std::vector<Invoice> InvoiceController::handleGetAllInvoices() const {

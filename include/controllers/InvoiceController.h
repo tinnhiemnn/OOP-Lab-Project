@@ -13,7 +13,7 @@ private:
 public:
     explicit InvoiceController(InvoiceService& service);
 
-    bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error);
+    bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& invoiceId, const QString& paymentMethodStr, QString& error);
 
     bool createAllInvoice(const QString& groupcode, const QString& receptionistId, const QString& discountName, const QString& paymentMethodStr, QString& error);
     

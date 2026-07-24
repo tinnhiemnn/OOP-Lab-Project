@@ -44,7 +44,7 @@ double InvoiceService::servicesTotal(const QString& bookingId) {
     return total;
 }
 
-bool InvoiceService::createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) 
+bool InvoiceService::createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& invoiceId, PaymentMethod paymentMethod, QString& error) 
 {
     auto booking = bookingRepo.findById(bookingId);
     if (!booking) {
@@ -77,14 +77,11 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
 
     double discountAmount = subtotalAmount - totalAmount;
 
-    // Tự sinh mã hóa đơn duy nhất và lấy ngày hiện tại
-    QString invoiceId = generateInvoiceId();
     QDate issuedDate = QDate::currentDate();
 
     Invoice newInvoice( invoiceId,  bookingId,   receptionistId,  issuedDate,  subtotalAmount,  totalAmount,  discountAmount,  paymentMethod, discountName
     );
 
-    // Lưu vào database
     if (!invoiceRepo.add(newInvoice)) {
         error = "Database error when saving the invoice: " + invoiceRepo.lastError();
         return false;
@@ -93,14 +90,13 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
     return true;
 }
 
-bool InvoiceService::createAllInvoice(const QString& groupcode,
-                       const QString& receptionistId,
-                       const QString& discountName,
-                       PaymentMethod paymentMethod,
-                       QString& error) {
+bool InvoiceService::createAllInvoice(const QString& groupcode, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) {
     auto bookings = bookingRepo.search(groupcode);
              
     bool found = false;
+
+    QString baseId = generateInvoiceId();
+    int index = 1;
 
     for (const auto& booking : bookings)
     {
@@ -108,11 +104,9 @@ bool InvoiceService::createAllInvoice(const QString& groupcode,
 
         found = true;
 
-        if (!createInvoice(booking.getId(),
-                           receptionistId,
-                           discountName,
-                           paymentMethod,
-                           error))
+        QString invoiceId = baseId + QString::number(index++);
+
+        if (!createInvoice(booking.getId(), receptionistId,  discountName, invoiceId, paymentMethod, error))
         {
             return false;
         }
