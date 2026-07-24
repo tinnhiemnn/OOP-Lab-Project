@@ -94,6 +94,7 @@ bool CustomerController::deleteCustomer(const QString& id, QString& error) {
     if (repository.remove(id)) {
         return true;
     }
+    
     error = repository.lastError();
     return false;
 }

@@ -90,10 +90,24 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
     return true;
 }
 
-bool InvoiceService::createAllInvoice(const QString& groupcode, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) {
+bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) {
+
+    auto booking = bookingRepo.findById(bookingId);
+    if (!booking) {
+        error = "Booking does not exist.";
+        return false;
+    }
+
+    QString groupcode = booking->getGroupCode();
     auto bookings = bookingRepo.search(groupcode);
              
     bool found = false;
+
+    if (!invoiceRepo.startTransaction())
+    {
+        error = invoiceRepo.lastError();
+        return false;
+    }
 
     QString baseId = generateInvoiceId();
     int index = 1;
@@ -104,19 +118,44 @@ bool InvoiceService::createAllInvoice(const QString& groupcode, const QString& r
 
         found = true;
 
+        bool paid = false; //Để check xem đã có invoice chưa
+
+        std::vector<Invoice> invoices = invoiceRepo.search(booking.getId());
+
+        for (const auto& invoice : invoices)
+        {
+            if (invoice.getBookingId() == booking.getId())
+            {
+                paid = true;
+                break;
+            }
+        }
+
+        if (paid) continue;
+
         QString invoiceId = baseId + QString::number(index++);
 
         if (!createInvoice(booking.getId(), receptionistId,  discountName, invoiceId, paymentMethod, error))
         {
+            invoiceRepo.rollbackTransaction();
             return false;
         }
     }
 
     if (!found)
     {
+        invoiceRepo.rollbackTransaction();
         error = "No bookings found for this group.";
         return false;
     }
+    
+    if (!invoiceRepo.commitTransaction())
+    {
+        invoiceRepo.rollbackTransaction();
+        error = invoiceRepo.lastError();
+        return false;
+    }
+
     return true;
 }
 

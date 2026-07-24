@@ -24,7 +24,7 @@ public:
 
     bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& invoiceId, PaymentMethod paymentMethod, QString& error);
 
-    bool createAllInvoice(const QString& groupcode, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error);
+    bool createAllInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error);
 
     std::vector<Invoice> getAllInvoices() const;
 

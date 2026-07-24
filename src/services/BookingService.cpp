@@ -21,6 +21,7 @@ bool BookingService::hasConflict(const QString& roomId, const QDate& checkIn, co
             }
         }
     }
+
     return false;
 }
 
@@ -50,6 +51,12 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
         return false;
     }
 
+    if (!bookings.startTransaction())
+    {
+        error = bookings.lastError();
+        return false;
+    }
+
     QString groupCode = makeGroupCode();
     QString baseBookingId = makeBookingId();
     int index = 1;
@@ -59,17 +66,20 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
         // Kiểm tra phòng có tồn tại không
         auto roomPtr = rooms.findById(roomId);
         if (!roomPtr) {
+            bookings.rollbackTransaction();
             error = "Room information not found!";
             return false;
         }
 
         if (roomPtr->getStatus() == RoomStatus::Maintenance) {
+            bookings.rollbackTransaction();
             error = "The room is under maintenance and cannot be booked!";
             return false;
         }
 
         // Kiểm tra trùng lịch phòng
         if (hasConflict(roomId, checkIn, checkOut)) {
+            bookings.rollbackTransaction();
             error = "The room has already been booked or is in use during this period!";
             return false;
         }
@@ -88,10 +98,18 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
 
         // Lưu vào database
         if (!bookings.add(newBooking)) {
+            bookings.rollbackTransaction();
             error = "Database error when saving the booking: " + bookings.lastError();
             return false;
         }
     }
+
+    if (!bookings.commitTransaction()) {
+        bookings.rollbackTransaction();
+        error = bookings.lastError();
+        return false;
+    }
+
     return true;
 }
 
@@ -114,6 +132,7 @@ bool BookingService::checkIn(const QString& bookingId, QString& error) {
         error = "Room not found.";
         return false;
     }
+    
     if (roomPtr->getStatus() != RoomStatus::Available) {
         error = "The current room is not ready for check-in (Status: " + Room::statusToString(roomPtr->getStatus()) + ")!";
         return false;
