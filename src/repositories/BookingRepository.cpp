@@ -24,6 +24,33 @@ Booking mapBooking(QSqlQuery& q) {
 }
 }
 
+bool BookingRepository::startTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.transaction(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
+bool BookingRepository::commitTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.commit(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
+bool BookingRepository::rollbackTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.rollback(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
 bool BookingRepository::add(const Booking& booking) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("INSERT INTO bookings(id, customer_id, receptionist_id, room_id, group_code, check_in, check_out, num_buffet, " 

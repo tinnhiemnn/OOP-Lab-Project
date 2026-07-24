@@ -19,6 +19,10 @@ struct ReceptionistKPI {
 
 class InvoiceRepository {
 public:
+    bool startTransaction();
+    bool commitTransaction();
+    bool rollbackTransaction();
+    
     bool add(const Invoice& invoice);
     std::vector<Invoice> findAll();
     std::vector<Invoice> search(const QString& keyword);
