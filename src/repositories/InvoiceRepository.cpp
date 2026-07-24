@@ -20,6 +20,33 @@ Invoice mapInvoice(QSqlQuery& q) {
 }
 }
 
+bool InvoiceRepository::startTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.transaction(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
+bool InvoiceRepository::commitTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.commit(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
+bool InvoiceRepository::rollbackTransaction() {
+    QSqlDatabase db = DatabaseManager::getInstance().database();
+    if (db.isOpen()) {
+        return db.rollback(); 
+    }
+    lastErrorMessage = "Database is not open.";
+    return false;
+}
+
 bool InvoiceRepository::add(const Invoice& invoice) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("INSERT INTO invoices(id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, "
