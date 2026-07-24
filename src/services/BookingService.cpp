@@ -51,6 +51,8 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
     }
 
     QString groupCode = makeGroupCode();
+    QString baseBookingId = makeBookingId();
+    int index = 1;
 
     for (const auto& roomId : roomIds)
     {
@@ -72,8 +74,8 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
             return false;
         }
 
-        // Sinh mã đơn đặt phòng
-        QString bookingId = makeBookingId();
+        //Sinh ma don dat phong
+        QString bookingId = baseBookingId + "_" + QString::number(index++);
 
         // Khởi tạo đối tượng Booking
         Booking newBooking(bookingId, customerId, receptionistId, roomId, groupCode, checkIn, checkOut, BookingStatus::Booked);
