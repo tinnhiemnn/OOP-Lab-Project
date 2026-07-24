@@ -1,7 +1,10 @@
 #pragma once
 
 #include "repositories/InvoiceRepository.h"
+#include "repositories/BookingRepository.h"
+#include "repositories/RoomRepository.h"
 #include "models/Invoice.h"
+
 #include <QString>
 #include <vector>
 #include <optional>

@@ -29,18 +29,17 @@ QString BookingService::makeBookingId() const {
     return "BK_" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
-bool BookingService::createBooking(const QString& customerId,
-                                   const QString& roomId,
-                                   const QDate& checkIn,
-                                   const QDate& checkOut,
-                                   const QString& receptionistId,
-                                   const QString& groupCode,
-                                   int buffetQty,
-                                   bool laundry,
-                                   bool decoration,
-                                   const QString& decorationNote,
-                                   QString& error) 
+QString BookingService::makeGroupCode() const {
+    return "GRP_" + QString::number(QDateTime::currentMSecsSinceEpoch());
+}
+
+bool BookingService::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
 {
+    if (roomIds.empty()) {
+        error = "No rooms selected!";
+        return false;
+    }
+
     if (checkIn >= checkOut) {
         error = "Check-out date must be after check-in date.";
         return false;
@@ -51,42 +50,46 @@ bool BookingService::createBooking(const QString& customerId,
         return false;
     }
 
-    // Kiểm tra phòng có tồn tại không
-    auto roomPtr = rooms.findById(roomId);
-    if (!roomPtr) {
-        error = "Room information not found!";
-        return false;
+    QString groupCode = makeGroupCode();
+
+    for (const auto& roomId : roomIds)
+    {
+        // Kiểm tra phòng có tồn tại không
+        auto roomPtr = rooms.findById(roomId);
+        if (!roomPtr) {
+            error = "Room information not found!";
+            return false;
+        }
+
+        if (roomPtr->getStatus() == RoomStatus::Maintenance) {
+            error = "The room is under maintenance and cannot be booked!";
+            return false;
+        }
+
+        // Kiểm tra trùng lịch phòng
+        if (hasConflict(roomId, checkIn, checkOut)) {
+            error = "The room has already been booked or is in use during this period!";
+            return false;
+        }
+
+        // Sinh mã đơn đặt phòng
+        QString bookingId = makeBookingId();
+
+        // Khởi tạo đối tượng Booking
+        Booking newBooking(bookingId, customerId, receptionistId, roomId, groupCode, checkIn, checkOut, BookingStatus::Booked);
+        
+        // Thiết lập dịch vụ đi kèm
+        newBooking.setBuffetQuantity(buffetQty);
+        newBooking.setLaundry(laundry);
+        newBooking.setDecoration(decoration);
+        newBooking.setDecorationNote(decorationNote);
+
+        // Lưu vào database
+        if (!bookings.add(newBooking)) {
+            error = "Database error when saving the booking: " + bookings.lastError();
+            return false;
+        }
     }
-
-    if (roomPtr->getStatus() == RoomStatus::Maintenance) {
-        error = "The room is under maintenance and cannot be booked!";
-        return false;
-    }
-
-    // Kiểm tra trùng lịch phòng
-    if (hasConflict(roomId, checkIn, checkOut)) {
-        error = "The room has already been booked or is in use during this period!";
-        return false;
-    }
-
-    // Sinh mã đơn đặt phòng
-    QString bookingId = makeBookingId();
-
-    // Khởi tạo đối tượng Booking
-    Booking newBooking(bookingId, customerId, receptionistId, roomId, groupCode, checkIn, checkOut, BookingStatus::Booked);
-    
-    // Thiết lập dịch vụ đi kèm
-    newBooking.setBuffetQuantity(buffetQty);
-    newBooking.setLaundry(laundry);
-    newBooking.setDecoration(decoration);
-    newBooking.setDecorationNote(decorationNote);
-
-    // Lưu vào database
-    if (!bookings.add(newBooking)) {
-        error = "Database error when saving the booking: " + bookings.lastError();
-        return false;
-    }
-
     return true;
 }
 

@@ -1,7 +1,5 @@
 #include "controllers/CustomerController.h"
 #include "utils/ValidationUtils.h"
-#include "repositories/CustomerRepository.h"
-#include "repositories/BookingRepository.h"
 
 CustomerController::CustomerController() {}
 

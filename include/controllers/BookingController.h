@@ -14,7 +14,7 @@ public:
     // Nhận vào Service thông qua cơ chế Dependency Injection (tham chiếu)
     explicit BookingController(BookingService& service);
 
-    bool createBooking(const QString& customerId, const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const QString& groupCode, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
+    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
 
     bool processCheckIn(const QString& bookingId, QString& error);
 

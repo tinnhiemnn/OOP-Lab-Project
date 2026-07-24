@@ -1,8 +1,5 @@
 #include "services/InvoiceService.h"
 
-#include "repositories/BookingRepository.h"
-#include "repositories/RoomRepository.h"
-
 #include "patterns/PricingContext.h"
 #include "patterns/SeasonalDiscount.h"
 #include "patterns/MemberDiscount.h"

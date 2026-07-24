@@ -1,6 +1,7 @@
 #pragma once
 
 #include "repositories/CustomerRepository.h"
+#include "repositories/BookingRepository.h"
 
 class CustomerController
 {
