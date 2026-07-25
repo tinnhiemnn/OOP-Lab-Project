@@ -1,9 +1,10 @@
 #include "controllers/BookingController.h"
 #include "utils/ValidationUtils.h"
-#include "repositories/BookingRepository.h"
 
-BookingController::BookingController(BookingService& service)
-    : bookingService(service) {}
+BookingController::BookingController()
+    : bookingRepo(),
+      roomRepo(),
+      bookingService(bookingRepo, roomRepo) {}
 
 bool BookingController::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
 {
@@ -56,10 +57,9 @@ bool BookingController::processCancelBooking(const QString& bookingId, QString& 
     return bookingService.cancelBooking(bookingId, error);
 }
 
-std::vector<Booking> BookingController::getAllBookings() const
+std::vector<Booking> BookingController::getAllBookings()
 {
-    BookingRepository repo;
-    return repo.findAll();
+    return bookingRepo.findAll();
 }
 
 std::vector<Booking> BookingController::searchBookings (const QString& keyword)

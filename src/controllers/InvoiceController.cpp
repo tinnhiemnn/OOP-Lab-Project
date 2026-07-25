@@ -11,7 +11,7 @@ bool InvoiceController::createInvoice(const QString& bookingId, const QString& r
         return false;
     }
     if (!ValidationUtils::isNonEmpty(receptionistId)) {
-        error = "Unable to determine the receptionist ID for billing!";
+        error = "Receptionist ID cannot be empty.";
         return false;
     }
 

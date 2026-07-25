@@ -6,8 +6,10 @@
 class CustomerController
 {
 private:
-    CustomerRepository repository;
+    CustomerRepository customerRepo;
     BookingRepository bookingRepo;
+
+    bool validateCustomer(const Customer& customer, QString& error);
 
 public:
     CustomerController();
