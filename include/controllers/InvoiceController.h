@@ -1,6 +1,7 @@
 #pragma once
 
 #include "services/InvoiceService.h"
+#include "repositories/InvoiceRepository.h"
 
 #include <QString>
 #include <vector>
@@ -8,10 +9,11 @@
 
 class InvoiceController {
 private:
-    InvoiceService& invoiceService;
+    InvoiceRepository invoiceRepo;
+    InvoiceService invoiceService;
 
 public:
-    explicit InvoiceController(InvoiceService& service);
+    InvoiceController();
 
     bool createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& invoiceId, const QString& paymentMethodStr, QString& error);
 

@@ -15,8 +15,7 @@ private:
     RoomRepository roomRepo;
 
 public:
-    // Nhận vào Service thông qua cơ chế Dependency Injection (tham chiếu)
-    explicit BookingController();
+    BookingController();
 
     bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
 

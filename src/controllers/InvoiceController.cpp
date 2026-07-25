@@ -1,8 +1,9 @@
 #include "controllers/InvoiceController.h"
 #include "utils/ValidationUtils.h"
 
-InvoiceController::InvoiceController(InvoiceService& service)
-    : invoiceService(service) {}
+InvoiceController::InvoiceController()
+    : invoiceRepo(),
+      invoiceService(invoiceRepo) {}
 
 bool InvoiceController::createInvoice(const QString& bookingId, const QString& receptionistId,  const QString& discountName, const QString& invoiceId, const QString& paymentMethodStr, QString& error)
 {

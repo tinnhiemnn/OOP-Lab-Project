@@ -7,12 +7,12 @@
 class RoomController
 {
 private:
-    RoomRepository repository;
+    RoomRepository roomRepo;
     BookingRepository bookingRepo;
-    BookingService& bookingService;
+    BookingService bookingService;
 
 public:
-    explicit RoomController(BookingService& service);
+    RoomController();
 
     std::vector<std::unique_ptr<Room>> getAllRooms();
     std::vector<std::unique_ptr<Room>> searchRooms(const QString& type, const QString& status);
