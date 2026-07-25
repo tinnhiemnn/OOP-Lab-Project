@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
     src/controllers/RoomController.cpp
     src/controllers/BookingController.cpp
     src/controllers/InvoiceController.cpp
+    src/controllers/ReportController.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
