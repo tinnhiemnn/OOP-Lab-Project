@@ -38,6 +38,7 @@ public:
     double getBasePrice() const { return basePrice; }
     RoomStatus getStatus() const { return status; }
     RoomType getRoomType() const { return type; }
+    virtual int getBeds() const = 0;
 
     //kiem tra phong
     bool isAvailable() const
