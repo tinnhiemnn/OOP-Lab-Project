@@ -1,7 +1,9 @@
 #pragma once
 
-//#include "controllers/ReportController.h"
-//#include "repositories/InvoiceRepository.h"
+#include "controllers/ReportController.h"
+#include "controllers/BookingController.h"
+#include "controllers/RoomController.h"
+#include "controllers/InvoiceController.h"
 #include "DashboardCard.h"
 #include <QWidget>
 
@@ -15,14 +17,17 @@ public:
 
 private:
     void reload();
+    
+    ReportController controller;
+    BookingController bookingController;
+    RoomController roomController;
+    InvoiceController invoiceController;
 
-    //ReportController controller;
-    //InvoiceRepository invoiceRepository;
     QLabel* revenueLabel;
     QLabel* bookingLabel;
     QLabel* roomLabel;
     QLabel* occupancyLabel;
     QTableWidget* table;
     DashboardCard* heroCard;
-    DashboardCard* tableCard;;
+    DashboardCard* tableCard;
 };

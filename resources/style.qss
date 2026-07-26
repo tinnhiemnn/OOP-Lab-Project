@@ -1,7 +1,4 @@
-/* =====================================================================
-   LuxeStay HMS — LIGHT THEME (chuyển thể từ hotel_dashboard_mockup_light.html)
-   Dán/replace nội dung này vào: resources/style.qss
-   ---------------------------------------------------------------------
+/* ---------------------------------------------------------------------
    Bảng màu gốc (biến CSS trong mockup -> giá trị hex dùng lại ở đây):
      --bg        #F5F7FA   nền cửa sổ
      --card      #FFFFFF   nền card
@@ -31,8 +28,14 @@ QMainWindow, QWidget#centralWidget {
 
 /* ------------------------------------------------------------------ */
 /* SIDEBAR (thay cho QTabWidget mặc định)                              */
+/* LUU Y: selector dung QWidget#sidebarWrap vi trong MainWindow.cpp     */
+/* widget cha thuc te co objectName la "sidebarWrap" (QWidget), khong   */
+/* phai "sidebar" (QFrame). Rule nay lam nen trang + duong line phai   */
+/* chay LIEN TUC suot ca vung brandBlock lan sidebarNav ben trong,      */
+/* giup logo/ten app va thanh dieu huong nhin lien thanh 1 khoi trang,  */
+/* giong ban mockup web tham khao.                                     */
 /* ------------------------------------------------------------------ */
-QFrame#sidebar {
+QWidget#sidebarWrap {
     background-color: #FFFFFF;
     border-right: 1px solid #E4E9F0;
 }
@@ -107,7 +110,6 @@ QFrame#planCard QLabel[role="planTitle"] {
 QListWidget#sidebarNav {
     background-color: #FFFFFF;
     border: none;
-    border-right: 1px solid #E4E9F0;
     padding: 24px 12px;
     font-size: 13px;
 }
@@ -136,10 +138,15 @@ QListWidget#sidebarNav::item:selected:!active {
 
 /* ------------------------------------------------------------------ */
 /* TOPBAR                                                              */
+/* LUU Y: topbar trong MainWindow.cpp la QWidget (khong phai QFrame),  */
+/* nen selector phai la QWidget#topbar. QWidget can bat them thuoc     */
+/* tinh Qt::WA_StyledBackground trong code de nhan background-color tu */
+/* QSS (xem MainWindow.cpp). Nen trang de "lien" voi mau trang cua      */
+/* sidebar (QWidget#sidebarWrap), tao cam giac 1 khoi thong nhat, chi   */
+/* con duong line doc mong (border-right cua sidebarWrap) lam ranh gioi.*/
 /* ------------------------------------------------------------------ */
-QFrame#topbar {
-    background-color: #FFFFFF;
-    border-bottom: 1px solid #E4E9F0;
+QWidget#topbar {
+    background-color: transparent;
 }
 QLabel[role="pageTitle"] {
     font-family: "Space Grotesk", sans-serif;
@@ -317,6 +324,20 @@ QHeaderView::section {
     border-bottom: 1px solid #E4E9F0;
 }
 QTableWidget::item { padding: 8px; }
+
+/* ------------------------------------------------------------------ */
+/* BOOKING VIEW — khung Room List (widget cuộn chứa các dòng Room)     */
+/* LUU Y: roomsContainer la QWidget, can Qt::WA_StyledBackground trong  */
+/* code (BookingView.cpp) de nhan duoc background-color o day.         */
+/* ------------------------------------------------------------------ */
+QWidget#roomListContainer {
+    background-color: rgba(148, 163, 184, 0.16);
+    border-radius: 10px;
+}
+QScrollArea#roomsScrollArea {
+    background: transparent;
+    border: none;
+}
 
 /* ------------------------------------------------------------------ */
 /* SCROLLBARS                                                          */

@@ -32,6 +32,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     auto* sidebarWrap = new QWidget(this);
     sidebarWrap->setObjectName("sidebarWrap");
     sidebarWrap->setFixedWidth(220);
+    // QWidget mac dinh KHONG ve background-color/border tu QSS, phai bat
+    // WA_StyledBackground thi rule QWidget#sidebarWrap trong style.qss moi ap dung.
+    // Nen trang nay se "tham" xuyen qua ca brand block lan sidebarNav ben trong
+    // (vi 2 widget con khong tu ve nen rieng), giup ca vung sidebar lien thanh 1 khoi trang.
+    sidebarWrap->setAttribute(Qt::WA_StyledBackground, true);
 
     auto* sidebarLayout = new QVBoxLayout(sidebarWrap);
     sidebarLayout->setContentsMargins(0, 0, 0, 0);
@@ -69,12 +74,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     sidebarLayout->addWidget(brand);
     sidebarLayout->addWidget(sidebarNav, /*stretch=*/1);
 
-    // Tạo hiệu ứng đổ bóng cho thanh sidebar
-    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
-    shadow->setBlurRadius(15);
-    shadow->setColor(QColor(0, 0, 0, 40));
-    shadow->setOffset(0, 4);
-    sidebarWrap->setGraphicsEffect(shadow);
+    // Da bo shadow cua sidebar: chuyen sang dang phang, chi con 1 duong line mong
+    // (border-right cua sidebarWrap trong style.qss) lam ranh gioi, giong ban mockup web.
 
     // Khởi tạo các trang giao diện con
     auto* bookingView = new BookingView(this);
@@ -89,16 +90,32 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     mainColLayout->setContentsMargins(0, 0, 0, 0);
     mainColLayout->setSpacing(0);
 
+    // Boc topbar trong 1 wrapper de co padding dong bo voi le trai/phai cua noi dung ben duoi.
+    auto* topbarWrap = new QWidget(this);
+    auto* topbarWrapLayout = new QVBoxLayout(topbarWrap);
+    topbarWrapLayout->setContentsMargins(28, 20, 28, 12);
+    topbarWrapLayout->setSpacing(0);
+
     auto* topbar = new QWidget(this);
     topbar->setObjectName("topbar");
-    topbar->setFixedHeight(64);
-    auto* topbarLayout = new QVBoxLayout(topbar);
-    topbarLayout->setContentsMargins(28, 0, 28, 0);
+    // Khong con la "card noi" nua (bo shadow/border/border-radius) -> tro ve dang phang,
+    // dinh lien vao nen trang, giong voi ban mockup web tham khao.
+    topbar->setAttribute(Qt::WA_StyledBackground, true);
+    // Mau nen (neu co) khai bao trong style.qss (QWidget#topbar).
 
-    m_pageTitle = new QLabel("Bookings", this);   // trùng với setCurrentRow(2) bên dưới
+    auto* topbarLayout = new QVBoxLayout(topbar);
+    topbarLayout->setContentsMargins(0, 0, 0, 0);
+    topbarLayout->setSpacing(2); // khoảng cách nhỏ giữa tiêu đề và dòng mô tả bên dưới
+
+    m_pageTitle = new QLabel("Bookings", this);   // trùng với setCurrentRow(0) bên dưới
     m_pageTitle->setProperty("role", "pageTitle");
     topbarLayout->addWidget(m_pageTitle);
-    topbarLayout->setAlignment(m_pageTitle, Qt::AlignVCenter);
+
+    m_pageSubtitle = new QLabel("Theo dõi đặt phòng theo quy trình", this);
+    m_pageSubtitle->setProperty("role", "pageSub");
+    topbarLayout->addWidget(m_pageSubtitle);
+
+    topbarWrapLayout->addWidget(topbar);
 
 
     auto* pages = new QStackedWidget(this);
@@ -109,10 +126,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     pages->addWidget(invoiceView);
     pages->addWidget(reportView);
 
-    mainColLayout->addWidget(topbar);
+    mainColLayout->addWidget(topbarWrap);
     mainColLayout->addWidget(pages, /*stretch=*/1);
 
     QStringList menuTitles = {"Bookings", "Customers", "Receptionists", "Rooms", "Invoices", "Reports"};
+    // Dong mo ta ngan duoi tieu de, tuong ung 1-1 voi menuTitles theo thu tu index.
+    QStringList menuSubtitles = {
+        "Theo dõi đặt phòng theo quy trình",
+        "Quản lý thông tin khách hàng",
+        "Quản lý nhân viên lễ tân",
+        "Quản lý danh sách phòng",
+        "Quản lý hoá đơn thanh toán",
+        "Thống kê và báo cáo tổng quan"
+    };
     for (const QString& title : menuTitles) {
         auto* item = new QListWidgetItem(title);
         item->setTextAlignment(Qt::AlignCenter); // Tất cả các tab đều được căn giữa đồng đều
@@ -122,9 +148,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     sidebarNav->setCurrentRow(0);      // "Bookings" active mặc định
     pages->setCurrentIndex(0);
 
-    connect(sidebarNav, &QListWidget::currentRowChanged, this, [this, sidebarNav, pages](int row) {
+    connect(sidebarNav, &QListWidget::currentRowChanged, this, [this, sidebarNav, pages, menuSubtitles](int row) {
         pages->setCurrentIndex(row);
         m_pageTitle->setText(sidebarNav->item(row)->text());
+        m_pageSubtitle->setText(menuSubtitles.value(row));
     });
 
     layout->addWidget(sidebarWrap);

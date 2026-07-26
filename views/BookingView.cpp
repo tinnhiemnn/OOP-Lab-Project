@@ -16,6 +16,7 @@
 #include <QString>
 #include <QFrame>
 #include <QLabel>
+#include <QScrollArea>
 
 namespace {
 QString text(QLineEdit* edit) { return edit->text().trimmed(); }
@@ -25,7 +26,6 @@ BookingView::BookingView(QWidget* parent)
     : QWidget(parent),
     controller(),
     bookingIdEdit(new QLineEdit(this)),
-    groupCodeEdit(new QLineEdit(this)),
     customerIdEdit(new QLineEdit(this)),
     receptionistIdEdit(new QLineEdit(this)),
     searchEdit(new QLineEdit(this)),
@@ -40,10 +40,9 @@ BookingView::BookingView(QWidget* parent)
 
     // Booking ID chỉ được set khi chọn 1 dòng trên table (dùng cho Check-in/Check-out/Cancel),
     // không cho sửa tay để tránh gõ nhầm sang booking khác.
-    bookingIdEdit->setPlaceholderText("Booking ID (chọn từ Booking List)");
+    bookingIdEdit->setPlaceholderText("Booking ID");
     bookingIdEdit->setReadOnly(true);
     
-    //groupCodeEdit->setPlaceholderText("Group ID (để trống nếu muốn hệ thống tự sinh)");
     customerIdEdit->setPlaceholderText("Customer ID");
     receptionistIdEdit->setPlaceholderText("Receptionist ID");
 
@@ -57,8 +56,6 @@ BookingView::BookingView(QWidget* parent)
     form->addWidget(new QLabel("Check-in", this), 0, 2);
     form->addWidget(checkInEdit, 0, 3);
 
-    //form->addWidget(new QLabel("Group ID", this), 1, 0);
-    //form->addWidget(groupCodeEdit, 1, 1);
     form->addWidget(new QLabel("Check-out", this), 1, 2);
     form->addWidget(checkOutEdit, 1, 3);
 
@@ -80,11 +77,33 @@ BookingView::BookingView(QWidget* parent)
     roomsHeader->addWidget(addRoomBtn);
 
     roomsLayout = new QVBoxLayout();
-    roomsLayout->setSpacing(4); // giảm để mỗi dòng Room sát nhau hơn, card gọn lại
+    roomsLayout->setContentsMargins(2, 2, 2, 2); // tăng padding vì giờ có nền, tránh dòng Room sát viền
+    roomsLayout->setSpacing(4);
+    roomsLayout->addStretch(1); // giữ các dòng Room dồn lên trên khi ít hơn chiều cao khung cuộn
+
+    // --- Container widget chứa các dòng Room, được đặt trong QScrollArea riêng ---
+    // Nhờ vậy Room List có thanh cuộn dọc như table, không làm formCard phình cao khi thêm nhiều phòng.
+    roomsContainer = new QWidget(this);
+    roomsContainer->setLayout(roomsLayout);
+    roomsContainer->setObjectName("roomListContainer");
+    // QWidget mac dinh KHONG ve background-color/border-radius tu QSS,
+    // phai bat WA_StyledBackground thi rule QWidget#roomListContainer trong
+    // style.qss moi ap dung (mau nen xam mo, bo goc).
+    roomsContainer->setAttribute(Qt::WA_StyledBackground, true);
+
+    roomsScrollArea = new QScrollArea(this);
+    roomsScrollArea->setObjectName("roomsScrollArea"); // de style.qss ap dung nen trong suot
+    roomsScrollArea->setWidget(roomsContainer);
+    roomsScrollArea->setWidgetResizable(true);
+    roomsScrollArea->setFrameShape(QFrame::NoFrame);
+    roomsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    roomsScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    roomsScrollArea->setMinimumHeight(115); // rộng hơn so với trước (140) để đỡ chật khi có 2-3 phòng
+    roomsScrollArea->setMaximumHeight(170);
 
     auto* roomsBox = new QVBoxLayout;
     roomsBox->addLayout(roomsHeader);
-    roomsBox->addLayout(roomsLayout);
+    roomsBox->addWidget(roomsScrollArea);
 
     connect(addRoomBtn, &QPushButton::clicked, this, [this] { addRoomRow(); });
 
@@ -111,7 +130,8 @@ BookingView::BookingView(QWidget* parent)
     actions->addWidget(reloadBtn);
 
     // --- Card 1: form đặt phòng (thông tin cố định + danh sách phòng kèm dịch vụ) + các nút hành động ---
-    formCard = new DashboardCard("Booking", "blue", this);
+    // Bo tieu de rieng ("Booking") de tiet kiem dien tich, giu nguyen colorTag cho accent mau.
+    formCard = new DashboardCard(QString(), "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(roomsBox);
     formCard->addContentLayout(actions);
@@ -140,14 +160,15 @@ BookingView::BookingView(QWidget* parent)
     tableLayout->addWidget(bookingTable);
 
     // --- Card 2: ô tìm kiếm + Booking List table ---
-    tableCard = new DashboardCard("Booking List", "purple", this);
+    // Bo tieu de rieng ("Booking List") de tiet kiem dien tich, giu nguyen colorTag cho accent mau.
+    tableCard = new DashboardCard(QString(), "purple", this);
     tableCard->addContentLayout(searching);
     tableCard->addContentLayout(tableLayout);
 
     // --- Layout tổng thể card 1 + card 2 ---
     auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 16, 24, 16);
-    layout->setSpacing(8);
+    layout->setContentsMargins(28, 20, 28, 20);
+    layout->setSpacing(10); // tăng khoảng cách giữa 2 card, đẩy Booking List xuống dưới một chút
     layout->addWidget(formCard, /*stretch=*/0);   // card Booking giữ nguyên kích thước cần thiết, không giãn thêm
     layout->addWidget(tableCard, /*stretch=*/1);  // Booking List chiếm hết phần còn lại -> to hơn
 
@@ -205,7 +226,8 @@ void BookingView::addRoomRow(const QString& roomId) {
     row->addWidget(removeBtn);
 
     roomRows.append(r);
-    roomsLayout->addWidget(r.rowWidget);
+    // Chen truoc phan tu stretch (luon la item cuoi cung) de cac dong Room dong len tren.
+    roomsLayout->insertWidget(roomsLayout->count() - 1, r.rowWidget);
 
     connect(removeBtn, &QPushButton::clicked, this, [this, r] {
         if (roomRows.size() <= 1) return; // luôn giữ ít nhất 1 phòng trong nhóm
@@ -269,7 +291,6 @@ void BookingView::selected(int row, int /*column*/) {
     const Booking& b = currentRows[row];
 
     bookingIdEdit->setText(b.getId());
-    groupCodeEdit->setText(b.getGroupCode());
     customerIdEdit->setText(b.getCustomerId());
     receptionistIdEdit->setText(b.getReceptionistId());
     checkInEdit->setDate(b.getCheckIn());
@@ -310,7 +331,6 @@ void BookingView::add() {
 
     customerIdEdit->clear();
     receptionistIdEdit->clear();
-    groupCodeEdit->clear();
     clearExtraRoomRows();
     if (!roomRows.isEmpty()) {
         roomRows[0].roomIdEdit->clear();

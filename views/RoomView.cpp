@@ -33,7 +33,6 @@ RoomView::RoomView(QWidget* parent)
       checkOutEdit(new QDateEdit(QDate::currentDate().addDays(1), this)),
       table(new QTableWidget(this)) {
 
-    idEdit->setReadOnly(true);
     idEdit->setPlaceholderText("Room ID");
 
     typeEdit->addItems({"Standard", "Deluxe", "President"});
@@ -83,7 +82,7 @@ RoomView::RoomView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard("Room", "blue", this);
+    formCard = new DashboardCard(QString(), "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -111,18 +110,17 @@ RoomView::RoomView(QWidget* parent)
     controls->addWidget(new QLabel("Check-out", this));
     controls->addWidget(checkOutEdit);
     controls->addWidget(checkAvailBtn);
-    //controls->addStretch(1);
 
     // --- CHANGED: Room List tu grid 4 cot sang table ---
-    // LUU Y: Room.h chua co getBeds() nen chua the hien cot "Beds" o day.
-    // Can bo sung "virtual int getBeds() const" vao Room.h (ngoai pham vi View).
-    table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"Room ID", "Type", "Price", "Status"});
+    // Da bo sung cot "Beds" (nam giua Price va Status).
+    // YEU CAU: Room.h can co "virtual int getBeds() const" de refresh() lay du lieu.
+    table->setColumnCount(5);
+    table->setHorizontalHeaderLabels({"Room ID", "Type", "Price", "Beds", "Status"});
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard("Room List", "purple", this);
+    tableCard = new DashboardCard(QString(), "purple", this);
     tableCard->addContentLayout(controls);
     tableCard->addContent(table);
 
@@ -149,14 +147,15 @@ void RoomView::refresh(std::vector<std::unique_ptr<Room>> rows) {
         table->setItem(row, 0, new QTableWidgetItem(room->getRoomId()));
         table->setItem(row, 1, new QTableWidgetItem(Room::typeToString(room->getRoomType())));
         table->setItem(row, 2, new QTableWidgetItem(QString::number(room->getBasePrice(), 'f', 0)));
-        table->setItem(row, 3, new QTableWidgetItem(Room::statusToString(room->getStatus())));
+        //table->setItem(row, 3, new QTableWidgetItem(QString::number(room->getBeds())));
+        table->setItem(row, 4, new QTableWidgetItem(Room::statusToString(room->getStatus())));
     }
 }
 
 void RoomView::reload() {
     refresh(controller.getAllRooms());
     // Sau khi reload, mo lai Room ID de san sang cho lan Add tiep theo.
-    //idEdit->setReadOnly(false);
+    idEdit->setReadOnly(false);
     idEdit->clear();
 }
 
@@ -166,11 +165,9 @@ void RoomView::selected() {
     idEdit->setText(table->item(row, 0)->text());
     typeEdit->setCurrentText(table->item(row, 1)->text());
     priceEdit->setValue(table->item(row, 2)->text().toDouble());
-    statusEdit->setCurrentText(table->item(row, 3)->text());
-
-    // Room ID khong duoc sua khi dang thao tac tren 1 phong da co san
-    // (chi dung de Update/Delete, khong the doi ID cua ban ghi da ton tai).
-    //idEdit->setReadOnly(true);
+    bedsEdit->setValue(table->item(row, 3)->text().toInt());
+    statusEdit->setCurrentText(table->item(row, 4)->text());
+    idEdit->setReadOnly(true);
 }
 
 void RoomView::add() {
@@ -233,8 +230,7 @@ void RoomView::search() {
         return;
     }
 
-    // TODO: can RoomController::findAvailableRooms(...) - xem ghi chu ben duoi.
-    refresh(controller.findAvailableRooms(checkIn, checkOut));
+    refresh(controller.checkAvailability(checkIn, checkOut));
 }*/
 
 void RoomView::error(const QString& message) {

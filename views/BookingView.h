@@ -15,6 +15,8 @@ class QSpinBox;
 class QCheckBox;
 class QPushButton;
 class QVBoxLayout;
+class QScrollArea;
+class QWidget;
 
 // Mỗi dòng trong "Room List" = 1 phòng sẽ trở thành 1 Booking record riêng khi bấm "Book"
 // (BookingController::createBooking hiện đã nhận đúng 1 phòng/1 lần gọi, xem BookingView::add()).
@@ -45,11 +47,10 @@ private:
 
     void addRoomRow(const QString& roomId = QString());
     void clearExtraRoomRows();   // giữ lại đúng 1 dòng Room khi đổ dữ liệu 1 booking đã chọn lên form
-    
+
     BookingController controller;
 
     QLineEdit* bookingIdEdit;    // Booking ID (READ-ONLY)
-    QLineEdit* groupCodeEdit;
     QLineEdit* customerIdEdit;
     QLineEdit* receptionistIdEdit;
     QLineEdit* searchEdit;
@@ -58,6 +59,8 @@ private:
 
     QVector<RoomServiceRow> roomRows;   // danh sách các dòng Room + dịch vụ riêng của từng phòng
     QVBoxLayout* roomsLayout;
+    QWidget* roomsContainer;       // widget chứa các dòng Room, được đặt bên trong scroll area
+    QScrollArea* roomsScrollArea;  // khung cuộn cho Room List, tránh formCard bị phình cao
     QPushButton* addRoomBtn;
 
     QTableWidget* bookingTable;

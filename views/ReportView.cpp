@@ -67,7 +67,8 @@ ReportView::ReportView(QWidget* parent)
     tableCard->addContent(table);
 
     auto* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(28, 24, 28, 24);
+    layout->setContentsMargins(28, 20, 28, 20);
+    layout->setSpacing(10);
     layout->addWidget(heroCard);
     layout->addWidget(tableCard);
 

@@ -22,7 +22,7 @@ CustomerView::CustomerView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
       phoneEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
-    idEdit->setReadOnly(true); //idCustomer -> no-edit
+    idEdit->setReadOnly(true);
     
     idEdit->setPlaceholderText("Customer ID");
     emailEdit->setPlaceholderText("abc@gmail.com");
@@ -60,7 +60,7 @@ CustomerView::CustomerView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard("Customer", "blue", this);
+    formCard = new DashboardCard(QString(), "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -79,14 +79,13 @@ CustomerView::CustomerView(QWidget* parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard("Customer List", "purple", this);
+    tableCard = new DashboardCard(QString(), "purple", this);
     tableCard->addContentLayout(searching);
     tableCard->addContent(table);
 
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(28, 20, 28, 20);
     layout->setSpacing(10);
-    //layout->addLayout(statsRow);
     layout->addWidget(formCard);
     layout->addWidget(tableCard, /*stretch=*/1);
     connect(addBtn, &QPushButton::clicked, this, [this] { add(); });

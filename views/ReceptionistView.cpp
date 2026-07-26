@@ -23,7 +23,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
     searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
-    idEdit->setReadOnly(true); //idReceptionist -> no-edit
+    idEdit->setReadOnly(true);
     idEdit->setPlaceholderText("Receptionist ID");
     emailEdit->setPlaceholderText("abc@gmail.com");
 
@@ -50,7 +50,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard("Receptionist", "orange", this);
+    formCard = new DashboardCard(QString(), "orange", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -69,7 +69,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard("Receptionist List", "purple", this);
+    tableCard = new DashboardCard(QString(), "purple", this);
     tableCard->addContentLayout(searching);
     tableCard->addContent(table);
 
@@ -101,7 +101,6 @@ void ReceptionistView::refresh(const std::vector<Receptionist>& rows) {
 
 void ReceptionistView::reload() {
     refresh(controller.getAllReceptionists()); 
-    //idEdit->setReadOnly(false);
     idEdit->clear();
 }
 
