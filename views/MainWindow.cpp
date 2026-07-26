@@ -32,10 +32,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     auto* sidebarWrap = new QWidget(this);
     sidebarWrap->setObjectName("sidebarWrap");
     sidebarWrap->setFixedWidth(220);
-    // QWidget mac dinh KHONG ve background-color/border tu QSS, phai bat
-    // WA_StyledBackground thi rule QWidget#sidebarWrap trong style.qss moi ap dung.
-    // Nen trang nay se "tham" xuyen qua ca brand block lan sidebarNav ben trong
-    // (vi 2 widget con khong tu ve nen rieng), giup ca vung sidebar lien thanh 1 khoi trang.
     sidebarWrap->setAttribute(Qt::WA_StyledBackground, true);
 
     auto* sidebarLayout = new QVBoxLayout(sidebarWrap);
@@ -49,7 +45,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     brandLayout->setContentsMargins(18, 20, 12, 16);
     brandLayout->setSpacing(10);
 
-    auto* brandMark = new QLabel("H", this);
+    auto* brandMark = new QLabel("P", this);
     brandMark->setObjectName("brandMark");
     brandMark->setFixedSize(36, 36);
     brandMark->setAlignment(Qt::AlignCenter);
@@ -57,7 +53,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     auto* brandTextCol = new QVBoxLayout();
     brandTextCol->setSpacing(0);
-    auto* brandName = new QLabel("HomeStay", this);
+    auto* brandName = new QLabel("Pink Home", this);
     brandName->setObjectName("brandName");
     auto* brandSub = new QLabel("Hotel Management", this);
     brandSub->setObjectName("brandSub");

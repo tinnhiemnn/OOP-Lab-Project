@@ -45,3 +45,8 @@ Desktop.ini
 .DS_Store
 .AppleDouble
 .LSOverride
+
+build_test/
+build/
+CMakeFiles/
+CMakeCache.txt
