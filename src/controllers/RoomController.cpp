@@ -97,7 +97,6 @@ bool RoomController::deleteRoom(const QString& id, QString& error) {
 std::vector<std::unique_ptr<Room>> RoomController::checkAvailability(
     const QDate& checkIn,
     const QDate& checkOut,
-    RoomType roomType,
     QString& error)
 {
     if (checkIn >= checkOut)

@@ -26,6 +26,5 @@ public:
     std::vector<std::unique_ptr<Room>> checkAvailability(
         const QDate& checkIn,
         const QDate& checkOut,
-        RoomType roomType,
         QString& error);
 };
