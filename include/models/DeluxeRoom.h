@@ -11,7 +11,7 @@ public:
     DeluxeRoom(QString id = "", double price = 0, RoomStatus status = RoomStatus::Available)
         : Room(std::move(id), price, status, RoomType::Deluxe) {}
 
-    int getBeds() override { return 1; }
+    int getBeds() const override { return 1; }
 
     double calculatePrice(int days) const override
     {

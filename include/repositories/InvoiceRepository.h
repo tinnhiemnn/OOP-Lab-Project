@@ -25,7 +25,7 @@ public:
     
     bool add(const Invoice& invoice);
     std::vector<Invoice> findAll();
-    std::vector<Invoice> search(const QString& keyword);
+    std::vector<Invoice> search(const QString& keyword, const QString& discountFilter, const QString& paymentFilter);
     std::optional<Invoice> findById(const QString& id);
     double totalRevenue();
     std::vector<double> getMonthlyRevenue(const QString& year);
