@@ -78,15 +78,22 @@ std::vector<Invoice> InvoiceRepository::findAll() {
     return rows;
 }
 
-std::vector<Invoice> InvoiceRepository::search(const QString& keyword) {
+std::vector<Invoice> InvoiceRepository::search(const QString& keyword, const QString& discountFilter, const QString& paymentFilter) {
     std::vector<Invoice> rows;
+    QString sql = "SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, "
+                  "payment_method, discount_name FROM invoices WHERE (id LIKE ? OR booking_id LIKE ? OR receptionist_id LIKE ?) ";
+    if (!discountFilter.isEmpty() && discountFilter != "All Discounts") sql += "AND discount_name = ? ";
+    if (!paymentFilter.isEmpty() && paymentFilter != "All Payments") sql += "AND payment_method = ? ";
+    sql += "ORDER BY id";
     QSqlQuery q(DatabaseManager::getInstance().database());
-    q.prepare("SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, "
-              "payment_method, discount_name FROM invoices WHERE id LIKE ? OR booking_id LIKE ? OR receptionist_id LIKE ? "
-              "OR discount_name LIKE ? OR payment_method LIKE ? ORDER BY id");
+    q.prepare(sql);
+
     const QString pattern = "%" + keyword + "%";
     q.addBindValue(pattern);
     q.addBindValue(pattern);
+    q.addBindValue(pattern);
+    if (!discountFilter.isEmpty() && discountFilter != "All Discounts") q.addBindValue(discountFilter);
+    if (!paymentFilter.isEmpty() && paymentFilter != "All Payments") q.addBindValue(paymentFilter);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return rows;
