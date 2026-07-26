@@ -1,15 +1,18 @@
 #pragma once
 
 #include "repositories/RoomRepository.h"
+#include "repositories/BookingRepository.h"
 #include "services/BookingService.h"
+
 class RoomController
 {
 private:
-    RoomRepository repository;
-    BookingService& bookingService;
+    RoomRepository roomRepo;
+    BookingRepository bookingRepo;
+    BookingService bookingService;
 
 public:
-    explicit RoomController(BookingService& service);
+    RoomController();
 
     std::vector<std::unique_ptr<Room>> getAllRooms();
     std::vector<std::unique_ptr<Room>> searchRooms(const QString& type, const QString& status);

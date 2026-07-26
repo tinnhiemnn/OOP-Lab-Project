@@ -7,6 +7,10 @@
 
 class BookingRepository {
 public:
+    bool startTransaction();
+    bool commitTransaction();
+    bool rollbackTransaction();
+    
     bool add(const Booking& booking);
     bool update(const Booking& booking);
     std::vector<Booking> findAll();

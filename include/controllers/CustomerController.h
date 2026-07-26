@@ -1,12 +1,15 @@
 #pragma once
 
 #include "repositories/CustomerRepository.h"
+#include "repositories/BookingRepository.h"
 
 class CustomerController
 {
 private:
-    CustomerRepository repository;
+    CustomerRepository customerRepo;
     BookingRepository bookingRepo;
+
+    bool validateCustomer(const Customer& customer, QString& error);
 
 public:
     CustomerController();

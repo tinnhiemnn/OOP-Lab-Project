@@ -1,8 +1,5 @@
 #include "services/InvoiceService.h"
 
-#include "repositories/BookingRepository.h"
-#include "repositories/RoomRepository.h"
-
 #include "patterns/PricingContext.h"
 #include "patterns/SeasonalDiscount.h"
 #include "patterns/MemberDiscount.h"
@@ -26,8 +23,9 @@ struct servicePrice {
 double InvoiceService::servicesTotal(const QString& bookingId) {
     servicePrice prices;
 
-    BookingRepository bookingRepo;
     auto booking = bookingRepo.findById(bookingId);
+
+    if (!booking) return 0.0;
 
     const int days = DateUtils::daysBetween(booking->getCheckIn().toString(), booking->getCheckOut().toString());
 
@@ -46,7 +44,7 @@ double InvoiceService::servicesTotal(const QString& bookingId) {
     return total;
 }
 
-bool InvoiceService::createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) 
+bool InvoiceService::createInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, const QString& invoiceId, PaymentMethod paymentMethod, QString& error) 
 {
     auto booking = bookingRepo.findById(bookingId);
     if (!booking) {
@@ -64,7 +62,7 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
     if (discountName == "Seasonal") {
         pricing.setStrategy(std::make_unique<SeasonalDiscount>());
     }
-    if (discountName == "Member") {
+    else if (discountName == "Member") {
         pricing.setStrategy(std::make_unique<MemberDiscount>());
     }
 
@@ -77,55 +75,87 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
         totalAmount = 0.0; //Tránh giảm giá nhiều hơn tiền phòng
     }
 
-    double discountAmount = totalAmount - subtotalAmount;
+    double discountAmount = subtotalAmount - totalAmount;
 
-    // Tự sinh mã hóa đơn duy nhất và lấy ngày hiện tại
-    QString invoiceId = generateInvoiceId();
     QDate issuedDate = QDate::currentDate();
 
     Invoice newInvoice( invoiceId,  bookingId,   receptionistId,  issuedDate,  subtotalAmount,  totalAmount,  discountAmount,  paymentMethod, discountName
     );
 
-    // Lưu vào database
     if (!invoiceRepo.add(newInvoice)) {
-        error = "Lỗi Database khi lưu hóa đơn: " + invoiceRepo.lastError();
+        error = "Database error when saving the invoice: " + invoiceRepo.lastError();
         return false;
     }
 
     return true;
 }
 
-bool InvoiceService::createAllInvoice(const QString& groupcode,
-                       const QString& receptionistId,
-                       const QString& discountName,
-                       PaymentMethod paymentMethod,
-                       QString& error) {
-    auto bookings = bookingRepo.findAll();
+bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& receptionistId, const QString& discountName, PaymentMethod paymentMethod, QString& error) {
+
+    auto booking = bookingRepo.findById(bookingId);
+    if (!booking) {
+        error = "Booking does not exist.";
+        return false;
+    }
+
+    QString groupcode = booking->getGroupCode();
+    auto bookings = bookingRepo.search(groupcode);
              
     bool found = false;
 
+    if (!invoiceRepo.startTransaction())
+    {
+        error = invoiceRepo.lastError();
+        return false;
+    }
+
+    QString baseId = generateInvoiceId();
+    int index = 1;
+
     for (const auto& booking : bookings)
     {
-        if (booking.getGroupCode() != groupcode)
-            continue;
+        if (booking.getGroupCode() != groupcode) continue;
 
         found = true;
 
-        if (!createInvoice(booking.getId(),
-                           receptionistId,
-                           discountName,
-                           paymentMethod,
-                           error))
+        bool paid = false; //Để check xem đã có invoice chưa
+
+        std::vector<Invoice> invoices = invoiceRepo.search(booking.getId());
+
+        for (const auto& invoice : invoices)
         {
+            if (invoice.getBookingId() == booking.getId())
+            {
+                paid = true;
+                break;
+            }
+        }
+
+        if (paid) continue;
+
+        QString invoiceId = baseId + QString::number(index++);
+
+        if (!createInvoice(booking.getId(), receptionistId,  discountName, invoiceId, paymentMethod, error))
+        {
+            invoiceRepo.rollbackTransaction();
             return false;
         }
     }
 
     if (!found)
     {
+        invoiceRepo.rollbackTransaction();
         error = "No bookings found for this group.";
         return false;
     }
+    
+    if (!invoiceRepo.commitTransaction())
+    {
+        invoiceRepo.rollbackTransaction();
+        error = invoiceRepo.lastError();
+        return false;
+    }
+
     return true;
 }
 

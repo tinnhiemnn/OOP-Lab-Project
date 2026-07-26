@@ -13,6 +13,7 @@ class BookingService {
 private:
     bool hasConflict(const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& excludeBookingId = "") const;
     QString makeBookingId() const;
+    QString makeGroupCode() const;
     double calculateBookingCost(const Booking& booking, double pricePerNight) const;
 
     BookingRepository& bookings;
@@ -21,17 +22,11 @@ private:
 public:
     BookingService(BookingRepository& bookings, RoomRepository& rooms);
 
-    bool createBooking(const QString& customerId, const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const QString& groupCode, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
+    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
 
     bool checkIn(const QString& bookingId, QString& error);
 
     bool checkOut(const QString& bookingId, QString& error);                     
 
     bool cancelBooking(const QString& bookingId, QString& error);
-
-    std::vector<std::unique_ptr<Room>> checkAvailability(
-    const QDate& checkIn,
-    const QDate& checkOut,
-    RoomType roomType,
-    QString& error);
 };

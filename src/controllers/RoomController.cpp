@@ -1,21 +1,24 @@
 #include "controllers/RoomController.h"
-#include "utils/ValidationUtils.h"
-#include "repositories/BookingRepository.h"
+
 #include "models/Booking.h"
 
-RoomController::RoomController(BookingService& service)
-    : bookingService(service) {}
+#include "utils/ValidationUtils.h"
+
+RoomController::RoomController()
+    : bookingRepo(),
+      roomRepo(),
+      bookingService(bookingRepo, roomRepo) {}
 
 std::vector<std::unique_ptr<Room>> RoomController::getAllRooms() {
-    return repository.findAll();
+    return roomRepo.findAll();
 }
 
 std::vector<std::unique_ptr<Room>> RoomController::searchRooms(const QString& type, const QString& status) {
-    return repository.search(type, status);
+    return roomRepo.search(type, status);
 }
 
 std::unique_ptr<Room> RoomController::getRoomById(const QString& id) {
-    return repository.findById(id);
+    return roomRepo.findById(id);
 }
 
 bool RoomController::addRoom(const Room& room, int beds, QString& error) {
@@ -34,26 +37,26 @@ bool RoomController::addRoom(const Room& room, int beds, QString& error) {
         return false;
     }
 
-    if (repository.add(room, beds)) {
+    if (roomRepo.add(room, beds)) {
         return true;
     }
-    error = repository.lastError();
+    error = roomRepo.lastError();
     return false;
 }
 
 bool RoomController::updateRoom(const Room& room, int beds, QString& error) {
-    if (repository.update(room, beds)) {
+    if (roomRepo.update(room, beds)) {
         return true;
     }
-    error = repository.lastError();
+    error = roomRepo.lastError();
     return false;
 }
 
 bool RoomController::updateRoomStatus(const QString& id, RoomStatus status, QString& error) {
-    if (repository.updateStatus(id, status)) {
+    if (roomRepo.updateStatus(id, status)) {
         return true;
     }
-    error = repository.lastError();
+    error = roomRepo.lastError();
     return false;
 }
 
@@ -65,14 +68,13 @@ bool RoomController::deleteRoom(const QString& id, QString& error) {
     }
 
     //Check room co ton tai hay khong
-    auto room = repository.findById(id);
+    auto room = roomRepo.findById(id);
     if (!room) {
         error = "Room does not exist.";
         return false;
     }
     
-    BookingRepository bookingRepo;
-    std::vector<Booking> allBookings = bookingRepo.findAll();
+    std::vector<Booking> allBookings = bookingRepo.search(id);
 
     //Check xem co booking nao dang Booked hoac CheckedIn voi room nay hay khong
     for (const auto& booking : allBookings) {
@@ -85,10 +87,10 @@ bool RoomController::deleteRoom(const QString& id, QString& error) {
         }
     }
 
-    if (repository.remove(id)) {
+    if (roomRepo.remove(id)) {
         return true;
     }
-    error = repository.lastError();
+    error = roomRepo.lastError();
     return false;
 }
 
@@ -104,10 +106,5 @@ std::vector<std::unique_ptr<Room>> RoomController::checkAvailability(
         return {};
     }
 
-    return bookingService.checkAvailability(
-        checkIn,
-        checkOut,
-        roomType,
-        error
-    );
+    return roomRepo.findAvailableInPeriod(checkIn, checkOut);
 }

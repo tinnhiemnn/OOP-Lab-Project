@@ -1,20 +1,23 @@
 #include "controllers/BookingController.h"
 #include "utils/ValidationUtils.h"
 
-BookingController::BookingController(BookingService& service)
-    : bookingService(service) {}
+BookingController::BookingController()
+    : bookingRepo(),
+      roomRepo(),
+      bookingService(bookingRepo, roomRepo) {}
 
-bool BookingController::createBooking(const QString& customerId, const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const QString& groupCode, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
+bool BookingController::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
 {
     if (!ValidationUtils::isNonEmpty(customerId)) {
         error = "Please select or enter the Customer ID!";
         return false;
     }
     
-    if (!ValidationUtils::isNonEmpty(roomId)) {
-        error = "Please select the room!";
+    if (roomIds.empty()) {
+        error = "Please select at least one room!";
         return false;
     }
+
     if (!ValidationUtils::isNonEmpty(receptionistId)) {
         error = "Receptionist ID cannot be empty!";
         return false;
@@ -24,7 +27,7 @@ bool BookingController::createBooking(const QString& customerId, const QString& 
         return false;
     }
 
-    return bookingService.createBooking(customerId, roomId, checkIn, checkOut, receptionistId, groupCode, buffetQty, laundry, decoration, decorationNote, error);
+    return bookingService.createMultiBookings(customerId, roomIds, checkIn, checkOut, receptionistId, buffetQty, laundry, decoration, decorationNote, error);
 }
 
 bool BookingController::processCheckIn(const QString& bookingId, QString& error) {
@@ -54,26 +57,12 @@ bool BookingController::processCancelBooking(const QString& bookingId, QString& 
     return bookingService.cancelBooking(bookingId, error);
 }
 
-std::vector<Booking> BookingController::getAllBookings() const
+std::vector<Booking> BookingController::getAllBookings()
 {
-    BookingRepository repo;
-    return repo.findAll();
+    return bookingRepo.findAll();
 }
 
-std::vector<Booking> BookingController::searchBookings (const QString& keyword){
-    std::vector<Booking> result;
-
-    auto bookings = bookingRepo.findAll();
-
-    for (const auto& booking : bookings)
-    {
-        if (booking.getId().contains(keyword, Qt::CaseInsensitive) ||
-            booking.getCustomerId().contains(keyword, Qt::CaseInsensitive) ||
-            booking.getRoomId().contains(keyword, Qt::CaseInsensitive) ||
-            booking.getGroupCode().contains(keyword, Qt::CaseInsensitive))
-        {
-            result.push_back(booking);
-        }
-    }
-    return result;
+std::vector<Booking> BookingController::searchBookings (const QString& keyword)
+{
+    return bookingRepo.search(keyword);
 }

@@ -20,11 +20,16 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
     src/patterns/RoomFactory.cpp
+    src/patterns/PricingContext.cpp
+    src/patterns/MemberDiscount.cpp
+    src/patterns/SeasonalDiscount.cpp
+    src/patterns/NoDiscount.cpp
     src/controllers/CustomerController.cpp
     src/controllers/ReceptionistController.cpp
     src/controllers/RoomController.cpp
     src/controllers/BookingController.cpp
     src/controllers/InvoiceController.cpp
+    src/controllers/ReportController.cpp
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
