@@ -120,7 +120,7 @@ bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& r
 
         bool paid = false; //Để check xem đã có invoice chưa
 
-        std::vector<Invoice> invoices = invoiceRepo.search(booking.getId());
+        std::vector<Invoice> invoices = invoiceRepo.search(booking.getId(), "", "");
 
         for (const auto& invoice : invoices)
         {
@@ -168,7 +168,8 @@ std::optional<Invoice> InvoiceService::getInvoiceById(const QString& id) const {
 }
 
 std::optional<Invoice> InvoiceService::getInvoiceByBookingId(const QString& bookingId) const {
-    auto allInvoices = invoiceRepo.findAll();
+    auto allInvoices = invoiceRepo.search(bookingId, "", "");
+    
     for (const auto& inv : allInvoices) {
         if (inv.getBookingId() == bookingId) {
             return inv;
