@@ -92,8 +92,8 @@ std::vector<Invoice> InvoiceRepository::search(const QString& keyword, const QSt
     q.addBindValue(pattern);
     q.addBindValue(pattern);
     q.addBindValue(pattern);
-    if (!discountFilter.isEmpty() && discountFilter != "All Discounts") q.bindValue(discountFilter);
-    if (!paymentFilter.isEmpty() && paymentFilter != "All Payments") q.bindValue(paymentFilter);
+    if (!discountFilter.isEmpty() && discountFilter != "All Discounts") q.addBindValue(discountFilter);
+    if (!paymentFilter.isEmpty() && paymentFilter != "All Payments") q.addBindValue(paymentFilter);
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return rows;
