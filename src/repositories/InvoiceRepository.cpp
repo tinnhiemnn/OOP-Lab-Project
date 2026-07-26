@@ -82,7 +82,8 @@ std::vector<Invoice> InvoiceRepository::search(const QString& keyword) {
     std::vector<Invoice> rows;
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("SELECT id, booking_id, receptionist_id, issued_date, subtotal_amount, total_amount, discount_amount, "
-              "payment_method, discount_name FROM invoices WHERE id LIKE ? OR booking_id LIKE ? ORDER BY id");
+              "payment_method, discount_name FROM invoices WHERE id LIKE ? OR booking_id LIKE ? OR receptionist_id LIKE ? "
+              "OR discount_name LIKE ? OR payment_method LIKE ? ORDER BY id");
     const QString pattern = "%" + keyword + "%";
     q.addBindValue(pattern);
     q.addBindValue(pattern);

@@ -19,7 +19,7 @@ public:
                RoomType::Standard),
           beds(std::max(1, beds)) {}
 
-    int getBeds() const { return beds; }
+    int getBeds() const override { return beds; }
 
     double calculatePrice(int days) const override
     {
