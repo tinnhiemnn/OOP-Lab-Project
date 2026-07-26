@@ -38,19 +38,22 @@ bool InvoiceController::createAllInvoice( const QString& bookingId, const QStrin
     
     return invoiceService.createAllInvoice(bookingId, receptionistId, discountName, method, error);
 }
-// Lấy danh sách hóa đơn
+
 std::vector<Invoice> InvoiceController::handleGetAllInvoices() const {
     return invoiceService.getAllInvoices();
 }
 
-// Tìm kiếm hóa đơn theo mã hóa đơn
 std::optional<Invoice> InvoiceController::handleGetInvoiceById(const QString& id) const {
     if (id.trimmed().isEmpty()) return std::nullopt;
     return invoiceService.getInvoiceById(id);
 }
 
-// Tìm kiếm hóa đơn theo mã đặt phòng
 std::optional<Invoice> InvoiceController::handleGetInvoiceByBookingId(const QString& bookingId) const {
     if (bookingId.trimmed().isEmpty()) return std::nullopt;
     return invoiceService.getInvoiceByBookingId(bookingId);
 }
+
+std::vector<Invoice> InvoiceController::searchInvoices(const QString& keyword, const QString& discountName, const QString& PaymentMethod)
+{
+    return invoiceRepo.search(keyword, discountName, PaymentMethod);
+}   
