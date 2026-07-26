@@ -28,9 +28,11 @@ CustomerView::CustomerView(QWidget* parent)
     emailEdit->setPlaceholderText("abc@gmail.com");
     phoneEdit->setPlaceholderText("0*********");
 
-    auto* form = new QGridLayout;
+    
+
+    /*auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
-    form->setVerticalSpacing(10 );
+    form->setVerticalSpacing(10);
     form->addWidget(new QLabel("Customer ID", this), 0, 0);
     form->addWidget(idEdit, 0, 1);
     form->addWidget(new QLabel("Name", this), 0, 2);
@@ -40,7 +42,14 @@ CustomerView::CustomerView(QWidget* parent)
     form->addWidget(new QLabel("Phone Number", this), 1, 2);
     form->addWidget(phoneEdit, 1, 3);
     form->setColumnStretch(1, 1);
-    form->setColumnStretch(3, 1);
+    form->setColumnStretch(3, 1);*/
+
+    auto* form = new QFormLayout;
+    form->setVerticalSpacing(10);
+    form->addRow("Customer ID", idEdit);
+    form->addRow("Name", nameEdit);
+    form->addRow("Email", emailEdit);
+    form->addRow("Phone Number", phoneEdit);
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);

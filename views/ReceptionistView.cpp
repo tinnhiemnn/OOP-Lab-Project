@@ -28,9 +28,11 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     emailEdit->setPlaceholderText("abc@gmail.com");
 
     auto* form = new QFormLayout;
+    form->setVerticalSpacing(12);
     form->addRow("Receptionist ID",idEdit);
     form->addRow("Name",nameEdit);
     form->addRow("Email",emailEdit);
+    
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);

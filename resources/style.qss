@@ -37,7 +37,7 @@ QMainWindow, QWidget#centralWidget {
 /* ------------------------------------------------------------------ */
 QWidget#sidebarWrap {
     background-color: #FFFFFF;
-    border-right: 1px solid #E4E9F0;
+    border-right: 0.5px solid #E4E9F0;
 }
 
 QLabel#brandMark {
@@ -145,6 +145,10 @@ QListWidget#sidebarNav::item:selected:!active {
 /* sidebar (QWidget#sidebarWrap), tao cam giac 1 khoi thong nhat, chi   */
 /* con duong line doc mong (border-right cua sidebarWrap) lam ranh gioi.*/
 /* ------------------------------------------------------------------ */
+QWidget#topbarWrap {
+    background-color: #FFFFFF;
+    border-bottom: 0.5px solid #E4E9F0;
+}
 QWidget#topbar {
     background-color: transparent;
 }
@@ -314,12 +318,28 @@ QTableWidget, QTableView {
     selection-background-color: rgba(37, 99, 235, 0.12);
     selection-color: #0F172A;
 }
+QHeaderView {
+    background-color: #FFFFFF;
+}
 QHeaderView::section {
     background-color: #FFFFFF;
     color: #94A3B8;
     font-size: 11px;
     font-weight: 700;
     padding: 10px;
+    border: none;
+    border-bottom: 1px solid #E4E9F0;
+}
+/* Cot STT (vertical header): can chinh rieng vi QHeaderView::section o tren
+   dung chung cho ca header ngang lan doc. STT can canh giua, khong bold qua. */
+QHeaderView::section:vertical {
+    padding: 6px 10px;
+    text-align: center;
+}
+/* O vuong nho tren-trai, giao giua header ngang va header doc — khong nam
+   trong QHeaderView::section nen phai style rieng, neu khong se lo nen den mac dinh */
+QTableCornerButton::section {
+    background-color: #FFFFFF;
     border: none;
     border-bottom: 1px solid #E4E9F0;
 }

@@ -50,7 +50,7 @@ BookingView::BookingView(QWidget* parent)
     // --- Nhóm thông tin cố định: Booking ID, Group ID, Customer ID, Receptionist ID, Check-in, Check-out ---
     auto* form = new QGridLayout;
     form->setHorizontalSpacing(16);
-    form->setVerticalSpacing(6); // giảm để card Booking gọn hơn, nhường chỗ cho Booking List
+    form->setVerticalSpacing(10);
     form->addWidget(new QLabel("Booking ID", this), 0, 0);
     form->addWidget(bookingIdEdit, 0, 1);
     form->addWidget(new QLabel("Check-in", this), 0, 2);

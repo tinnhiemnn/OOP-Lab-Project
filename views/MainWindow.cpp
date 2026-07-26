@@ -92,6 +92,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     // Boc topbar trong 1 wrapper de co padding dong bo voi le trai/phai cua noi dung ben duoi.
     auto* topbarWrap = new QWidget(this);
+    topbarWrap->setObjectName("topbarWrap");
+    // Giong sidebarWrap: QWidget mac dinh khong tu ve background-color tu QSS,
+    // phai bat WA_StyledBackground thi rule QWidget#topbarWrap trong style.qss
+    // moi ap dung (nen trang + border-bottom lam duong phan cach voi noi dung).
+    topbarWrap->setAttribute(Qt::WA_StyledBackground, true);
     auto* topbarWrapLayout = new QVBoxLayout(topbarWrap);
     topbarWrapLayout->setContentsMargins(28, 20, 28, 12);
     topbarWrapLayout->setSpacing(0);
@@ -105,7 +110,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     auto* topbarLayout = new QVBoxLayout(topbar);
     topbarLayout->setContentsMargins(0, 0, 0, 0);
-    topbarLayout->setSpacing(2); // khoảng cách nhỏ giữa tiêu đề và dòng mô tả bên dưới
+    topbarLayout->setSpacing(0); // khoảng cách nhỏ giữa tiêu đề và dòng mô tả bên dưới
 
     m_pageTitle = new QLabel("Bookings", this);   // trùng với setCurrentRow(0) bên dưới
     m_pageTitle->setProperty("role", "pageTitle");
