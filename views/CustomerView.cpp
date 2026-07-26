@@ -124,7 +124,7 @@ void CustomerView::selected() {
 
 void CustomerView::add() { 
     QString e;
-    const Customer c(idEdit->text(), 
+    Customer c(idEdit->text(), 
                nameEdit->text(), 
                emailEdit->text(), 
                phoneEdit->text());
@@ -142,7 +142,7 @@ void CustomerView::add() {
 
 void CustomerView::update() { 
     QString e;
-    const Customer c(idEdit->text(), 
+    Customer c(idEdit->text(), 
                nameEdit->text(), 
                emailEdit->text(), 
                phoneEdit->text());

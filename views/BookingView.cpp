@@ -23,12 +23,9 @@ QString text(QLineEdit* edit) { return edit->text().trimmed(); }
 
 BookingView::BookingView(QWidget* parent)
     : QWidget(parent),
-    repository(),
-    roomRepository(),
-    service(repository, roomRepository),
-    controller(service),
+    controller(),
     bookingIdEdit(new QLineEdit(this)),
-    //groupCodeEdit(new QLineEdit(this)),
+    groupCodeEdit(new QLineEdit(this)),
     customerIdEdit(new QLineEdit(this)),
     receptionistIdEdit(new QLineEdit(this)),
     searchEdit(new QLineEdit(this)),
@@ -288,42 +285,41 @@ void BookingView::selected(int row, int /*column*/) {
 }
 
 void BookingView::add() {
-    MultiBookingRequest request;
-    request.customerId = text(customerIdEdit);
-    request.receptionistId = text(receptionistIdEdit);
-    request.checkIn = checkInEdit->date();
-    request.checkOut = checkOutEdit->date();
-
-    request.groupCode = text(groupCodeEdit);
-
+    std::vector<QString> roomIds;
     for (const auto& r : roomRows) {
         const QString roomId = text(r.roomIdEdit);
         if (roomId.isEmpty()) continue;
-
-        SingleRoomRequest room;
-        room.roomId = roomId;
-        room.buffetQty = r.buffetQtyEdit->value();
-        room.laundryService = r.laundryCheck->isChecked();
-        room.decorService = r.decorCheck->isChecked();
-        room.decorNote = text(r.decorNotesEdit);
-        request.rooms.push_back(room);
+        roomIds.push_back(roomId);
     }
 
-    if (request.rooms.empty()) {
+    if (roomIds.empty()) {
         error("Please enter at least one Room ID!");
         return;
     }
 
+    int buffetQty = roomRows[0].buffetQtyEdit->value();
+    bool laundry = roomRows[0].laundryCheck->isChecked();
+    bool decoration = roomRows[0].decorCheck->isChecked();
+    QString decorationNote = text(roomRows[0].decorNotesEdit);
+
     QString e;
-    // TODO (backend): BookingController hiện CHƯA có hàm createMultiBookings(). Cần bổ sung
-    // (forward xuống BookingService -> BookingRepository, chạy trong 1 transaction, tự sinh
-    // groupCode nếu request.groupCode rỗng, tự sinh từng bookingId cho mỗi phòng).
-    /*if (!controller.createMultiBookings(request, e)) {
+    if (!controller.createMultiBookings(text(customerIdEdit), roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), buffetQty, laundry, decoration, decorationNote, e)) {
         error(e);
         return;
-    }*/
+    }
 
+    customerIdEdit->clear();
+    receptionistIdEdit->clear();
     groupCodeEdit->clear();
+    clearExtraRoomRows();
+    if (!roomRows.isEmpty()) {
+        roomRows[0].roomIdEdit->clear();
+        roomRows[0].buffetQtyEdit->setValue(0);
+        roomRows[0].laundryCheck->setChecked(false);
+        roomRows[0].decorCheck->setChecked(false);
+        roomRows[0].decorNotesEdit->clear();
+    }
+
     reload();
 }
 

@@ -1,5 +1,6 @@
 #include "DashboardCard.h"
 #include "ReportView.h"
+#include "models/Invoice.h"
 
 #include <QGridLayout>
 #include <QHeaderView>
@@ -11,8 +12,16 @@
 #include <QGraphicsDropShadowEffect>
 
 ReportView::ReportView(QWidget* parent)
-    : QWidget(parent), revenueLabel(new QLabel(this)), bookingLabel(new QLabel(this)), roomLabel(new QLabel(this)),
-    occupancyLabel(new QLabel(this)), table(new QTableWidget(this)){
+    : QWidget(parent),
+      controller(),
+      bookingController(),
+      roomController(),
+      invoiceController(),
+      revenueLabel(new QLabel(this)),
+      bookingLabel(new QLabel(this)),
+      roomLabel(new QLabel(this)),
+      occupancyLabel(new QLabel(this)),
+      table(new QTableWidget(this)) {
 
     // --- Hero card: doanh thu + occupancy ---
     auto* heroRow = new QHBoxLayout;
@@ -61,4 +70,29 @@ ReportView::ReportView(QWidget* parent)
     layout->setContentsMargins(28, 24, 28, 24);
     layout->addWidget(heroCard);
     layout->addWidget(tableCard);
+
+    connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
+    reload();
+}
+
+void ReportView::reload() {
+    OverallReport report = controller.getOverallReport();
+    revenueLabel->setText(report.totalRevenue);
+    occupancyLabel->setText(report.roomOccupancyRate);
+
+    int bookingCount = static_cast<int>(bookingController.getAllBookings().size());
+    bookingLabel->setText(QString::number(bookingCount));
+
+    int roomCount = static_cast<int>(roomController.getAllRooms().size());
+    roomLabel->setText(QString::number(roomCount));
+
+    auto invoices = invoiceController.handleGetAllInvoices();
+    table->setRowCount(static_cast<int>(invoices.size()));
+    for (int row = 0; row < static_cast<int>(invoices.size()); ++row) {
+        const auto& i = invoices[static_cast<size_t>(row)];
+        table->setItem(row, 0, new QTableWidgetItem(i.getId()));
+        table->setItem(row, 1, new QTableWidgetItem(i.getBookingId()));
+        table->setItem(row, 2, new QTableWidgetItem(QString::number(i.getTotalAmount(), 'f', 0) + " VND"));
+        table->setItem(row, 3, new QTableWidgetItem(Invoice::paymentMethodToString(i.getPaymentMethod())));
+    }
 }

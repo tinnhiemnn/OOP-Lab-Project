@@ -1,10 +1,7 @@
 #pragma once
 
 #include "controllers/BookingController.h"
-#include "repositories/BookingRepository.h"
-#include "repositories/RoomRepository.h"
-#include "services/BookingService.h"
-#include "MultiBookingRequest.h"
+#include "models/Booking.h"
 
 #include <DashboardCard.h>
 #include <QWidget>
@@ -48,14 +45,7 @@ private:
 
     void addRoomRow(const QString& roomId = QString());
     void clearExtraRoomRows();   // giữ lại đúng 1 dòng Room khi đổ dữ liệu 1 booking đã chọn lên form
-
-    // TODO (backend): add() bên dưới gọi controller.createMultiBookings(request, error).
-    // BookingController hiện CHƯA có hàm này, cần backend bổ sung
-    // (xem danh sách hàm cần thiết đã gửi kèm). Hàm này thay thế hoàn toàn cách gọi
-    // createBooking() lặp lại từng phòng như trước, để có transaction (atomic) thật sự.
-    BookingRepository repository;
-    RoomRepository roomRepository;
-    BookingService service;
+    
     BookingController controller;
 
     QLineEdit* bookingIdEdit;    // Booking ID (READ-ONLY)

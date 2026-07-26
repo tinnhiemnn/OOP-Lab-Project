@@ -1,8 +1,7 @@
 #pragma once
 
 #include "controllers/InvoiceController.h"
-#include "services/InvoiceService.h"
-#include "repositories/InvoiceRepository.h"
+#include "models/Invoice.h"
 #include "DashboardCard.h"
 #include <QWidget>
 #include <vector>
@@ -27,11 +26,6 @@ private:
     void applyFilters();      // NEW: client-side filter by discount/payment
     void error(const QString& message);
 
-    // Order matters: invoiceRepo must be constructed before invoiceService
-    // (InvoiceService keeps a reference to it), and invoiceService before
-    // controller (InvoiceController keeps a reference to it).
-    InvoiceRepository invoiceRepo;
-    InvoiceService invoiceService;
     InvoiceController controller;
 
     // Cache of the last loaded/searched list, so filters can be applied

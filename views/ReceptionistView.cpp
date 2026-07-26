@@ -80,30 +80,12 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     layout->addWidget(tableCard, /*stretch=*/1);
 
     connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
-    //connect(updateBtn, &QPushButton::clicked, this, [this] { update(); });
-    //connect(deleteBtn, &QPushButton::clicked, this, [this] { remove(); });
+    connect(updateBtn, &QPushButton::clicked, this, [this] { update(); });
+    connect(deleteBtn, &QPushButton::clicked, this, [this] { remove(); });
     connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
     connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
     connect(table, &QTableWidget::itemSelectionChanged, this, [this] { selected(); });
     reload();
-
-    // --- du lieu mau tam thoi, khop voi tab Receptionists trong mockup,
-    //     xoa khoi day khi da noi controller/repository that ---
-    /*struct SeedRow { QString id, name, email; };
-    const QVector<SeedRow> seed = {
-                                   {"E03", "Hoai Thu",   "thu.hoai@luxestay.vn",   "34", "52.000.000 VND", "excellent"},
-                                   {"E01", "Mai Anh",    "anh.mai@luxestay.vn",    "29", "45.000.000 VND", "excellent"},
-                                   {"E05", "Ngoc Ha",    "ha.ngoc@luxestay.vn",    "26", "41.000.000 VND", "good"},
-                                   {"E02", "Thanh Tung", "tung.thanh@luxestay.vn", "22", "38.000.000 VND", "good"},
-                                   {"E04", "Quoc Bao",   "bao.quoc@luxestay.vn",   "18", "30.000.000 VND", "average"},
-                                   };
-    table->setRowCount(seed.size());
-    for (int row = 0; row < seed.size(); ++row) {
-        const auto& r = seed[row];
-        table->setItem(row, 0, new QTableWidgetItem(r.id));
-        table->setItem(row, 1, new QTableWidgetItem(r.name));
-        table->setItem(row, 2, new QTableWidgetItem(r.email));
-    }*/
 }
 
 
@@ -130,12 +112,11 @@ void ReceptionistView::selected() {
     nameEdit->setText(table->item(row, 1)->text());
     emailEdit->setText(table->item(row, 2)->text());
 
-    //idEdit->setReadOnly(true);
 }
 
 void ReceptionistView::add() { 
     QString e;
-    const Receptionist r(idEdit->text(), 
+    Receptionist r(idEdit->text(), 
                nameEdit->text(), 
                emailEdit->text());
 
@@ -149,7 +130,7 @@ void ReceptionistView::add() {
     }
 }
 
-/*void ReceptionistView::update() { 
+void ReceptionistView::update() { 
     QString e;
     const Receptionist r(idEdit->text(), 
                nameEdit->text(), 
@@ -163,9 +144,9 @@ void ReceptionistView::add() {
         nameEdit->clear();
         emailEdit->clear();
     }
-}*/
+}
 
-/*void ReceptionistView::remove() { 
+void ReceptionistView::remove() { 
     QString e;
     if (!controller.deleteReceptionist(idEdit->text(), e))
         error(e); 
@@ -175,7 +156,7 @@ void ReceptionistView::add() {
         nameEdit->clear();
         emailEdit->clear();
     }
-}*/
+}
 
 void ReceptionistView::search() { refresh(controller.searchReceptionists(searchEdit->text())); }
 void ReceptionistView::error(const QString& message) { QMessageBox::warning(this, "Receptionist Error", message); }

@@ -16,6 +16,7 @@
 #include <QFrame>
 #include <QGraphicsDropShadowEffect>
 #include <algorithm>
+#include <QDateTime>
 
 namespace {
     QString text(QLineEdit* edit) { return edit->text().trimmed(); }
@@ -24,9 +25,7 @@ namespace {
 
 InvoiceView::InvoiceView(QWidget* parent)
     : QWidget(parent),
-      invoiceRepo(),
-      invoiceService(invoiceRepo),
-      controller(invoiceService),
+      controller(),
       bookingIdEdit(new QLineEdit(this)),
       receptionistIdEdit(new QLineEdit(this)),
       serviceChargeEdit(new QDoubleSpinBox(this)),
@@ -114,7 +113,7 @@ InvoiceView::InvoiceView(QWidget* parent)
     layout->addWidget(tableCard, /*stretch=*/1);
 
     connect(createBtn, &QPushButton::clicked, this, [this] { add(); });
-    //connect(createGroupBtn, &QPushButton::clicked, this, [this] { addGroup(); });
+    connect(createGroupBtn, &QPushButton::clicked, this, [this] { addGroup(); });
     connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
     connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
     connect(discountFilter, &QComboBox::currentTextChanged, this, [this] { applyFilters(); });
@@ -174,30 +173,28 @@ void InvoiceView::selected() {
 
 void InvoiceView::add() {
     QString e;
-    // "None" in the discount combo box means "no discount" -> send empty string.
     const QString discountName = current(discountEdit) == "None" ? QString() : current(discountEdit);
+    QString invoiceId = "INV_" + QString::number(QDateTime::currentMSecsSinceEpoch());
 
     if (!controller.createInvoice(text(bookingIdEdit), text(receptionistIdEdit),
-                                   discountName, current(paymentEdit), e)) {
+                                   discountName, invoiceId, current(paymentEdit), e)) {
         error(e);
     } else {
         reload();
     }
 }
 
-/*void InvoiceView::addGroup() {
-    // TODO: requires InvoiceController::handleCreateInvoicesForGroup(...)
-    // See backend TODO notes - not implemented yet, pending Booking/Repository details.
+void InvoiceView::addGroup() {
     QString e;
     const QString discountName = current(discountEdit) == "None" ? QString() : current(discountEdit);
 
-    if (!controller.handleCreateInvoicesForGroup(text(bookingIdEdit), text(receptionistIdEdit),
-                                                  discountName, current(paymentEdit), e)) {
+    if (!controller.createAllInvoice(text(bookingIdEdit), text(receptionistIdEdit),
+                                     discountName, current(paymentEdit), e)) {
         error(e);
     } else {
         reload();
     }
-}*/
+}
 
 void InvoiceView::search() {
     // InvoiceController only exposes lookup-by-id and lookup-by-booking-id,
