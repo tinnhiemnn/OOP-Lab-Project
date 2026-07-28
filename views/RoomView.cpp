@@ -181,7 +181,7 @@ void RoomView::add() {
         return;
     }
 
-    if (!controller.addRoom(*room, bedsEdit->value(), e)) {
+    if (!controller.addRoom(*room, e)) {
         error(e);
     } else {
         reload();
@@ -200,7 +200,7 @@ void RoomView::update() {
         return;
     }
 
-    if (!controller.updateRoom(*room, bedsEdit->value(), e)) {
+    if (!controller.updateRoom(*room, e)) {
         error(e);
     } else {
         reload();
