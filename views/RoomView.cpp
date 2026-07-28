@@ -135,7 +135,7 @@ RoomView::RoomView(QWidget* parent)
     connect(deleteBtn, &QPushButton::clicked, this, [this] { remove(); });
     connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
     connect(filterBtn, &QPushButton::clicked, this, [this] { search(); });
-    //connect(checkAvailBtn, &QPushButton::clicked, this, [this] { checkAvailability(); });
+    connect(checkAvailBtn, &QPushButton::clicked, this, [this] { checkAvailability(); });
     connect(table, &QTableWidget::itemSelectionChanged, this, [this] { selected(); });
     reload();
 }
@@ -147,14 +147,13 @@ void RoomView::refresh(std::vector<std::unique_ptr<Room>> rows) {
         table->setItem(row, 0, new QTableWidgetItem(room->getRoomId()));
         table->setItem(row, 1, new QTableWidgetItem(Room::typeToString(room->getRoomType())));
         table->setItem(row, 2, new QTableWidgetItem(QString::number(room->getBasePrice(), 'f', 0)));
-        //table->setItem(row, 3, new QTableWidgetItem(QString::number(room->getBeds())));
+        table->setItem(row, 3, new QTableWidgetItem(QString::number(room->getBeds())));
         table->setItem(row, 4, new QTableWidgetItem(Room::statusToString(room->getStatus())));
     }
 }
 
 void RoomView::reload() {
     refresh(controller.getAllRooms());
-    // Sau khi reload, mo lai Room ID de san sang cho lan Add tiep theo.
     idEdit->setReadOnly(false);
     idEdit->clear();
 }
@@ -221,17 +220,18 @@ void RoomView::search() {
     refresh(controller.searchRooms(current(filterType), current(filterStatus)));
 }
 
-/*void RoomView::checkAvailability() {
+void RoomView::checkAvailability() {
     const QDate checkIn = checkInEdit->date();
     const QDate checkOut = checkOutEdit->date();
+    QString e;
 
     if (checkOut <= checkIn) {
         error("Check-out date must be after Check-in date.");
         return;
     }
 
-    refresh(controller.checkAvailability(checkIn, checkOut));
-}*/
+    refresh(controller.checkAvailability(checkIn, checkOut, e));
+}
 
 void RoomView::error(const QString& message) {
     QMessageBox::warning(this, "Room Error", message);

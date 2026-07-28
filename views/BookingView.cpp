@@ -17,9 +17,41 @@
 #include <QFrame>
 #include <QLabel>
 #include <QScrollArea>
+#include <QIcon>
+#include <QPixmap>
+#include <QPainter>
+#include <QSize>
 
 namespace {
 QString text(QLineEdit* edit) { return edit->text().trimmed(); }
+
+// Vẽ icon dấu "+"/"-" bằng QPainter thay vì dùng ký tự text ("+", "×"),
+QIcon makePlusIcon(const QColor& color, int size = 16) {
+    QPixmap pm(size, size);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(color);
+    const int thickness = qMax(2, size / 6);
+    const int margin = size / 6;
+    p.drawRoundedRect(margin, size / 2 - thickness / 2, size - 2 * margin, thickness, thickness / 2, thickness / 2);
+    p.drawRoundedRect(size / 2 - thickness / 2, margin, thickness, size - 2 * margin, thickness / 2, thickness / 2);
+    return QIcon(pm);
+}
+
+QIcon makeMinusIcon(const QColor& color, int size = 16) {
+    QPixmap pm(size, size);
+    pm.fill(Qt::transparent);
+    QPainter p(&pm);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(Qt::NoPen);
+    p.setBrush(color);
+    const int thickness = qMax(2, size / 6);
+    const int margin = size / 6;
+    p.drawRoundedRect(margin, size / 2 - thickness / 2, size - 2 * margin, thickness, thickness / 2, thickness / 2);
+    return QIcon(pm);
+}
 }
 
 BookingView::BookingView(QWidget* parent)
@@ -72,8 +104,14 @@ BookingView::BookingView(QWidget* parent)
     roomsHeader->addWidget(new QLabel("Room List", this));
     roomsHeader->addStretch();
     addRoomBtn->setProperty("variant", "ghost");
+    addRoomBtn->setObjectName("addRoomBtn"); // hook để style.qss chỉnh hover riêng cho nút thêm phòng
     addRoomBtn->setFixedWidth(32);
     addRoomBtn->setToolTip("Add room into group");
+    addRoomBtn->setText(QString());
+    // Dùng --primary-prs (#D66A8C) của theme hồng pastel, đồng bộ với màu chữ
+    // của variant="secondary"/nav active thay vì màu xám tự chọn không ăn nhập.
+    addRoomBtn->setIcon(makePlusIcon(QColor("#D66A8C")));
+    addRoomBtn->setIconSize(QSize(14, 14));
     roomsHeader->addWidget(addRoomBtn);
 
     roomsLayout = new QVBoxLayout();
@@ -86,9 +124,6 @@ BookingView::BookingView(QWidget* parent)
     roomsContainer = new QWidget(this);
     roomsContainer->setLayout(roomsLayout);
     roomsContainer->setObjectName("roomListContainer");
-    // QWidget mac dinh KHONG ve background-color/border-radius tu QSS,
-    // phai bat WA_StyledBackground thi rule QWidget#roomListContainer trong
-    // style.qss moi ap dung (mau nen xam mo, bo goc).
     roomsContainer->setAttribute(Qt::WA_StyledBackground, true);
 
     roomsScrollArea = new QScrollArea(this);
@@ -98,7 +133,7 @@ BookingView::BookingView(QWidget* parent)
     roomsScrollArea->setFrameShape(QFrame::NoFrame);
     roomsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     roomsScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    roomsScrollArea->setMinimumHeight(115); // rộng hơn so với trước (140) để đỡ chật khi có 2-3 phòng
+    roomsScrollArea->setMinimumHeight(115);
     roomsScrollArea->setMaximumHeight(170);
 
     auto* roomsBox = new QVBoxLayout;
@@ -130,7 +165,6 @@ BookingView::BookingView(QWidget* parent)
     actions->addWidget(reloadBtn);
 
     // --- Card 1: form đặt phòng (thông tin cố định + danh sách phòng kèm dịch vụ) + các nút hành động ---
-    // Bo tieu de rieng ("Booking") de tiet kiem dien tich, giu nguyen colorTag cho accent mau.
     formCard = new DashboardCard(QString(), "blue", this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(roomsBox);
@@ -146,7 +180,7 @@ BookingView::BookingView(QWidget* parent)
     searching->addWidget(searchEdit);
     searching->addWidget(searchBtn);
 
-    // --- Booking List: table thay cho 4 cột kanban trước đây ---
+    // --- Booking List ---
     bookingTable = new QTableWidget(0, 7, this);
     bookingTable->setHorizontalHeaderLabels(
         {"Booking ID", "Customer ID", "Receptionist ID", "Group Code", "Room ID", "Services", "Status"});
@@ -160,7 +194,6 @@ BookingView::BookingView(QWidget* parent)
     tableLayout->addWidget(bookingTable);
 
     // --- Card 2: ô tìm kiếm + Booking List table ---
-    // Bo tieu de rieng ("Booking List") de tiet kiem dien tich, giu nguyen colorTag cho accent mau.
     tableCard = new DashboardCard(QString(), "purple", this);
     tableCard->addContentLayout(searching);
     tableCard->addContentLayout(tableLayout);
@@ -172,7 +205,7 @@ BookingView::BookingView(QWidget* parent)
     layout->addWidget(formCard, /*stretch=*/0);   // card Booking giữ nguyên kích thước cần thiết, không giãn thêm
     layout->addWidget(tableCard, /*stretch=*/1);  // Booking List chiếm hết phần còn lại -> to hơn
 
-    //connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
+    connect(addBtn, &QPushButton::clicked, this, [this] { add(); });
     connect(inBtn, &QPushButton::clicked, this, [this] { checkIn(); });
     connect(outBtn, &QPushButton::clicked, this, [this] { checkOut(); });
     connect(cancelBtn, &QPushButton::clicked, this, [this] { cancel(); });
@@ -185,7 +218,6 @@ BookingView::BookingView(QWidget* parent)
 
 void BookingView::addRoomRow(const QString& roomId) {
     // Mỗi dòng gồm: Room ID + Buffet qty + Laundry + Decoration (riêng cho từng phòng)
-    // + 1 nút "×" để xoá dòng đó khỏi nhóm booking.
     RoomServiceRow r;
 
     r.rowWidget = new QWidget(this);
@@ -195,7 +227,7 @@ void BookingView::addRoomRow(const QString& roomId) {
 
     r.roomIdEdit = new QLineEdit(this);
     r.roomIdEdit->setPlaceholderText("Room ID");
-    r.roomIdEdit->setMaximumWidth(110); // thu nhỏ ô Room ID lại, không cần chiếm nhiều chỗ
+    r.roomIdEdit->setMaximumWidth(110);
     if (!roomId.isEmpty()) r.roomIdEdit->setText(roomId);
 
     auto* buffetLbl = new QLabel("Buffet:", this);
@@ -212,10 +244,13 @@ void BookingView::addRoomRow(const QString& roomId) {
     r.decorNotesEdit->setEnabled(false);
     connect(r.decorCheck, &QCheckBox::toggled, r.decorNotesEdit, &QLineEdit::setEnabled);
 
-    auto* removeBtn = new QPushButton("×", this);
+    auto* removeBtn = new QPushButton(this);
     removeBtn->setProperty("variant", "ghost");
+    removeBtn->setObjectName("removeRoomBtn");
     removeBtn->setFixedWidth(28);
-    removeBtn->setToolTip("Bỏ phòng này khỏi nhóm");
+    removeBtn->setToolTip("Delete room");
+    removeBtn->setIcon(makeMinusIcon(QColor("#C96257")));
+    removeBtn->setIconSize(QSize(14, 14));
 
     row->addWidget(r.roomIdEdit, /*stretch=*/0);
     row->addWidget(buffetLbl, /*stretch=*/0);

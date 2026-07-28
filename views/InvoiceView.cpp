@@ -200,8 +200,6 @@ void InvoiceView::addGroup() {
 }
 
 void InvoiceView::search() {
-    // InvoiceController only exposes lookup-by-id and lookup-by-booking-id,
-    // there is no free-text search, so we try both and show whichever matches.
     const QString key = text(searchEdit);
     std::vector<Invoice> results;
 

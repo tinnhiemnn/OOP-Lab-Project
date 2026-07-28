@@ -25,6 +25,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
 
     idEdit->setReadOnly(true);
     idEdit->setPlaceholderText("Receptionist ID");
+    nameEdit->setPlaceholderText("Receptionist Name");
     emailEdit->setPlaceholderText("abc@gmail.com");
 
     auto* form = new QFormLayout;

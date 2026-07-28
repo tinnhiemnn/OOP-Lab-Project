@@ -369,6 +369,24 @@ QScrollArea#roomsScrollArea {
     border: none;
 }
 
+/* Nút "+" thêm phòng và nút "-" xoá phòng trong Room List: icon được vẽ
+   trực tiếp bằng QPainter trong BookingView.cpp (không dùng ký tự text
+   nữa vì dễ bị mất khi trùng màu nền), màu icon lấy đúng theo bảng màu:
+     - addRoomBtn:    #D66A8C (--primary-prs)  — cùng tông variant="secondary"
+     - removeRoomBtn: #C96257 (--coral text)   — cùng tông status Cancelled/Maintenance
+   Hover riêng bên dưới chỉ đổi nền để làm nổi bật thao tác, không ảnh
+   hưởng icon (icon là pixmap tĩnh, không đổi màu theo :hover). */
+QPushButton#addRoomBtn:hover {
+    background-color: #F3C6D9;
+}
+QPushButton#removeRoomBtn {
+    border-color: #F3C6D9;
+}
+QPushButton#removeRoomBtn:hover {
+    background-color: #FBE1DC;
+    border-color: #F0B8AC;
+}
+
 /* ------------------------------------------------------------------ */
 /* SCROLLBARS                                                          */
 /* ------------------------------------------------------------------ */
