@@ -21,24 +21,29 @@ class Room
 {
 private:
     QString roomId;
+    int beds = 1; 
     double basePrice = 0.0;
     RoomStatus status = RoomStatus::Available;
     RoomType type = RoomType::Standard;
 
 public:
     Room() = default;
-    Room(QString roomId, double basePrice, RoomStatus status, RoomType type)
-        : roomId(std::move(roomId)),
-          basePrice(basePrice),
-          status(status),
-          type(type) {}
+    Room(QString roomId, double basePrice, RoomStatus status, RoomType type, int beds)
+        : roomId(std::move(roomId)), beds(beds), basePrice(basePrice), status(status), type(type) {}
     virtual ~Room() = default;
 
+    virtual int maxBeds() const = 0;
+    
     const QString& getRoomId() const { return roomId; }
     double getBasePrice() const { return basePrice; }
     RoomStatus getStatus() const { return status; }
     RoomType getRoomType() const { return type; }
-    virtual int getBeds() const = 0;
+    int getBeds() const { return beds; }
+
+    void setBeds(int beds) 
+    {
+        this -> beds = beds;
+    }
 
     //kiem tra phong
     bool isAvailable() const

@@ -17,14 +17,14 @@ std::unique_ptr<Room> mapRoom(QSqlQuery& q) {
 }
 }
 
-bool RoomRepository::add(const Room& room, int beds) {
+bool RoomRepository::add(const Room& room) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("INSERT INTO rooms(id, base_price, status, type, beds) VALUES(?, ?, ?, ?, ?)");
     q.addBindValue(room.getRoomId());
     q.addBindValue(room.getBasePrice());
     q.addBindValue(Room::statusToString(room.getStatus()));
     q.addBindValue(Room::typeToString(room.getRoomType()));
-    q.addBindValue(beds);
+    q.addBindValue(room.getBeds());
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();
         return false;
@@ -32,13 +32,13 @@ bool RoomRepository::add(const Room& room, int beds) {
     return true;
 }
 
-bool RoomRepository::update(const Room& room, int beds) {
+bool RoomRepository::update(const Room& room) {
     QSqlQuery q(DatabaseManager::getInstance().database());
     q.prepare("UPDATE rooms SET base_price = ?, status = ?, type = ?, beds = ? WHERE id = ?");
     q.addBindValue(room.getBasePrice());
     q.addBindValue(Room::statusToString(room.getStatus()));
     q.addBindValue(Room::typeToString(room.getRoomType()));
-    q.addBindValue(beds);
+    q.addBindValue(room.getBeds());
     q.addBindValue(room.getRoomId());
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();

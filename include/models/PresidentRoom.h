@@ -8,13 +8,13 @@ class PresidentRoom : public Room
 public:
     PresidentRoom() = default;
     
-    PresidentRoom(QString id = "", double price = 0, RoomStatus status = RoomStatus::Available)
-        : Room(std::move(id), price, status, RoomType::President) {}
+    PresidentRoom(QString id = "", double price = 0, RoomStatus status = RoomStatus::Available, int beds = 1)
+        : Room(std::move(id), price, status, RoomType::President, beds) {}
 
-    int getBeds() const override { return 1; }
-
+    int maxBeds() const override { return 5; }
+    
     double calculatePrice(int days) const override
     {
-        return std::max(1, days) * getBasePrice() * 1.5;
+        return std::max(1, days) * (getBasePrice() * 1.5 + (getBeds() - 1) * 100000.0);
     }
 };

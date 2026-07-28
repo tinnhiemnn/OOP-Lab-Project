@@ -8,8 +8,8 @@
 
 class RoomRepository {
 public:
-    bool add(const Room& room, int beds);
-    bool update(const Room& room, int beds);
+    bool add(const Room& room);
+    bool update(const Room& room);
     bool remove(const QString& id);
     bool updateStatus(const QString& id, RoomStatus status);
     std::vector<std::unique_ptr<Room>> findAll();

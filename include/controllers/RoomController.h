@@ -18,8 +18,8 @@ public:
     std::vector<std::unique_ptr<Room>> searchRooms(const QString& type, const QString& status);
     std::unique_ptr<Room> getRoomById(const QString& id);
     
-    bool addRoom(const Room& room, int beds, QString& error);
-    bool updateRoom(const Room& room, int beds, QString& error);
+    bool addRoom(const Room& room, QString& error);
+    bool updateRoom(const Room& room, QString& error);
     bool updateRoomStatus(const QString& id, RoomStatus status, QString& error);
     bool deleteRoom(const QString& id, QString& error);
 
