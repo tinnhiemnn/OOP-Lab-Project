@@ -21,7 +21,7 @@ std::unique_ptr<Room> RoomController::getRoomById(const QString& id) {
     return roomRepo.findById(id);
 }
 
-bool RoomController::addRoom(const Room& room, int beds, QString& error) {
+bool RoomController::addRoom(const Room& room, QString& error) {
     if (!ValidationUtils::isNonEmpty(Room::typeToString(room.getRoomType()))) {
         error = "Room cannot be empty.";
         return false;
@@ -37,17 +37,29 @@ bool RoomController::addRoom(const Room& room, int beds, QString& error) {
         return false;
     }
 
-    if (roomRepo.add(room, beds)) {
+    if (room.getBeds() < 1 || room.getBeds() > room.maxBeds()) {
+        error = "Invalid number of beds for this room type.";
+        return false;
+    }
+
+    if (roomRepo.add(room)) {
         return true;
     }
+
     error = roomRepo.lastError();
     return false;
 }
 
-bool RoomController::updateRoom(const Room& room, int beds, QString& error) {
-    if (roomRepo.update(room, beds)) {
+bool RoomController::updateRoom(const Room& room, QString& error) {
+    if (room.getBeds() < 1 || room.getBeds() > room.maxBeds()) {
+        error = "Invalid number of beds for this room type.";
+        return false;
+    }
+
+    if (roomRepo.update(room)) {
         return true;
     }
+
     error = roomRepo.lastError();
     return false;
 }
@@ -61,13 +73,11 @@ bool RoomController::updateRoomStatus(const QString& id, RoomStatus status, QStr
 }
 
 bool RoomController::deleteRoom(const QString& id, QString& error) {
-    //Check co phai RoomID rong hay khong
     if (!ValidationUtils::isNonEmpty(id)) {
         error = "Room ID cannot be empty.";
         return false;
     }
 
-    //Check room co ton tai hay khong
     auto room = roomRepo.findById(id);
     if (!room) {
         error = "Room does not exist.";

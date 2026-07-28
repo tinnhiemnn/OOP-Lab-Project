@@ -13,16 +13,13 @@ public:
     StandardRoom() = default;
  
     StandardRoom(QString id, double price, RoomStatus status = RoomStatus::Available, int beds = 1)
-        : Room(std::move(id),
-               price,
-               status,
-               RoomType::Standard),
-          beds(std::max(1, beds)) {}
+        : Room(std::move(id), price, status,
+               RoomType::Standard, beds) {}
 
-    int getBeds() const override { return beds; }
-
+    int maxBeds() const override { return 2; }
+    
     double calculatePrice(int days) const override
     {
-        return std::max(1, days) * (getBasePrice() + (beds - 1) * 100000.0);
+        return std::max(1, days) * (getBasePrice() + (getBeds() - 1) * 100000.0);
     }
 };
