@@ -5,10 +5,32 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
+#include <QFontDatabase>
+
+void loadCustomFonts() {
+
+    QStringList fontPaths = {
+        ":/fonts/Inter-Regular.ttf",
+        ":/fonts/Inter-Medium.ttf",
+        ":/fonts/Inter-SemiBold.ttf",
+        ":/fonts/Inter-Bold.ttf",
+    };
+
+    for (const QString &fontPath : fontPaths) {
+        int fontId = QFontDatabase::addApplicationFont(fontPath);
+        if (fontId != -1) {
+            QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
+        } else {
+            qDebug() << "Error: Cannot load font!" << fontPath;
+        }
+    }
+}
 
 int main(int argc, char* argv[]) {
     QApplication::setStyle("Fusion");
     QApplication app(argc, argv);
+
+    loadCustomFonts();
 
     //load file qss toan cuc
     QFile file(":/style.qss");

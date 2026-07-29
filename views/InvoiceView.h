@@ -34,7 +34,6 @@ private:
 
     QLineEdit* bookingIdEdit;
     QLineEdit* receptionistIdEdit;
-    QDoubleSpinBox* serviceChargeEdit;
     QComboBox* discountEdit;
     QComboBox* paymentEdit;
     QLineEdit* searchEdit;

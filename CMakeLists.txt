@@ -9,7 +9,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Charts)
 
 set(PROJECT_INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -19,22 +19,26 @@ set(PROJECT_INCLUDE_DIRS
 set(PROJECT_SOURCES
     src/main.cpp
     src/database/DatabaseManager.cpp
+
     src/patterns/RoomFactory.cpp
     src/patterns/PricingContext.cpp
     src/patterns/MemberDiscount.cpp
     src/patterns/SeasonalDiscount.cpp
     src/patterns/NoDiscount.cpp
+
     src/controllers/CustomerController.cpp
     src/controllers/ReceptionistController.cpp
     src/controllers/RoomController.cpp
     src/controllers/BookingController.cpp
     src/controllers/InvoiceController.cpp
     src/controllers/ReportController.cpp
+
     src/repositories/CustomerRepository.cpp
     src/repositories/ReceptionistRepository.cpp
     src/repositories/RoomRepository.cpp
     src/repositories/BookingRepository.cpp
     src/repositories/InvoiceRepository.cpp
+
     src/services/BookingService.cpp
     src/services/ReportService.cpp
     src/services/InvoiceService.cpp
@@ -46,6 +50,7 @@ set(PROJECT_SOURCES
     views/ReportView.cpp 
     views/ReceptionistView.cpp 
     views/InvoiceView.cpp 
+    views/OccupancyRing.cpp
 
     views/DashboardCard.h 
 )
@@ -54,5 +59,5 @@ add_executable(HotelManagement ${PROJECT_SOURCES}
     resources/resources.qrc
 )
 target_include_directories(HotelManagement PRIVATE ${PROJECT_INCLUDE_DIRS})
-target_link_libraries(HotelManagement PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql)
+target_link_libraries(HotelManagement PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql Qt6::Charts)
 target_compile_definitions(HotelManagement PRIVATE PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")

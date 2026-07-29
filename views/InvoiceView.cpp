@@ -28,13 +28,10 @@ InvoiceView::InvoiceView(QWidget* parent)
       controller(),
       bookingIdEdit(new QLineEdit(this)),
       receptionistIdEdit(new QLineEdit(this)),
-      serviceChargeEdit(new QDoubleSpinBox(this)),
       discountEdit(new QComboBox(this)), paymentEdit(new QComboBox(this)),
       searchEdit(new QLineEdit(this)),
       discountFilter(new QComboBox(this)), paymentFilter(new QComboBox(this)),
       table(new QTableWidget(this)) {
-    serviceChargeEdit->setRange(0, 100000000);
-    serviceChargeEdit->setDecimals(0);
     discountEdit->addItems({"None", "Seasonal", "Member"});
     paymentEdit->addItems({"Cash", "Credit Card", "E-Wallet"});
 
@@ -49,12 +46,10 @@ InvoiceView::InvoiceView(QWidget* parent)
     form->addWidget(bookingIdEdit, 0, 1);
     form->addWidget(new QLabel("Receptionist ID", this), 0, 2);
     form->addWidget(receptionistIdEdit, 0, 3);
-    form->addWidget(new QLabel("Service Charge", this), 1, 0);
-    form->addWidget(serviceChargeEdit, 1, 1);
-    form->addWidget(new QLabel("Discount", this), 1, 2);
-    form->addWidget(discountEdit, 1, 3);
-    form->addWidget(new QLabel("Payment", this), 2, 0);
-    form->addWidget(paymentEdit, 2, 1);
+    form->addWidget(new QLabel("Discount", this), 1, 0);
+    form->addWidget(discountEdit, 1, 1);
+    form->addWidget(new QLabel("Payment", this), 1, 2);
+    form->addWidget(paymentEdit, 1, 3);
     form->setColumnStretch(1, 1);
     form->setColumnStretch(3, 1);
 
@@ -201,15 +196,10 @@ void InvoiceView::addGroup() {
 
 void InvoiceView::search() {
     const QString key = text(searchEdit);
-    std::vector<Invoice> results;
+    const QString discountKey = current(discountFilter) == "All Discounts" ? QString() : current(discountFilter);
+    const QString paymentKey = current(paymentFilter) == "All Payments" ? QString() : current(paymentFilter);
 
-    if (auto invoiceById = controller.handleGetInvoiceById(key)) {
-        results.push_back(*invoiceById);
-    } else if (auto invoiceByBooking = controller.handleGetInvoiceByBookingId(key)) {
-        results.push_back(*invoiceByBooking);
-    }
-
-    currentInvoices = results;
+    currentInvoices = controller.searchInvoices(key, discountKey, paymentKey);
     applyFilters();
 }
 

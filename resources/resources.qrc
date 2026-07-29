@@ -1,5 +1,9 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/">
     <file>style.qss</file>
+    <file>fonts/Inter-Regular.ttf</file>
+    <file>fonts/Inter-Bold.ttf</file>
+    <file>fonts/Inter-SemiBold.ttf</file>
+    <file>fonts/Inter-Medium.ttf</file>
 </qresource>
 </RCC>
