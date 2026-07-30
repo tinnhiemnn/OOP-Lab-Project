@@ -35,7 +35,7 @@ std::vector<RoomTypeReport> ReportService::getRoomTypeReport() {
         item.revenue = invoices.getTotalRevenueByRoomType(item.roomType);
         totalRevenue += item.revenue;
 
-        item.totalBookings = bookings.countBookings(item.roomType, "All");
+        item.completedBookings = bookings.countBookings(item.roomType, Booking::statusToString(BookingStatus::CheckedOut));
         item.cancelledBookings = bookings.countBookings(item.roomType, Booking::statusToString(BookingStatus::Cancelled));
         reports.push_back(item); 
     }
@@ -43,7 +43,7 @@ std::vector<RoomTypeReport> ReportService::getRoomTypeReport() {
         item.revenuePercentage = (totalRevenue > 0.0 ? (item.revenue * 100.0) / totalRevenue : 0.0);
 
         if (item.totalBookings > 0) {
-            item.cancellationRate = (item.cancelledBookings * 100.0) / item.totalBookings;
+            item.cancellationRate = (item.cancelledBookings * 100.0) / item.completedBookings;
             item.successRate = 100.0 - item.cancellationRate;
         } else {
             item.cancellationRate = 0.0;
