@@ -42,8 +42,8 @@ std::vector<RoomTypeReport> ReportService::getRoomTypeReport() {
     for (auto& item : reports) {
         item.revenuePercentage = (totalRevenue > 0.0 ? (item.revenue * 100.0) / totalRevenue : 0.0);
 
-        if (item.totalBookings > 0) {
-            item.cancellationRate = (item.cancelledBookings * 100.0) / item.completedBookings;
+        if (item.completedBookings + item.cancelledBookings > 0) {
+            item.cancellationRate = (item.cancelledBookings * 100.0) / (item.completedBookings + item.cancelledBookings);
             item.successRate = 100.0 - item.cancellationRate;
         } else {
             item.cancellationRate = 0.0;

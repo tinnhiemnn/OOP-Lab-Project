@@ -15,7 +15,7 @@ struct RoomTypeReport {
     double revenue = 0.0;
     double revenuePercentage = 0.0;
     
-    int totalBookings = 0;
+    int completedBookings = 0;
     int cancelledBookings = 0;
     double cancellationRate = 0.0;
     double successRate = 0.0;   
