@@ -15,6 +15,7 @@ class QChartView;
 class QChart;
 class QScrollArea;
 class QAbstractAxis;
+class QPushButton;
 
 // ReportView hiển thị tab "Reports" giống file mockup HTML:
 //  - Hero row: doanh thu hiện tại + vòng tròn tỉ lệ lấp đầy phòng
@@ -55,6 +56,7 @@ private slots:
 
 private:
     // --- Dựng UI ---
+    void buildTopBar(QVBoxLayout* root);
     void buildHeroRow(QVBoxLayout* root);
     void buildRevenueCard(QVBoxLayout* root);
     void buildRoomTypeCard(QVBoxLayout* root);
@@ -92,6 +94,9 @@ private:
     QScrollArea* scrollArea = nullptr;
     QWidget* scrollContent = nullptr;
 
+    // Top bar
+    QPushButton* refreshButton = nullptr;
+
     // Hero
     QLabel* revenueValueLabel = nullptr;
     QLabel* revenueTrendLabel = nullptr;
@@ -119,7 +124,7 @@ private:
 
     // --- Giá trị màu mặc định (dùng khi project chưa load file .qss có
     // qproperty- tương ứng; production nên luôn override qua QSS) ---
-    QColor chartBackground   { "#FFFFFF" };
+    QColor chartBackground   { 255, 255, 255, 0 };
     QColor axisTextColor     { "#334155" };
     QColor axisLineColor     { "#CBD5E1" };
     QColor gridLineColor     { 15, 23, 42, 25 };

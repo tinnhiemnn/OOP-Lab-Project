@@ -411,17 +411,14 @@ QLabel[status="Cancelled"]   { background-color: #FBE1DC; color: #C96257; border
 QLabel[status="Checked-in"]  { background-color: #FCE9F0; color: #D66A8C; border-radius: 10px; padding: 3px 10px; font-weight: 700; font-size: 11px; }
 QLabel[status="Checked-out"] { background-color: #FFF6F9; color: #B58CA0; border-radius: 10px; padding: 3px 10px; font-weight: 700; font-size: 11px; }
 
-/ ----------------------------------------
-/ ReceptionistView
-/ -----------------------------------------
 QLabel[tier="excellent"] { background:#DFF5EC; color:#4FA98A; border-radius:10px; padding:3px 10px; font-weight:700; }
 QLabel[tier="good"]      { background:#F1E9FB; color:#9B72D1; border-radius:10px; padding:3px 10px; font-weight:700; }
 QLabel[tier="average"]   { background:#FCE7D3; color:#D9915C; border-radius:10px; padding:3px 10px; font-weight:700; }
 
 
-// -----------------------------------------
-// ReportView
-// --------------------------------------
+/* -----------------------------------------
+   ReportView
+   -------------------------------------- */
 QFrame[rankItem="true"] { background:#FCE9F0; border-radius:12px; }
 QFrame[rankItem="true"][topRank="true"] { background:qlineargradient(x1:0,y1:0,x2:1,y2:0, stop:0 #FFF3DC, stop:1 #FFEBD1); border:1px solid #F0C68A; }
 QLabel[role="rankNumber"] { background:#FFF6F9; border-radius:8px; font-weight:700; color:#B58CA0; }
@@ -438,9 +435,9 @@ ReportView {
     /* QWidget#reportScrollContent phủ gần kín ReportView nên dòng này chủ
        yếu để tránh lóe đen 1 khung hình khi resize/trước khi scroll content
        kịp vẽ; nguồn màu nền thật sự nằm ở rule reportScrollContent bên dưới. */
-    background-color: #F8FAFC;
+    background-color: #F6D8E4;
 
-    qproperty-chartBackground: #FFFFFF;
+    qproperty-chartBackground: rgba(255, 255, 255, 0);
     qproperty-axisTextColor: #334155;
     qproperty-axisLineColor: #CBD5E1;
     qproperty-gridLineColor: rgba(15, 23, 42, 25);
@@ -466,7 +463,7 @@ QScrollArea#reportScrollArea > QWidget {
     border: none;
 }
 QWidget#reportScrollContent {
-    background-color: #F8FAFC;
+    background-color: #F6D8E4;
 }
 
 QLabel[role="heroIcon"] {
@@ -515,7 +512,7 @@ QLabel[role="heroLabel"] {
 /* Con số doanh thu lớn (128.450.000 đ) */
 QLabel[role="heroValue"] {
     font-family: "Inter";
-    font-size: 36px;       /* Tăng cỡ chữ to nổi bật */
+    font-size: 30px;       /* Tăng cỡ chữ to nổi bật */
     font-weight: 700;      /* Đặt độ đậm Bold */
     color: #0F172A;        /* Màu chữ tối tương phản cao */
     padding: 2px 0px;

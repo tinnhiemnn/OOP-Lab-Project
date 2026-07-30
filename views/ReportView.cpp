@@ -3,6 +3,7 @@
 #include "OccupancyRing.h"
 
 #include <QComboBox>
+#include <QPushButton>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -24,6 +25,8 @@
 #include <QValueAxis>
 #include <QAbstractAxis>
 
+#include <algorithm>
+
 #ifdef QT_CHARTS_NAMESPACE
 using namespace QT_CHARTS_NAMESPACE;
 #endif
@@ -38,14 +41,8 @@ constexpr int kMonthCount = 12;
 ReportView::ReportView(QWidget* parent)
     : QWidget(parent), controller() {
 
-    // QWidget thường KHÔNG tự vẽ background-color từ QSS nếu thiếu
-    // Qt::WA_StyledBackground (chỉ QFrame/QLabel... mới tự vẽ). Thiếu dòng
-    // này là lý do toàn bộ vùng nội dung Report bị lộ màu nền đen mặc định
-    // của QScrollArea/viewport thay vì màu nền sáng khai báo trong QSS.
     setAttribute(Qt::WA_StyledBackground, true);
 
-    // Layout ngoài cùng chỉ chứa 1 QScrollArea, để toàn bộ nội dung report
-    // (hero + 3 card) có thể cuộn khi màn hình không đủ cao.
     auto* outer = new QVBoxLayout(this);
     outer->setContentsMargins(0, 0, 0, 0);
     outer->setSpacing(0);
@@ -69,6 +66,7 @@ ReportView::ReportView(QWidget* parent)
     layout->setContentsMargins(28, 20, 28, 24);
     layout->setSpacing(16);
 
+    buildTopBar(layout);
     buildHeroRow(layout);
     buildRevenueCard(layout);
     buildRoomTypeCard(layout);
@@ -79,6 +77,23 @@ ReportView::ReportView(QWidget* parent)
     outer->addWidget(scrollArea);
 
     reload();
+}
+
+// ----------------------------------------------------------------------------
+// TOP BAR: nút Làm mới (refresh) - gọi lại reload() để tải lại toàn bộ dữ
+// liệu report (doanh thu, tỉ lệ lấp đầy, thống kê phòng, nhân viên, top
+// khách hàng...), giống pattern nút Refresh ở CustomerView.
+// ----------------------------------------------------------------------------
+void ReportView::buildTopBar(QVBoxLayout* root) {
+    auto* topBar = new QHBoxLayout;
+    topBar->addStretch();
+
+    refreshButton = new QPushButton(QString::fromUtf8("Refresh"), this);
+    refreshButton->setProperty("variant", "ghost");
+    connect(refreshButton, &QPushButton::clicked, this, &ReportView::reload);
+
+    topBar->addWidget(refreshButton);
+    root->addLayout(topBar);
 }
 
 // ----------------------------------------------------------------------------
@@ -96,7 +111,7 @@ void ReportView::buildHeroRow(QVBoxLayout* root) {
     revLayout->setContentsMargins(24, 22, 24, 22);
     revLayout->setSpacing(8);
 
-    auto* revTitle = new QLabel(QString::fromUtf8("Tổng doanh thu hiện tại"), this);
+    auto* revTitle = new QLabel(QString::fromUtf8("Total revenue"), this);
     revTitle->setProperty("role", "heroLabel");
 
     auto* revLabelRow = new QHBoxLayout;
@@ -123,7 +138,7 @@ void ReportView::buildHeroRow(QVBoxLayout* root) {
     occOuter->setContentsMargins(24, 22, 24, 22);
     occOuter->setSpacing(10);
 
-    auto* occTitle = new QLabel(QString::fromUtf8("Tỉ lệ lấp đầy phòng"), this);
+    auto* occTitle = new QLabel(QString::fromUtf8("Occupancy rate"), this);
     occTitle->setProperty("role", "heroLabel");
 
     auto* occLabelRow = new QHBoxLayout;
@@ -148,10 +163,6 @@ void ReportView::buildHeroRow(QVBoxLayout* root) {
     occOuter->addLayout(occLabelRow);
     occOuter->addLayout(occRow);
 
-    // Tỉ lệ 1.3fr : 1fr giống grid-template-columns trong mockup.
-    // LƯU Ý: trước đây để (12, 1) - lệch quá xa so với comment, khiến occBox
-    // bị bóp gần như bằng 0 và occupancyLegend (setWordWrap true) phải xuống
-    // dòng theo từng chữ một (đúng như lỗi thấy trong ảnh app hiện tại).
     // Dùng (13, 10) ~ đúng tỉ lệ 1.3:1 như mockup.
     heroRow->addWidget(revBox, 13);
     heroRow->addWidget(occBox, 10);
@@ -164,7 +175,7 @@ void ReportView::buildHeroRow(QVBoxLayout* root) {
 // ----------------------------------------------------------------------------
 void ReportView::buildRevenueCard(QVBoxLayout* root) {
     auto* headerRow = new QHBoxLayout;
-    auto* title = new QLabel(QString::fromUtf8("Doanh thu theo tháng"), this);
+    auto* title = new QLabel(QString::fromUtf8("Monthly revenue report"), this);
     title->setProperty("role", "cardTitle");
 
     yearSelect = new QComboBox(this);
@@ -191,7 +202,7 @@ void ReportView::buildRevenueCard(QVBoxLayout* root) {
 // CARD: Thống kê theo loại phòng (donut + bar ngang hoàn thành/hủy)
 // ----------------------------------------------------------------------------
 void ReportView::buildRoomTypeCard(QVBoxLayout* root) {
-    auto* title = new QLabel(QString::fromUtf8("Thống kê theo loại phòng"), this);
+    auto* title = new QLabel(QString::fromUtf8("Statistics by room type"), this);
     title->setProperty("role", "cardTitle");
 
     // Trước đây chỉ setMinimumHeight(190) nên 2 chart giãn hết chiều cao còn
@@ -245,9 +256,9 @@ void ReportView::buildBottomRow(QVBoxLayout* root) {
     auto* bottomRow = new QHBoxLayout;
     bottomRow->setSpacing(20);
 
-    auto* recTitle = new QLabel(QString::fromUtf8("Doanh thu theo nhân viên"), this);
+    auto* recTitle = new QLabel(QString::fromUtf8("Revenue Per Employee"), this);
     recTitle->setProperty("role", "cardTitle");
-    auto* recSub = new QLabel(QString::fromUtf8("Xếp hạng KPI"), this);
+    auto* recSub = new QLabel(QString::fromUtf8("KPI evaluation"), this);
     recSub->setProperty("role", "cardSubtle");
 
     auto* recHeader = new QHBoxLayout;
@@ -255,7 +266,8 @@ void ReportView::buildBottomRow(QVBoxLayout* root) {
     recHeader->addStretch();
     recHeader->addWidget(recSub);
 
-    receptionistChartView = makeChartView(225,280);
+    receptionistChartView = makeChartView(225);
+    
 
     auto* recLayout = new QVBoxLayout;
     recLayout->addLayout(recHeader);
@@ -264,7 +276,7 @@ void ReportView::buildBottomRow(QVBoxLayout* root) {
     receptionistCard = new DashboardCard(QString(), "orange", this);
     receptionistCard->addContentLayout(recLayout);
 
-    auto* topTitle = new QLabel(QString::fromUtf8("Top 5 khách hàng"), this);
+    auto* topTitle = new QLabel(QString::fromUtf8("Top 5 customers"), this);
     topTitle->setProperty("role", "cardTitle");
 
     topCustomersLayout = new QVBoxLayout;
@@ -390,11 +402,9 @@ void ReportView::updateHero() {
     int pct = extractPercent(report.roomOccupancyRate);
     occupancyRing->setPercent(pct);
     occupancyLegend->setText(
-        QString::fromUtf8("<b>%1%</b> phòng đang sử dụng<br>%2% phòng còn trống")
+        QString::fromUtf8("<b>%1%</b> occupied<br>%2% available")
             .arg(pct).arg(100 - pct));
 
-    // Pill "↗ +X.X% so với tháng trước": dùng lại dữ liệu getRevenueByYear()
-    // của năm đang chọn, không cần thêm API backend mới cho growth rate.
     double growthPct = 0.0;
     std::vector<double> monthly = controller.getRevenueByYear(yearSelect->currentText());
     if (computeLastMonthGrowth(monthly, growthPct)) {
@@ -531,12 +541,12 @@ void ReportView::updateRoomTypeChart() {
 
     // --- Bar ngang: hoàn thành / hủy theo loại phòng ---
     clearLayout(cancelBarLegendLayout);
-    addLegendItem(cancelBarLegendLayout, completedColor, QString::fromUtf8("Hoàn thành"));
-    addLegendItem(cancelBarLegendLayout, cancelledColor, QString::fromUtf8("Hủy đặt phòng"));
+    addLegendItem(cancelBarLegendLayout, completedColor, QString::fromUtf8("Completed"));
+    addLegendItem(cancelBarLegendLayout, cancelledColor, QString::fromUtf8("Cancelled"));
     cancelBarLegendLayout->addStretch();
 
-    auto* completedSet = new QBarSet(QString::fromUtf8("Hoàn thành"));
-    auto* cancelSet = new QBarSet(QString::fromUtf8("Đã hủy"));
+    auto* completedSet = new QBarSet(QString::fromUtf8("Completed"));
+    auto* cancelSet = new QBarSet(QString::fromUtf8("Cancelled"));
     completedSet->setColor(completedColor);
     cancelSet->setColor(cancelledColor);
 
@@ -574,31 +584,52 @@ void ReportView::updateRoomTypeChart() {
 void ReportView::updateReceptionistChart() {
     std::vector<ReceptionistKPI> kpis = controller.getReceptionistReport();
 
-    auto* set = new QBarSet("Doanh thu");
+    // Sắp xếp giảm dần theo doanh thu để cột cao nhất luôn nằm bên trái,
+    // khớp với độ đậm nhạt gán theo thứ hạng ngay bên dưới.
+    std::sort(kpis.begin(), kpis.end(), [](const ReceptionistKPI& a, const ReceptionistKPI& b) {
+        return a.totalRevenue > b.totalRevenue;
+    });
 
-    // Gradient dọc (đậm ở đỉnh -> nhạt hơn ở đáy) thay vì màu phẳng, giúp
-    // cột trông "mềm" hơn để bù cho việc QBarSeries (QtCharts widgets)
-    // không hỗ trợ bo góc đầu cột (chỉ Qt Graphs - module mới hơn - mới có
-    // property roundness). Vẫn dùng đúng receptionistBarColor làm gốc màu
-    // nên vẫn đổi được qua QSS như trước.
-    QLinearGradient barGradient(0, 0, 0, 1);
-    barGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
-    QColor barTop = receptionistBarColor;
-    QColor barBottom = receptionistBarColor.lighter(135);
-    barGradient.setColorAt(0.0, barTop);
-    barGradient.setColorAt(1.0, barBottom);
-    set->setBrush(barGradient);
-    set->setPen(QPen(receptionistBarColor.darker(115), 1));
-
-    QStringList names;
-    for (const auto& k : kpis) {
-        *set << k.totalRevenue;
-        names << k.name;
-    }
+    const int n = static_cast<int>(kpis.size());
+    const double maxVal = n > 0 ? kpis.front().totalRevenue : 0.0;
 
     auto* series = new QBarSeries();
-    series->append(set);
-    series->setBarWidth(0.38); // mảnh hơn, mặc định QtCharts là 0.5
+    // QBarSeries chia đều barWidth cho số QBarSet cùng 1 category; ở đây mỗi
+    // cột là 1 set riêng (xem bên dưới) nên set 1.0 (tối đa cho phép) để cột
+    // hiển thị chiếm hết phần dành cho nó, không bị mảnh hơn cần thiết.
+    series->setBarWidth(1.0);
+
+    QStringList names;
+    for (int i = 0; i < n; ++i) {
+        const auto& k = kpis[static_cast<size_t>(i)];
+        names << k.name;
+
+        // Qt Charts chỉ cho 1 brush/màu chung cho toàn bộ 1 QBarSet, nên để
+        // mỗi cột có màu đậm nhạt khác nhau, mỗi nhân viên phải là 1 QBarSet
+        // riêng - toàn giá trị 0, trừ đúng vị trí category (index i) của
+        // chính họ. Các set khác đều 0 tại vị trí này nên không vẽ đè lên.
+        auto* set = new QBarSet(k.name);
+        for (int j = 0; j < n; ++j)
+            *set << (j == i ? k.totalRevenue : 0.0);
+
+        // Độ đậm nhạt theo tỉ lệ so với doanh thu cao nhất: doanh thu càng
+        // thấp thì cột càng nhạt màu. Cột đứng đầu (ratio = 1) giữ nguyên
+        // receptionistBarColor gốc, cột thấp nhất nhạt nhất (lighter ~190).
+        const double ratio = maxVal > 0 ? (k.totalRevenue / maxVal) : 1.0;
+        const int lightenAmount = 100 + static_cast<int>((1.0 - ratio) * 90);
+        const QColor base = receptionistBarColor.lighter(lightenAmount);
+
+        // Vẫn giữ gradient dọc (đậm ở đỉnh -> nhạt hơn ở đáy) như trước để
+        // cột trông "mềm" hơn, chỉ đổi gốc màu (base) theo thứ hạng ở trên.
+        QLinearGradient barGradient(0, 0, 0, 1);
+        barGradient.setCoordinateMode(QGradient::ObjectBoundingMode);
+        barGradient.setColorAt(0.0, base);
+        barGradient.setColorAt(1.0, base.lighter(135));
+        set->setBrush(barGradient);
+        set->setPen(QPen(base.darker(115), 1));
+
+        series->append(set);
+    }
 
     auto* chart = new QChart();
     chart->addSeries(series);

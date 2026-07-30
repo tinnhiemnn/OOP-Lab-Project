@@ -124,12 +124,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     QStringList menuTitles = {"Bookings", "Customers", "Receptionists", "Rooms", "Invoices", "Reports"};
     // Dong mo ta ngan duoi tieu de, tuong ung 1-1 voi menuTitles theo thu tu index.
     QStringList menuSubtitles = {
-        "Theo dõi đặt phòng theo quy trình",
-        "Quản lý thông tin khách hàng",
-        "Quản lý nhân viên lễ tân",
-        "Quản lý danh sách phòng",
-        "Quản lý hoá đơn thanh toán",
-        "Thống kê và báo cáo tổng quan"
+        "Track bookings workflow",
+        "Manage customer information",
+        "Manage reception staff",
+        "Manage room inventory",
+        "Manage billing & invoices",
+        "Overview statistics and reports"
     };
     for (const QString& title : menuTitles) {
         auto* item = new QListWidgetItem(title);
