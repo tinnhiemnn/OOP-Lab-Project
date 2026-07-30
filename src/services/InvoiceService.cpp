@@ -52,6 +52,22 @@ bool InvoiceService::createInvoice(const QString& bookingId, const QString& rece
         return false;
     }
 
+    if (booking->getStatus() == BookingStatus::Cancelled) {
+        error = "Cannot create invoice for a cancelled booking.";
+        return false;
+    }
+
+    std::vector<Invoice> invoices = invoiceRepo.search(bookingId, "", "");
+
+    for (const auto& invoice : invoices)
+    {
+        if (invoice.getBookingId() == bookingId)
+        {
+            error = "This booking already has an invoice.";
+            return false;
+        }
+    }
+
     auto room = roomRepo.findById(booking->getRoomId());
     if (!room) {
         error = "Room does not exist.";
@@ -102,6 +118,7 @@ bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& r
     auto bookings = bookingRepo.search(groupcode);
              
     bool found = false;
+    bool created = false;
 
     if (!invoiceRepo.startTransaction())
     {
@@ -117,6 +134,8 @@ bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& r
         if (booking.getGroupCode() != groupcode) continue;
 
         found = true;
+
+        if (booking.getStatus() == BookingStatus::Cancelled) continue;
 
         bool paid = false; //Để check xem đã có invoice chưa
 
@@ -135,17 +154,26 @@ bool InvoiceService::createAllInvoice(const QString& bookingId, const QString& r
 
         QString invoiceId = baseId + QString::number(index++);
 
-        if (!createInvoice(booking.getId(), receptionistId,  discountName, invoiceId, paymentMethod, error))
+        if (!createInvoice( booking.getId(), receptionistId, discountName, invoiceId, paymentMethod, error))
         {
             invoiceRepo.rollbackTransaction();
             return false;
         }
+
+        created = true;
     }
 
     if (!found)
     {
         invoiceRepo.rollbackTransaction();
         error = "No bookings found for this group.";
+        return false;
+    }
+
+    if (!created)
+    {
+        invoiceRepo.rollbackTransaction();
+        error = "Cannot create invoices for the rooms in this group.";
         return false;
     }
     

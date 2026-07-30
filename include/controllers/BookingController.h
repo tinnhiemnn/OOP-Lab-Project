@@ -1,8 +1,11 @@
 #pragma once
 
 #include "services/BookingService.h"
+
 #include "repositories/BookingRepository.h"
 #include "repositories/RoomRepository.h"
+#include "repositories/CustomerRepository.h"
+#include "repositories/ReceptionistRepository.h"
 
 #include <QString>
 #include <QDate>
@@ -13,11 +16,13 @@ private:
 
     BookingRepository bookingRepo;
     RoomRepository roomRepo;
+    CustomerRepository customerRepo;
+    ReceptionistRepository receptionistRepo;
 
 public:
     BookingController();
 
-    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
+    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const std::vector<RoomServiceSelection>& services, QString& error);
 
     bool processCheckIn(const QString& bookingId, QString& error);
 

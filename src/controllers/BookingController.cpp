@@ -6,10 +6,16 @@ BookingController::BookingController()
       roomRepo(),
       bookingService(bookingRepo, roomRepo) {}
 
-bool BookingController::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
+bool BookingController::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const std::vector<RoomServiceSelection>& services, QString& error)
 {
     if (!ValidationUtils::isNonEmpty(customerId)) {
         error = "Please select or enter the Customer ID!";
+        return false;
+    }
+
+    auto customer = customerRepo.findById(customerId);
+    if (!customer) {
+        error = "Customer ID does not exist or is inactive!";
         return false;
     }
     
@@ -22,12 +28,26 @@ bool BookingController::createMultiBookings(const QString& customerId, const std
         error = "Receptionist ID cannot be empty!";
         return false;
     }
-    if (buffetQty < 0) {
-        error = "The number of buffet tickets cannot be negative!";
+
+    auto receptionist = receptionistRepo.findById(receptionistId);
+    if (!receptionist) {
+        error = "Receptionist ID does not exist or is inactive!";
         return false;
     }
 
-    return bookingService.createMultiBookings(customerId, roomIds, checkIn, checkOut, receptionistId, buffetQty, laundry, decoration, decorationNote, error);
+    if (services.size() != roomIds.size()) {
+        error = "Service information does not match the selected rooms!";
+        return false;
+    }
+
+    for (const auto& service : services) {
+        if (service.buffetQty < 0) {
+            error = "The number of buffet tickets cannot be negative!";
+            return false;
+        }
+    }
+
+    return bookingService.createMultiBookings(customerId, roomIds, checkIn, checkOut, receptionistId, services, error);
 }
 
 bool BookingController::processCheckIn(const QString& bookingId, QString& error) {

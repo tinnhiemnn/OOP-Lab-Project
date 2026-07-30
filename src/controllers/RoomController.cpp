@@ -32,6 +32,11 @@ bool RoomController::addRoom(const Room& room, QString& error) {
         return false;
     }
 
+    if (roomRepo.findById(room.getRoomId())) {
+        error = "Room ID already exists.";
+        return false;
+    }
+
     if(!ValidationUtils::isPositiveMoney(room.getBasePrice())) {
         error = "Room price must be greater than 0.";
         return false;

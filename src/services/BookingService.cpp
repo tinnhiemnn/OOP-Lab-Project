@@ -34,10 +34,15 @@ QString BookingService::makeGroupCode() const {
     return "GRP_" + QString::number(QDateTime::currentMSecsSinceEpoch());
 }
 
-bool BookingService::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error)
+bool BookingService::createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const std::vector<RoomServiceSelection>& services, QString& error)
 {
     if (roomIds.empty()) {
         error = "No rooms selected!";
+        return false;
+    }
+
+    if (services.size() != roomIds.size()) {
+        error = "Service information does not match the selected rooms.";
         return false;
     }
 
@@ -61,8 +66,11 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
     QString baseBookingId = makeBookingId();
     int index = 1;
 
-    for (const auto& roomId : roomIds)
+    for (size_t i = 0; i < roomIds.size(); ++i)
     {
+        const auto& roomId = roomIds[i];
+        const auto& service = services[i];
+
         // Kiểm tra phòng có tồn tại không
         auto roomPtr = rooms.findById(roomId);
         if (!roomPtr) {
@@ -87,14 +95,13 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
         //Sinh ma don dat phong
         QString bookingId = baseBookingId + QString::number(index++);
 
-        // Khởi tạo đối tượng Booking
         Booking newBooking(bookingId, customerId, receptionistId, roomId, groupCode, checkIn, checkOut, BookingStatus::Booked);
         
         // Thiết lập dịch vụ đi kèm
-        newBooking.setBuffetQuantity(buffetQty);
-        newBooking.setLaundry(laundry);
-        newBooking.setDecoration(decoration);
-        newBooking.setDecorationNote(decorationNote);
+        newBooking.setBuffetQuantity(service.buffetQty);
+        newBooking.setLaundry(service.laundry);
+        newBooking.setDecoration(service.decoration);
+        newBooking.setDecorationNote(service.decorationNote);
 
         // Lưu vào database
         if (!bookings.add(newBooking)) {
