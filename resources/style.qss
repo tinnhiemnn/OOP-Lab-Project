@@ -363,6 +363,30 @@ QTableCornerButton::section {
 QTableWidget::item { padding: 8px; }
 
 /* ------------------------------------------------------------------ */
+/* CHECKBOX — dùng chung cho Laundry / Decor trong Room List           */
+/* Laundry = mint (--mint, tông "success"), Decor = lavender (--lavender), */
+/* để 2 dịch vụ không lẫn màu khi cùng được tick trên 1 dòng Room.      */
+/* ------------------------------------------------------------------ */
+QCheckBox::indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+    border: 1.5px solid #F3C6D9;
+    background-color: #FFF6F9;
+}
+QCheckBox::indicator:hover {
+    border: 1.5px solid #F2A8C2;
+}
+QCheckBox#laundryCheck::indicator:checked {
+    background-color: #D66A8C;
+    border: 1.5px solid #FFF6F9;
+}
+QCheckBox#decorCheck::indicator:checked {
+    background-color: #D66A8C;
+    border: 1.5px solid #FFF6F9;
+}
+
+/* ------------------------------------------------------------------ */
 /* BOOKING VIEW — khung Room List (widget cuộn chứa các dòng Room)     */
 /* LUU Y: roomsContainer la QWidget, can Qt::WA_StyledBackground trong  */
 /* code (BookingView.cpp) de nhan duoc background-color o day.         */
@@ -536,7 +560,7 @@ QLabel[role="heroTrend"][trendDown="true"] {
 /* Ghi chú tỉ lệ phòng (3/4 phòng đang sử dụng...) */
 QLabel[role="occLegend"] {
     font-family: "Inter";
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: #475569;
     line-height: 1.4;

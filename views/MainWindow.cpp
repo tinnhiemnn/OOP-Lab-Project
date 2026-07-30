@@ -99,11 +99,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     topbarLayout->setContentsMargins(0, 0, 0, 0);
     topbarLayout->setSpacing(0); // khoảng cách nhỏ giữa tiêu đề và dòng mô tả bên dưới
 
-    m_pageTitle = new QLabel("Bookings", this);   // trùng với setCurrentRow(0) bên dưới
+    m_pageTitle = new QLabel("Customers", this);   // trùng với setCurrentRow(0) bên dưới
     m_pageTitle->setProperty("role", "pageTitle");
     topbarLayout->addWidget(m_pageTitle);
 
-    m_pageSubtitle = new QLabel("Theo dõi đặt phòng theo quy trình", this);
+    m_pageSubtitle = new QLabel("Manage customer information", this);
     m_pageSubtitle->setProperty("role", "pageSub");
     topbarLayout->addWidget(m_pageSubtitle);
 
@@ -111,23 +111,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
 
     auto* pages = new QStackedWidget(this);
-    pages->addWidget(bookingView);
     pages->addWidget(customerView);
     pages->addWidget(receptionistView);
     pages->addWidget(roomView);
+    pages->addWidget(bookingView);
     pages->addWidget(invoiceView);
     pages->addWidget(reportView);
 
     mainColLayout->addWidget(topbarWrap);
     mainColLayout->addWidget(pages, /*stretch=*/1);
 
-    QStringList menuTitles = {"Bookings", "Customers", "Receptionists", "Rooms", "Invoices", "Reports"};
+    QStringList menuTitles = {"Customers", "Receptionists", "Rooms", "Bookings", "Invoices", "Reports"};
     // Dong mo ta ngan duoi tieu de, tuong ung 1-1 voi menuTitles theo thu tu index.
     QStringList menuSubtitles = {
-        "Track bookings workflow",
         "Manage customer information",
         "Manage reception staff",
         "Manage room inventory",
+        "Track bookings workflow",
         "Manage billing & invoices",
         "Overview statistics and reports"
     };

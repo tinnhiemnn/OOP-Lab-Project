@@ -181,9 +181,12 @@ BookingView::BookingView(QWidget* parent)
     searching->addWidget(searchBtn);
 
     // --- Booking List ---
-    bookingTable = new QTableWidget(0, 7, this);
+    // Thêm 2 cột "Check-in" và "Check-out" để xem trực tiếp ngày nhận/trả phòng
+    // của từng booking ngay trên table, không cần bấm chọn dòng rồi xem lại form.
+    bookingTable = new QTableWidget(0, 9, this);
     bookingTable->setHorizontalHeaderLabels(
-        {"Booking ID", "Customer ID", "Receptionist ID", "Group Code", "Room ID", "Services", "Status"});
+        {"Booking ID", "Customer ID", "Receptionist ID", "Group Code", "Room ID",
+         "Check-in", "Check-out", "Services", "Status"});
     bookingTable->horizontalHeader()->setStretchLastSection(true);
     bookingTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     bookingTable->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -238,6 +241,10 @@ void BookingView::addRoomRow(const QString& roomId) {
 
     r.laundryCheck = new QCheckBox("Laundry", this);
     r.decorCheck = new QCheckBox("Decor", this);
+    // Đổi màu riêng cho từng loại dịch vụ khi tick (xem style.qss), tránh 2 checkbox
+    // Laundry/Decor cùng 1 màu nhìn dễ lẫn khi cả 2 đều được chọn trên cùng 1 dòng Room.
+    r.laundryCheck->setObjectName("laundryCheck");
+    r.decorCheck->setObjectName("decorCheck");
 
     r.decorNotesEdit = new QLineEdit(this);
     r.decorNotesEdit->setPlaceholderText("Decoration notes");
@@ -311,8 +318,10 @@ void BookingView::refresh(const std::vector<Booking>& rows) {
         setCell(2, b.getReceptionistId());
         setCell(3, b.getGroupCode());
         setCell(4, b.getRoomId());
-        setCell(5, services.isEmpty() ? "-" : services.join(", "));
-        setCell(6, Booking::statusToString(b.getStatus()));
+        setCell(5, b.getCheckIn().toString("yyyy-MM-dd"));
+        setCell(6, b.getCheckOut().toString("yyyy-MM-dd"));
+        setCell(7, services.isEmpty() ? "-" : services.join(", "));
+        setCell(8, Booking::statusToString(b.getStatus()));
         ++r;
     }
 }

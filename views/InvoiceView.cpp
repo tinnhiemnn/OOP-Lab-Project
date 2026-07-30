@@ -171,7 +171,10 @@ void InvoiceView::selected() {
 
 void InvoiceView::add() {
     QString e;
-    const QString discountName = current(discountEdit) == "None" ? QString() : current(discountEdit);
+    // Giữ nguyên literal "None" khi user chọn "None" - không gán rỗng, vì
+    // backend cần phân biệt rõ "None" (không áp dụng discount nào) với
+    // chuỗi rỗng (chưa xác định/không hợp lệ).
+    const QString discountName = current(discountEdit);
     QString invoiceId = "INV_" + QString::number(QDateTime::currentMSecsSinceEpoch());
 
     if (!controller.createInvoice(text(bookingIdEdit), text(receptionistIdEdit),
@@ -184,7 +187,8 @@ void InvoiceView::add() {
 
 void InvoiceView::addGroup() {
     QString e;
-    const QString discountName = current(discountEdit) == "None" ? QString() : current(discountEdit);
+    // Tương tự add(): giữ nguyên "None", không gán rỗng.
+    const QString discountName = current(discountEdit);
 
     if (!controller.createAllInvoice(text(bookingIdEdit), text(receptionistIdEdit),
                                      discountName, current(paymentEdit), e)) {
