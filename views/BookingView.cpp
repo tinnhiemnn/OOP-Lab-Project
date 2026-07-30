@@ -351,10 +351,18 @@ void BookingView::selected(int row, int /*column*/) {
 
 void BookingView::add() {
     std::vector<QString> roomIds;
+    std::vector<RoomServiceSelection> services;   // mỗi phòng có 1 service riêng, khớp index với roomIds
     for (const auto& r : roomRows) {
         const QString roomId = text(r.roomIdEdit);
         if (roomId.isEmpty()) continue;
         roomIds.push_back(roomId);
+
+        RoomServiceSelection service;
+        service.buffetQty = r.buffetQtyEdit->value();
+        service.laundry = r.laundryCheck->isChecked();
+        service.decoration = r.decorCheck->isChecked();
+        service.decorationNote = text(r.decorNotesEdit);
+        services.push_back(service);
     }
 
     if (roomIds.empty()) {
@@ -362,13 +370,8 @@ void BookingView::add() {
         return;
     }
 
-    int buffetQty = roomRows[0].buffetQtyEdit->value();
-    bool laundry = roomRows[0].laundryCheck->isChecked();
-    bool decoration = roomRows[0].decorCheck->isChecked();
-    QString decorationNote = text(roomRows[0].decorNotesEdit);
-
     QString e;
-    if (!controller.createMultiBookings(text(customerIdEdit), roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), buffetQty, laundry, decoration, decorationNote, e)) {
+    if (!controller.createMultiBookings(text(customerIdEdit), roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), services, e)) {
         error(e);
         return;
     }
