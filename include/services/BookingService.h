@@ -9,6 +9,14 @@
 #include <QDate>
 #include <optional>
 
+struct RoomServiceSelection
+{
+    int buffetQty = 0;
+    bool laundry = false;
+    bool decoration = false;
+    QString decorationNote;
+};
+
 class BookingService {
 private:
     bool hasConflict(const QString& roomId, const QDate& checkIn, const QDate& checkOut, const QString& excludeBookingId = "") const;
@@ -22,7 +30,7 @@ private:
 public:
     BookingService(BookingRepository& bookings, RoomRepository& rooms);
 
-    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, int buffetQty, bool laundry, bool decoration, const QString& decorationNote, QString& error);
+    bool createMultiBookings(const QString& customerId, const std::vector<QString>& roomIds, const QDate& checkIn, const QDate& checkOut, const QString& receptionistId, const std::vector<RoomServiceSelection>& services, QString& error);
 
     bool checkIn(const QString& bookingId, QString& error);
 

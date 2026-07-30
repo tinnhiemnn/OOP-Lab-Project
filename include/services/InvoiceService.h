@@ -17,7 +17,6 @@ private:
     RoomRepository roomRepo;
     
 public:
-    // Constructor nhận vào InvoiceRepository để làm việc với DB
     explicit InvoiceService(InvoiceRepository& invoiceRepo);
 
     double servicesTotal(const QString& bookingId);

@@ -15,6 +15,6 @@ public:
     
     double calculatePrice(int days) const override
     {
-        return std::max(1, days) * (getBasePrice() * 1.2 + (getBeds() - 1) * 100000.0);
+        return std::max(1, days) * (getBasePrice() * 1.2 + (getBeds() - 1) * 150000.0);
     }
 };
