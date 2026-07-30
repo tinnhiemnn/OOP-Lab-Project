@@ -13,9 +13,9 @@ std::unique_ptr<Room> RoomFactory::createRoom(RoomType type,
     case RoomType::Standard:
         return std::make_unique<StandardRoom>(roomId, basePrice, status, numberOfBeds);
     case RoomType::Deluxe:
-        return std::make_unique<DeluxeRoom>(roomId, basePrice, status);
+        return std::make_unique<DeluxeRoom>(roomId, basePrice, status, numberOfBeds);
     case RoomType::President:
-        return std::make_unique<PresidentRoom>(roomId, basePrice, status);
+        return std::make_unique<PresidentRoom>(roomId, basePrice, status, numberOfBeds);
     }
     return std::make_unique<StandardRoom>(roomId, basePrice, status, numberOfBeds);
 }
