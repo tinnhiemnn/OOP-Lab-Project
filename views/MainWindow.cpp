@@ -13,6 +13,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPixmap>
 
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
@@ -45,10 +46,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     brandLayout->setContentsMargins(18, 20, 12, 16);
     brandLayout->setSpacing(10);
 
-    auto* brandMark = new QLabel("P", this);
+    auto* brandMark = new QLabel(this);
     brandMark->setObjectName("brandMark");
     brandMark->setFixedSize(36, 36);
     brandMark->setAlignment(Qt::AlignCenter);
+
+    QPixmap home(":/icons/home.svg");
+    brandMark->setPixmap(home.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+
     brandLayout->addWidget(brandMark);
 
     auto* brandTextCol = new QVBoxLayout();

@@ -152,8 +152,7 @@ void ReportView::buildHeroRow(QVBoxLayout* root) {
     occupancyLegend = new QLabel(this);
     occupancyLegend->setProperty("role", "occLegend");
     occupancyLegend->setWordWrap(true);
-    // Rich text để bold số % (giống số "3" bold trong mockup), tránh chữ bị
-    // tràn dòng kỳ lạ khi occBox đã đủ rộng sau khi sửa tỉ lệ heroRow ở trên.
+
     occupancyLegend->setTextFormat(Qt::RichText);
     occupancyLegend->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     occRow->addWidget(occupancyRing);
@@ -193,7 +192,7 @@ void ReportView::buildRevenueCard(QVBoxLayout* root) {
     contentLayout->addLayout(headerRow);
     contentLayout->addWidget(revenueChartView);
 
-    revenueCard = new DashboardCard(QString(), "blue", this);
+    revenueCard = new DashboardCard(QString(), this);
     revenueCard->addContentLayout(contentLayout);
     root->addWidget(revenueCard);
 }
@@ -244,7 +243,7 @@ void ReportView::buildRoomTypeCard(QVBoxLayout* root) {
     contentLayout->addWidget(title);
     contentLayout->addLayout(splitRow);
 
-    roomTypeCard = new DashboardCard(QString(), "purple", this);
+    roomTypeCard = new DashboardCard(QString(), this);
     roomTypeCard->addContentLayout(contentLayout);
     root->addWidget(roomTypeCard);
 }
@@ -273,7 +272,7 @@ void ReportView::buildBottomRow(QVBoxLayout* root) {
     recLayout->addLayout(recHeader);
     recLayout->addWidget(receptionistChartView);
 
-    receptionistCard = new DashboardCard(QString(), "orange", this);
+    receptionistCard = new DashboardCard(QString(), this);
     receptionistCard->addContentLayout(recLayout);
 
     auto* topTitle = new QLabel(QString::fromUtf8("Top 5 customers"), this);
@@ -287,7 +286,7 @@ void ReportView::buildBottomRow(QVBoxLayout* root) {
     topOuter->addLayout(topCustomersLayout);
     topOuter->addStretch();
 
-    topCustomerCard = new DashboardCard(QString(), "green", this);
+    topCustomerCard = new DashboardCard(QString(), this);
     topCustomerCard->addContentLayout(topOuter);
 
     // Tỉ lệ 2fr : 1fr giống .two-col trong mockup

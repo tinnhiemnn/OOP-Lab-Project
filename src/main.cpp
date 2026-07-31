@@ -27,7 +27,9 @@ void loadCustomFonts() {
 }
 
 int main(int argc, char* argv[]) {
-    QApplication::setStyle("Fusion");
+    // Xóa bỏ viền đen của các combo box
+    //QApplication::setStyle("Fusion"); 
+    
     QApplication app(argc, argv);
 
     loadCustomFonts();

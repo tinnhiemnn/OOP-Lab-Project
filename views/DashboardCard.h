@@ -8,7 +8,7 @@
 class DashboardCard : public QFrame {
     Q_OBJECT
 public:
-    explicit DashboardCard(const QString& title, const QString& iconType = QString(),
+    explicit DashboardCard(const QString& title,
                            QWidget* parent = nullptr) : QFrame(parent)
     {
         setProperty("cardStyle", true);
@@ -19,13 +19,6 @@ public:
         if (!title.isEmpty()) {
             auto* head = new QHBoxLayout();
             head->setSpacing(10);
-            if (!iconType.isEmpty()) {
-                auto* icon = new QLabel(this);
-                icon->setFixedSize(30, 30);
-                icon->setAlignment(Qt::AlignCenter);
-                icon->setProperty("iconType", iconType); // "blue"/"green"/"orange"/"purple"/"red"
-                head->addWidget(icon);
-            }
             auto* titleLbl = new QLabel(title, this);
             titleLbl->setProperty("role", "cardTitle");
             head->addWidget(titleLbl);

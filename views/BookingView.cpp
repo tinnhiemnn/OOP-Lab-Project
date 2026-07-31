@@ -70,8 +70,6 @@ BookingView::BookingView(QWidget* parent)
     checkInEdit->setDisplayFormat("yyyy-MM-dd");
     checkOutEdit->setDisplayFormat("yyyy-MM-dd");
 
-    // Booking ID chỉ được set khi chọn 1 dòng trên table (dùng cho Check-in/Check-out/Cancel),
-    // không cho sửa tay để tránh gõ nhầm sang booking khác.
     bookingIdEdit->setPlaceholderText("Booking ID");
     bookingIdEdit->setReadOnly(true);
     
@@ -108,8 +106,7 @@ BookingView::BookingView(QWidget* parent)
     addRoomBtn->setFixedWidth(32);
     addRoomBtn->setToolTip("Add room into group");
     addRoomBtn->setText(QString());
-    // Dùng --primary-prs (#D66A8C) của theme hồng pastel, đồng bộ với màu chữ
-    // của variant="secondary"/nav active thay vì màu xám tự chọn không ăn nhập.
+
     addRoomBtn->setIcon(makePlusIcon(QColor("#D66A8C")));
     addRoomBtn->setIconSize(QSize(14, 14));
     roomsHeader->addWidget(addRoomBtn);
@@ -127,13 +124,13 @@ BookingView::BookingView(QWidget* parent)
     roomsContainer->setAttribute(Qt::WA_StyledBackground, true);
 
     roomsScrollArea = new QScrollArea(this);
-    roomsScrollArea->setObjectName("roomsScrollArea"); // de style.qss ap dung nen trong suot
+    roomsScrollArea->setObjectName("roomsScrollArea");
     roomsScrollArea->setWidget(roomsContainer);
     roomsScrollArea->setWidgetResizable(true);
     roomsScrollArea->setFrameShape(QFrame::NoFrame);
     roomsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     roomsScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    roomsScrollArea->setMinimumHeight(115);
+    roomsScrollArea->setMinimumHeight(95);
     roomsScrollArea->setMaximumHeight(170);
 
     auto* roomsBox = new QVBoxLayout;
@@ -165,7 +162,7 @@ BookingView::BookingView(QWidget* parent)
     actions->addWidget(reloadBtn);
 
     // --- Card 1: form đặt phòng (thông tin cố định + danh sách phòng kèm dịch vụ) + các nút hành động ---
-    formCard = new DashboardCard(QString(), "blue", this);
+    formCard = new DashboardCard(QString(), this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(roomsBox);
     formCard->addContentLayout(actions);
@@ -181,8 +178,6 @@ BookingView::BookingView(QWidget* parent)
     searching->addWidget(searchBtn);
 
     // --- Booking List ---
-    // Thêm 2 cột "Check-in" và "Check-out" để xem trực tiếp ngày nhận/trả phòng
-    // của từng booking ngay trên table, không cần bấm chọn dòng rồi xem lại form.
     bookingTable = new QTableWidget(0, 9, this);
     bookingTable->setHorizontalHeaderLabels(
         {"Booking ID", "Customer ID", "Receptionist ID", "Group Code", "Room ID",
@@ -197,7 +192,7 @@ BookingView::BookingView(QWidget* parent)
     tableLayout->addWidget(bookingTable);
 
     // --- Card 2: ô tìm kiếm + Booking List table ---
-    tableCard = new DashboardCard(QString(), "purple", this);
+    tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
     tableCard->addContentLayout(tableLayout);
 
@@ -241,13 +236,12 @@ void BookingView::addRoomRow(const QString& roomId) {
 
     r.laundryCheck = new QCheckBox("Laundry", this);
     r.decorCheck = new QCheckBox("Decor", this);
-    // Đổi màu riêng cho từng loại dịch vụ khi tick (xem style.qss), tránh 2 checkbox
-    // Laundry/Decor cùng 1 màu nhìn dễ lẫn khi cả 2 đều được chọn trên cùng 1 dòng Room.
+
     r.laundryCheck->setObjectName("laundryCheck");
     r.decorCheck->setObjectName("decorCheck");
-
     r.decorNotesEdit = new QLineEdit(this);
     r.decorNotesEdit->setPlaceholderText("Decoration notes");
+
     r.decorNotesEdit->setEnabled(false);
     connect(r.decorCheck, &QCheckBox::toggled, r.decorNotesEdit, &QLineEdit::setEnabled);
 
@@ -328,6 +322,25 @@ void BookingView::refresh(const std::vector<Booking>& rows) {
 
 void BookingView::reload() {
     refresh(controller.getAllBookings());
+
+    bookingTable->clearSelection();
+    bookingTable->setCurrentCell(-1, -1);
+
+    bookingIdEdit->clear();
+    customerIdEdit->clear();
+    receptionistIdEdit->clear();
+    checkInEdit->setDate(QDate::currentDate());
+    checkOutEdit->setDate(QDate::currentDate().addDays(1));
+
+    clearExtraRoomRows();
+    if (!roomRows.isEmpty()) {
+        auto& r = roomRows.first();
+        r.roomIdEdit->clear();
+        r.buffetQtyEdit->setValue(0);
+        r.laundryCheck->setChecked(false);
+        r.decorCheck->setChecked(false);
+        r.decorNotesEdit->clear();
+    }
 }
 
 void BookingView::selected(int row, int /*column*/) {
@@ -374,17 +387,6 @@ void BookingView::add() {
     if (!controller.createMultiBookings(text(customerIdEdit), roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), services, e)) {
         error(e);
         return;
-    }
-
-    customerIdEdit->clear();
-    receptionistIdEdit->clear();
-    clearExtraRoomRows();
-    if (!roomRows.isEmpty()) {
-        roomRows[0].roomIdEdit->clear();
-        roomRows[0].buffetQtyEdit->setValue(0);
-        roomRows[0].laundryCheck->setChecked(false);
-        roomRows[0].decorCheck->setChecked(false);
-        roomRows[0].decorNotesEdit->clear();
     }
 
     reload();

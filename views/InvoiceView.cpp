@@ -83,7 +83,7 @@ InvoiceView::InvoiceView(QWidget* parent)
     searching->addWidget(paymentFilter);
 
     // --- Card 1: form tao hoa don ---
-    formCard = new DashboardCard(QString(), "blue", this);
+    formCard = new DashboardCard(QString(), this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -97,7 +97,7 @@ InvoiceView::InvoiceView(QWidget* parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard(QString(), "green", this);
+    tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
     tableCard->addContent(table);
 
@@ -158,6 +158,12 @@ void InvoiceView::applyFilters() {
 void InvoiceView::reload() {
     currentInvoices = controller.handleGetAllInvoices();
     applyFilters();
+
+    table->setCurrentCell(-1, -1);
+    bookingIdEdit->clear();
+    receptionistIdEdit->clear();
+    discountEdit->setCurrentIndex(0);
+    paymentEdit->setCurrentIndex(0);
 }
 
 void InvoiceView::selected() {

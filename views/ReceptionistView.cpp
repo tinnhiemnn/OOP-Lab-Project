@@ -53,7 +53,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard(QString(), "orange", this);
+    formCard = new DashboardCard(QString(), this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -69,10 +69,14 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     table->setColumnCount(3);
     table->setHorizontalHeaderLabels({"ID", "Name", "Email"});
     table->horizontalHeader()->setStretchLastSection(true);
+
+    QHeaderView *header = table->horizontalHeader();
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard(QString(), "purple", this);
+    tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
     tableCard->addContent(table);
 
@@ -104,7 +108,10 @@ void ReceptionistView::refresh(const std::vector<Receptionist>& rows) {
 
 void ReceptionistView::reload() {
     refresh(controller.getAllReceptionists()); 
+    table->setCurrentCell(-1, -1);
     idEdit->clear();
+    nameEdit->clear();
+    emailEdit->clear();
 }
 
 void ReceptionistView::selected() {
@@ -113,7 +120,6 @@ void ReceptionistView::selected() {
     idEdit->setText(table->item(row, 0)->text());
     nameEdit->setText(table->item(row, 1)->text());
     emailEdit->setText(table->item(row, 2)->text());
-
 }
 
 void ReceptionistView::add() { 
@@ -124,12 +130,8 @@ void ReceptionistView::add() {
 
     if (!controller.addReceptionist(r, e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-    }
 }
 
 void ReceptionistView::update() { 
@@ -140,25 +142,20 @@ void ReceptionistView::update() {
 
     if (!controller.updateReceptionist(r, e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-    }
 }
 
 void ReceptionistView::remove() { 
     QString e;
     if (!controller.deleteReceptionist(idEdit->text(), e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-    }
 }
 
-void ReceptionistView::search() { refresh(controller.searchReceptionists(searchEdit->text())); }
+void ReceptionistView::search() { 
+    refresh(controller.searchReceptionists(searchEdit->text())); 
+}
+
 void ReceptionistView::error(const QString& message) { QMessageBox::warning(this, "Receptionist Error", message); }

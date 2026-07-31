@@ -82,7 +82,7 @@ RoomView::RoomView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard(QString(), "blue", this);
+    formCard = new DashboardCard(QString(), this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -120,7 +120,7 @@ RoomView::RoomView(QWidget* parent)
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard(QString(), "purple", this);
+    tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(controls);
     tableCard->addContent(table);
 
@@ -154,8 +154,14 @@ void RoomView::refresh(std::vector<std::unique_ptr<Room>> rows) {
 
 void RoomView::reload() {
     refresh(controller.getAllRooms());
+    table->setCurrentCell(-1, -1);
+
     idEdit->setReadOnly(false);
     idEdit->clear();
+    typeEdit->setCurrentIndex(0);
+    priceEdit->setValue(priceEdit->minimum());
+    bedsEdit->setValue(bedsEdit->minimum());
+    statusEdit->setCurrentIndex(0);
 }
 
 void RoomView::selected() {

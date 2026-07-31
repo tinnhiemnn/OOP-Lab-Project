@@ -26,15 +26,15 @@ CustomerView::CustomerView(QWidget* parent)
     
     idEdit->setPlaceholderText("Customer ID");
     nameEdit->setPlaceholderText("Customer Name");
-    emailEdit->setPlaceholderText("abc@gmail.com");
     phoneEdit->setPlaceholderText("0*********");
+    emailEdit->setPlaceholderText("abc@gmail.com");
 
     auto* form = new QFormLayout;
     form->setVerticalSpacing(10);
     form->addRow("Customer ID", idEdit);
     form->addRow("Name", nameEdit);
-    form->addRow("Email", emailEdit);
     form->addRow("Phone Number", phoneEdit);
+    form->addRow("Email", emailEdit);
 
     auto* actions = new QHBoxLayout;
     auto* addBtn = new QPushButton("Add", this);
@@ -54,7 +54,7 @@ CustomerView::CustomerView(QWidget* parent)
     actions->addWidget(deleteBtn);
     actions->addWidget(reloadBtn);
 
-    formCard = new DashboardCard(QString(), "blue", this);
+    formCard = new DashboardCard(QString(), this);
     formCard->addContentLayout(form);
     formCard->addContentLayout(actions);
 
@@ -68,12 +68,16 @@ CustomerView::CustomerView(QWidget* parent)
 
     table->setObjectName("tableBookings");
     table->setColumnCount(4);
-    table->setHorizontalHeaderLabels({"ID", "Name", "Email", "Phone"});
+    table->setHorizontalHeaderLabels({"ID", "Name", "Phone", "Email"});
     table->horizontalHeader()->setStretchLastSection(true);
+
+    QHeaderView *header = table->horizontalHeader();
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    tableCard = new DashboardCard(QString(), "purple", this);
+    tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
     tableCard->addContent(table);
 
@@ -97,13 +101,18 @@ void CustomerView::refresh(const std::vector<Customer>& rows) {
         const auto& c = rows[static_cast<size_t>(row)];
         table->setItem(row, 0, new QTableWidgetItem(c.getId()));
         table->setItem(row, 1, new QTableWidgetItem(c.getName()));
-        table->setItem(row, 2, new QTableWidgetItem(c.getEmail()));
-        table->setItem(row, 3, new QTableWidgetItem(c.getPhone()));
+        table->setItem(row, 2, new QTableWidgetItem(c.getPhone()));
+        table->setItem(row, 3, new QTableWidgetItem(c.getEmail()));
     }
 }
 
 void CustomerView::reload() { 
     refresh(controller.listCustomers()); 
+    table->setCurrentCell(-1, -1);
+    idEdit->clear();
+    nameEdit->clear();
+    emailEdit->clear();
+    phoneEdit->clear();
 }
 
 void CustomerView::selected() {
@@ -124,13 +133,8 @@ void CustomerView::add() {
 
     if (!controller.addCustomer(c, e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-        phoneEdit->clear();
-    }
 }
 
 void CustomerView::update() { 
@@ -142,26 +146,16 @@ void CustomerView::update() {
 
     if (!controller.updateCustomer(c, e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-        phoneEdit->clear();
-    }
 }
 
 void CustomerView::remove() { 
     QString e;
     if (!controller.deleteCustomer(idEdit->text(), e))
         error(e); 
-    else {
+    else
         reload();
-        idEdit->clear();
-        nameEdit->clear();
-        emailEdit->clear();
-        phoneEdit->clear();
-    }
 }
 
 void CustomerView::search() { 

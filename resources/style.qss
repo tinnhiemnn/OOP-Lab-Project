@@ -38,12 +38,6 @@ QMainWindow, QWidget#centralWidget {
 
 /* ------------------------------------------------------------------ */
 /* SIDEBAR (thay cho QTabWidget mặc định)                              */
-/* LUU Y: selector dung QWidget#sidebarWrap vi trong MainWindow.cpp     */
-/* widget cha thuc te co objectName la "sidebarWrap" (QWidget), khong   */
-/* phai "sidebar" (QFrame). Rule nay lam nen trang + duong line phai   */
-/* chay LIEN TUC suot ca vung brandBlock lan sidebarNav ben trong,      */
-/* giup logo/ten app va thanh dieu huong nhin lien thanh 1 khoi trang,  */
-/* giong ban mockup web tham khao.                                     */
 /* ------------------------------------------------------------------ */
 QWidget#sidebarWrap {
     background-color: #FFF6F9;
@@ -51,10 +45,9 @@ QWidget#sidebarWrap {
 }
 
 QLabel#brandMark {
+    background-color: #EA8FAE;
     border-radius: 10px;
-    background-color: #EA8FAE; /* fallback phẳng, gradient thật set bằng code nếu muốn */
-    color: #FFFFFF;
-    font-weight: 700;
+    padding: 4px;
 }
 
 QLabel#brandName {
@@ -149,11 +142,7 @@ QListWidget#sidebarNav::item:selected:!active {
 /* ------------------------------------------------------------------ */
 /* TOPBAR                                                              */
 /* LUU Y: topbar trong MainWindow.cpp la QWidget (khong phai QFrame),  */
-/* nen selector phai la QWidget#topbar. QWidget can bat them thuoc     */
-/* tinh Qt::WA_StyledBackground trong code de nhan background-color tu */
-/* QSS (xem MainWindow.cpp). Nen trang de "lien" voi mau trang cua      */
-/* sidebar (QWidget#sidebarWrap), tao cam giac 1 khoi thong nhat, chi   */
-/* con duong line doc mong (border-right cua sidebarWrap) lam ranh gioi.*/
+/* nen selector phai la QWidget#topbar.                               */
 /* ------------------------------------------------------------------ */
 QWidget#topbarWrap {
     background-color: #FFF6F9;
@@ -217,13 +206,6 @@ QLabel[role="cardTitle"] {
     font-size: 15px;
     color: #6B4557;
 }
-
-/* Khung icon nhỏ 30x30 đặt trước card-title, đổi màu theo iconType */
-QLabel[iconType="blue"]   { background-color: #FCE9F0; color: #D66A8C; border-radius: 9px; }
-QLabel[iconType="green"]  { background-color: #DFF5EC; color: #4FA98A; border-radius: 9px; }
-QLabel[iconType="orange"] { background-color: #FCE7D3; color: #D9915C; border-radius: 9px; }
-QLabel[iconType="purple"] { background-color: #F1E9FB; color: #9B72D1; border-radius: 9px; }
-QLabel[iconType="red"]    { background-color: #FBE1DC; color: #C96257; border-radius: 9px; }
 
 /* ------------------------------------------------------------------ */
 /* HERO CARD / STAT MINI / RANK ITEM (dùng ở tab Reports)              */
@@ -323,6 +305,11 @@ QComboBox QAbstractItemView {
     outline: none;
 }
 
+QComboBox QAbstractItemView {
+    border: none;
+    outline: 0;
+}
+
 /* ------------------------------------------------------------------ */
 /* TABLES                                                              */
 /* ------------------------------------------------------------------ */
@@ -364,8 +351,6 @@ QTableWidget::item { padding: 8px; }
 
 /* ------------------------------------------------------------------ */
 /* CHECKBOX — dùng chung cho Laundry / Decor trong Room List           */
-/* Laundry = mint (--mint, tông "success"), Decor = lavender (--lavender), */
-/* để 2 dịch vụ không lẫn màu khi cùng được tick trên 1 dòng Room.      */
 /* ------------------------------------------------------------------ */
 QCheckBox::indicator {
     width: 15px;
@@ -380,16 +365,16 @@ QCheckBox::indicator:hover {
 QCheckBox#laundryCheck::indicator:checked {
     background-color: #D66A8C;
     border: 1.5px solid #FFF6F9;
+    image: url(:/icons/check.svg);
 }
 QCheckBox#decorCheck::indicator:checked {
     background-color: #D66A8C;
     border: 1.5px solid #FFF6F9;
+    image: url(:/icons/check.svg);
 }
 
 /* ------------------------------------------------------------------ */
 /* BOOKING VIEW — khung Room List (widget cuộn chứa các dòng Room)     */
-/* LUU Y: roomsContainer la QWidget, can Qt::WA_StyledBackground trong  */
-/* code (BookingView.cpp) de nhan duoc background-color o day.         */
 /* ------------------------------------------------------------------ */
 QWidget#roomListContainer {
     background-color: rgba(255, 255, 255, 0.35); /* lớp phủ sáng, nhẹ nhàng trên nền hồng dịu */
@@ -400,13 +385,11 @@ QScrollArea#roomsScrollArea {
     border: none;
 }
 
-/* Nút "+" thêm phòng và nút "-" xoá phòng trong Room List: icon được vẽ
-   trực tiếp bằng QPainter trong BookingView.cpp (không dùng ký tự text
-   nữa vì dễ bị mất khi trùng màu nền), màu icon lấy đúng theo bảng màu:
+/* Nút "+" thêm phòng và nút "-" xoá phòng trong Room List
      - addRoomBtn:    #D66A8C (--primary-prs)  — cùng tông variant="secondary"
      - removeRoomBtn: #C96257 (--coral text)   — cùng tông status Cancelled/Maintenance
    Hover riêng bên dưới chỉ đổi nền để làm nổi bật thao tác, không ảnh
-   hưởng icon (icon là pixmap tĩnh, không đổi màu theo :hover). */
+   hưởng icon */
 QPushButton#addRoomBtn:hover {
     background-color: #F3C6D9;
 }
@@ -452,7 +435,7 @@ QLabel[role="rankId"] { color:#DCC0CE; font-size:10.5px; }
 QLabel[role="rankAmount"] { font-weight:700; color:#4FA98A; }
 
 /* ============================================================
-   BỔ SUNG CHO TAB REPORTS (theo hotel_dashboard_mockup_light)
+   BỔ SUNG CHO TAB REPORTS
    ============================================================ */
 
 ReportView {
@@ -527,7 +510,7 @@ QFrame[heroCard="true"][variant="occupancy"] {
 /* Nhãn tiêu đề card (Tổng doanh thu hiện tại / Tỉ lệ lấp đầy phòng) */
 QLabel[role="heroLabel"] {
     font-family: "Inter";
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
     color: #64748B;
     margin-bottom: 2px;
@@ -537,7 +520,7 @@ QLabel[role="heroLabel"] {
 QLabel[role="heroValue"] {
     font-family: "Inter";
     font-size: 30px;       /* Tăng cỡ chữ to nổi bật */
-    font-weight: 700;      /* Đặt độ đậm Bold */
+    font-weight: 600;      /* Đặt độ đậm Bold */
     color: #0F172A;        /* Màu chữ tối tương phản cao */
     padding: 2px 0px;
 }
@@ -545,7 +528,7 @@ QLabel[role="heroValue"] {
 /* 3. Badge xu hướng (+18.6% so với tháng trước) */
 QLabel[role="heroTrend"] {
     font-family: "Inter";
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: #0F766E;
     background-color: rgba(13, 148, 136, 0.12);
@@ -560,7 +543,7 @@ QLabel[role="heroTrend"][trendDown="true"] {
 /* Ghi chú tỉ lệ phòng (3/4 phòng đang sử dụng...) */
 QLabel[role="occLegend"] {
     font-family: "Inter";
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 500;
     color: #475569;
     line-height: 1.4;
