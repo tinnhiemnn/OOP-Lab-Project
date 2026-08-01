@@ -405,12 +405,12 @@ void ReportView::updateHero() {
             .arg(pct).arg(100 - pct));
 
     double growthPct = 0.0;
-    std::vector<double> monthly = controller.getRevenueByYear(yearSelect->currentText());
+    std::vector<double> monthly = controller.getRevenueByYear();
     if (computeLastMonthGrowth(monthly, growthPct)) {
         const QString arrow = growthPct >= 0 ? QString::fromUtf8("↗") : QString::fromUtf8("↘");
         const QString sign = growthPct >= 0 ? "+" : "";
         revenueTrendLabel->setText(
-            QString::fromUtf8("%1 %2%3% so với tháng trước")
+            QString::fromUtf8("%1 %2%3% from last month")
                 .arg(arrow, sign)
                 .arg(growthPct, 0, 'f', 1));
         revenueTrendLabel->setProperty("trendDown", growthPct < 0);
