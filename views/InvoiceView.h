@@ -15,6 +15,7 @@ class QFrame;
 class InvoiceView : public QWidget {
 public:
     explicit InvoiceView(QWidget* parent = nullptr);
+    void setReceptionistId(const QString& recId);
 
 private:
     void refresh(const std::vector<Invoice>& rows);

@@ -26,6 +26,7 @@ set(PROJECT_SOURCES
     src/patterns/SeasonalDiscount.cpp
     src/patterns/NoDiscount.cpp
 
+    src/controllers/LoginController.cpp
     src/controllers/CustomerController.cpp
     src/controllers/ReceptionistController.cpp
     src/controllers/RoomController.cpp
@@ -43,6 +44,7 @@ set(PROJECT_SOURCES
     src/services/ReportService.cpp
     src/services/InvoiceService.cpp
 
+    views/LoginView.cpp
     views/BookingView.cpp
     views/CustomerView.cpp
     views/MainWindow.cpp

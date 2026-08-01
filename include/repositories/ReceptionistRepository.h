@@ -6,6 +6,7 @@
 
 class ReceptionistRepository {
 public:
+    QString verifyLogin(const QString& username, const QString& password);
     bool add(const Receptionist& Receptionist);
     bool update(const Receptionist& Receptionist);
     bool remove(const QString& id);

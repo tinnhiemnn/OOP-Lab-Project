@@ -214,6 +214,13 @@ BookingView::BookingView(QWidget* parent)
     reload();
 }
 
+void BookingView::setReceptionistId(const QString& recId) {
+    if (receptionistIdEdit) {
+        receptionistIdEdit->setText(recId);
+        receptionistIdEdit->setReadOnly(true);
+    }
+}
+
 void BookingView::addRoomRow(const QString& roomId) {
     // Mỗi dòng gồm: Room ID + Buffet qty + Laundry + Decoration (riêng cho từng phòng)
     RoomServiceRow r;

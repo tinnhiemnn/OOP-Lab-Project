@@ -14,9 +14,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPixmap>
+#include <QPushButton>
+#include <QApplication>
+#include <QProcess>
 
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
+MainWindow::MainWindow(const QString& role, const QString& username, QWidget* parent) : QMainWindow(parent), m_userRole(role) {
 
     // Cấu hình cửa số chính
     setWindowTitle("Hotel Management System");
@@ -69,11 +72,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
     // Tạo thanh điều hướng
     auto* sidebarNav = new QListWidget(this);
-    sidebarNav->setObjectName("sidebarNav");   // dat object name cho thanh sidebar
+    sidebarNav->setObjectName("sidebarNav");
     sidebarNav->setFrameShape(QFrame::NoFrame);
     sidebarNav->setIconSize(QSize(18, 18));
+    
     sidebarLayout->addWidget(brand);
     sidebarLayout->addWidget(sidebarNav, /*stretch=*/1);
+
+    // Thêm nút Logout
+    auto* btnLogout = new QPushButton("Logout", this);
+    btnLogout->setObjectName("btnLogout");
+    btnLogout->setCursor(Qt::PointingHandCursor);
+    sidebarLayout->addWidget(btnLogout);
+    
+    connect(btnLogout, &QPushButton::clicked, this, [this]{handleLogout();});
 
     // Khởi tạo các trang giao diện con
     auto* bookingView = new BookingView(this);
@@ -82,6 +94,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     auto* roomView = new RoomView(this);
     auto* invoiceView = new InvoiceView(this);
     auto* reportView = new ReportView(this);
+
+    if (role == "RECEPTIONIST") {
+        bookingView->setReceptionistId(username);
+        invoiceView->setReceptionistId(username);
+    }
 
     auto* mainCol = new QWidget(this);
     auto* mainColLayout = new QVBoxLayout(mainCol);
@@ -142,7 +159,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         sidebarNav->addItem(item);
     }
 
-    sidebarNav->setCurrentRow(0);      // "Bookings" active mặc định
+    if (m_userRole == "RECEPTIONIST") {
+        sidebarNav->item(1)->setHidden(true); // Ẩn Tab Receptionists
+        sidebarNav->item(5)->setHidden(true); // Ẩn Tab Reports
+    }
+    sidebarNav->setCurrentRow(0); 
     pages->setCurrentIndex(0);
 
     connect(sidebarNav, &QListWidget::currentRowChanged, this, [this, sidebarNav, pages, menuSubtitles](int row) {
@@ -154,4 +175,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     layout->addWidget(sidebarWrap);
     layout->addWidget(mainCol, /*stretch=*/1);
     setCentralWidget(central);
+}
+
+void MainWindow::handleLogout() {
+    this->close(); // Đóng cửa sổ chính
+    qApp->quit();
+    QProcess::startDetached(qApp->arguments()[0], qApp->arguments()); 
 }

@@ -30,6 +30,11 @@ bool ReceptionistController::addReceptionist(Receptionist& receptionist, QString
         return false;
     }
 
+    if (!ValidationUtils::isNonEmpty(receptionist.getPassword())) {
+        error = "Receptionist password cannot be empty.";
+        return false;
+    }
+
     receptionist.setId(repository.generateNextId());
 
     if (repository.add(receptionist)) return true;
@@ -45,6 +50,11 @@ bool ReceptionistController::updateReceptionist(const Receptionist& receptionist
 
     if (!ValidationUtils::isValidEmail(receptionist.getEmail())) {
         error = "Invalid email format!";
+        return false;
+    }
+
+    if (!ValidationUtils::isNonEmpty(receptionist.getPassword())) {
+        error = "Receptionist password cannot be empty.";
         return false;
     }
 

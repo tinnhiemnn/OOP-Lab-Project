@@ -1,5 +1,6 @@
 #include "database/DatabaseManager.h"
 #include "MainWindow.h"
+#include "LoginView.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -50,8 +51,19 @@ int main(int argc, char* argv[]) {
         QMessageBox::critical(nullptr, "Database Error", QString("Cannot open database:\n") + database.lastError());
         return 1;
     }
-    MainWindow window;
-    window.show();
+
+    LoginView loginView;
+    loginView.setWindowTitle("Login - Hotel Management System");
+    loginView.resize(1280, 720);
+    loginView.show();
+
+    MainWindow* mainWindow = nullptr;
+    QObject::connect(&loginView, &LoginView::loginSuccess, [&](const QString& role, const QString& username) {      
+        mainWindow = new MainWindow(role, username);
+        mainWindow->show();
+        loginView.close();
+    });
+
     return app.exec();
 }
 

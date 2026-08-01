@@ -20,19 +20,21 @@ namespace {
 }
 
 ReceptionistView::ReceptionistView(QWidget* parent)
-    : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)),
-    searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
+    : QWidget(parent), idEdit(new QLineEdit(this)), nameEdit(new QLineEdit(this)), emailEdit(new QLineEdit(this)), 
+    passwordEdit(new QLineEdit(this)), searchEdit(new QLineEdit(this)), table(new QTableWidget(this)) {
 
     idEdit->setReadOnly(true);
     idEdit->setPlaceholderText("Receptionist ID");
     nameEdit->setPlaceholderText("Receptionist Name");
     emailEdit->setPlaceholderText("abc@gmail.com");
+    passwordEdit->setPlaceholderText("Receptionist Password");
 
     auto* form = new QFormLayout;
     form->setVerticalSpacing(12);
     form->addRow("Receptionist ID",idEdit);
     form->addRow("Name",nameEdit);
     form->addRow("Email",emailEdit);
+    form->addRow("Password",passwordEdit);
     
 
     auto* actions = new QHBoxLayout;
@@ -66,8 +68,8 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     searching->addWidget(searchBtn);
 
     table->setObjectName("tableReceptionists");
-    table->setColumnCount(3);
-    table->setHorizontalHeaderLabels({"ID", "Name", "Email"});
+    table->setColumnCount(4);
+    table->setHorizontalHeaderLabels({"ID", "Name", "Email", "Password"});
     table->horizontalHeader()->setStretchLastSection(true);
 
     QHeaderView *header = table->horizontalHeader();
@@ -103,6 +105,7 @@ void ReceptionistView::refresh(const std::vector<Receptionist>& rows) {
         table->setItem(row, 0, new QTableWidgetItem(r.getId()));
         table->setItem(row, 1, new QTableWidgetItem(r.getName()));
         table->setItem(row, 2, new QTableWidgetItem(r.getEmail()));
+        table->setItem(row, 3, new QTableWidgetItem(r.getPassword()));
     }
 }
 
@@ -112,6 +115,7 @@ void ReceptionistView::reload() {
     idEdit->clear();
     nameEdit->clear();
     emailEdit->clear();
+    passwordEdit->clear();
 }
 
 void ReceptionistView::selected() {
@@ -120,13 +124,15 @@ void ReceptionistView::selected() {
     idEdit->setText(table->item(row, 0)->text());
     nameEdit->setText(table->item(row, 1)->text());
     emailEdit->setText(table->item(row, 2)->text());
+    passwordEdit->setText(table->item(row, 3)->text());
 }
 
 void ReceptionistView::add() { 
     QString e;
     Receptionist r(idEdit->text(), 
                nameEdit->text(), 
-               emailEdit->text());
+               emailEdit->text(),
+               passwordEdit->text());
 
     if (!controller.addReceptionist(r, e))
         error(e); 
@@ -138,7 +144,8 @@ void ReceptionistView::update() {
     QString e;
     const Receptionist r(idEdit->text(), 
                nameEdit->text(), 
-               emailEdit->text());
+               emailEdit->text(),
+               passwordEdit->text());
 
     if (!controller.updateReceptionist(r, e))
         error(e); 

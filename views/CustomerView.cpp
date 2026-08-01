@@ -120,8 +120,8 @@ void CustomerView::selected() {
     if (row < 0) return;
     idEdit->setText(table->item(row, 0)->text());
     nameEdit->setText(table->item(row, 1)->text());
-    emailEdit->setText(table->item(row, 2)->text());
-    phoneEdit->setText(table->item(row, 3)->text());
+    phoneEdit->setText(table->item(row, 2)->text());
+    emailEdit->setText(table->item(row, 3)->text());
 }
 
 void CustomerView::add() { 

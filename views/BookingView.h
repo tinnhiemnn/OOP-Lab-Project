@@ -33,6 +33,7 @@ struct RoomServiceRow {
 class BookingView : public QWidget {
 public:
     explicit BookingView(QWidget* parent = nullptr);
+    void setReceptionistId(const QString& recId);
 
 private:
     void refresh(const std::vector<Booking>& rows);

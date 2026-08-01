@@ -29,7 +29,7 @@ private:
     QLineEdit* idEdit;
     QLineEdit* nameEdit;
     QLineEdit* emailEdit;
-    QLineEdit* phoneEdit;
+    QLineEdit* passwordEdit;
     QLineEdit* searchEdit;
     QTableWidget* table;
 

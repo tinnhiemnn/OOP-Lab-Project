@@ -117,6 +117,13 @@ InvoiceView::InvoiceView(QWidget* parent)
     reload();
 }
 
+void InvoiceView::setReceptionistId(const QString& recId) {
+    if (receptionistIdEdit) {
+        receptionistIdEdit->setText(recId);
+        receptionistIdEdit->setReadOnly(true);
+    }
+}
+
 void InvoiceView::refresh(const std::vector<Invoice>& rows) {
     table->setRowCount(static_cast<int>(rows.size()));
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
