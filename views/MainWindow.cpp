@@ -49,13 +49,10 @@ MainWindow::MainWindow(const QString& role, const QString& username, QWidget* pa
     brandLayout->setContentsMargins(18, 20, 12, 16);
     brandLayout->setSpacing(10);
 
-    auto* brandMark = new QLabel(this);
+    auto* brandMark = new QLabel("PH", this);
     brandMark->setObjectName("brandMark");
     brandMark->setFixedSize(36, 36);
     brandMark->setAlignment(Qt::AlignCenter);
-
-    QPixmap home(":/icons/home.svg");
-    brandMark->setPixmap(home.scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
     brandLayout->addWidget(brandMark);
 

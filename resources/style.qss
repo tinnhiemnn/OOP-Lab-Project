@@ -44,10 +44,21 @@ QWidget#sidebarWrap {
     border-right: 0.5px solid #F8DCE8;
 }
 
-QLabel#brandMark {
+/*QLabel#brandMark {
     background-color: #EA8FAE;
     border-radius: 10px;
     padding: 4px;
+}*/
+
+QLabel#brandMark {
+    background-color: #EA8FAE;
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-family: "Inter";
+    font-weight: 600;
+    font-size: 14px;
+    qproperty-alignment: AlignCenter;
 }
 
 QLabel#brandName {
@@ -603,4 +614,164 @@ QLabel[role="rankAmt"] {
 }
 QFrame[rankTop1="true"] QLabel[role="rankAmt"] {
     color: #B45309;
+}
+
+/* ============================================================
+   LOGIN VIEW — Cổng đăng nhập dành cho NHÂN VIÊN (staff portal),
+   không phải trang đặt phòng cho khách. Bố cục 2 panel trong 1
+   khối card: Brand (trái, gradient hồng đậm) + Form (phải, nền
+   sáng). Cùng bảng màu với các View còn lại.
+   LƯU Ý: mọi QWidget dùng background-color/border-radius bên dưới
+   đều cần setAttribute(Qt::WA_StyledBackground, true) trong .cpp,
+   nếu không rule sẽ bị bỏ qua (xem mục "QSS WA_StyledBackground"
+   trong ghi chú dự án).
+   ============================================================ */
+QWidget#loginRoot {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #F6D8E4, stop:1 #FCE9F0);
+}
+
+QWidget#loginSplitCard {
+    background-color: #FFF6F9; /* fallback; 2 panel con phủ gần kín bề mặt */
+    border-radius: 26px;
+}
+
+/* --- Panel trái: Brand / Hero --- */
+QWidget#loginBrandPanel {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #F2A8C2, stop:1 #EA8FAE);
+    border-top-left-radius: 26px;
+    border-bottom-left-radius: 26px;
+}
+QLabel#brandMarkXl {
+    background-color: rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 16px;
+    color: #FFFFFF;
+    font-family: "Inter";
+    font-weight: 700;
+    font-size: 20px;
+    qproperty-alignment: AlignCenter;
+}
+QLabel#loginBrandTitle {
+    /* Ưu tiên serif sang trọng nếu máy có cài; nếu không, Qt tự rơi về
+       Georgia rồi tới serif hệ thống — không cần nhúng font mới. */
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: #FFFFFF;
+}
+QLabel#loginBrandTagline {
+    font-family: "Inter";
+    font-weight: 600;
+    font-size: 10.5px;
+    color: rgba(255, 255, 255, 0.85);
+    /* QSS không hỗ trợ letter-spacing; muốn chữ giãn cách kiểu "H O T E L"
+       thì chèn khoảng trắng thủ công vào chuỗi text ngay trong C++. */
+}
+QFrame#loginDivider {
+    background-color: rgba(255, 255, 255, 0.35);
+    border: none;
+}
+QLabel#loginNotice {
+    font-family: "Inter";
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.90);
+}
+QLabel#loginFeatures {
+    font-family: "Inter";
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- Panel phải: Form đăng nhập --- */
+QWidget#loginFormPanel {
+    background-color: #FFF6F9;
+    border-top-right-radius: 26px;
+    border-bottom-right-radius: 26px;
+}
+QLabel#loginEyebrow {
+    font-family: "Inter";
+    font-weight: 700;
+    font-size: 10.5px;
+    color: #D66A8C;
+}
+QLabel#loginTitle {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: #6B4557;
+}
+QLabel#loginSub {
+    font-family: "Inter";
+    font-size: 12.5px;
+    color: #B58CA0;
+}
+QLabel#fieldLabel {
+    font-family: "Inter";
+    font-weight: 600;
+    font-size: 11.5px;
+    color: #6B4557;
+}
+QLineEdit#loginInput {
+    background-color: #FCE9F0;
+    border: 1px solid #F3C6D9;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #6B4557;
+    selection-background-color: #EA8FAE;
+    selection-color: #FFFFFF;
+}
+QLineEdit#loginInput:focus { border: 1px solid #EA8FAE; }
+
+QPushButton#btnTogglePass {
+    background-color: #FCE9F0;
+    border: 1px solid #F3C6D9;
+    border-radius: 10px;
+    color: #B58CA0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0px;
+}
+QPushButton#btnTogglePass:hover   { background-color: #F3C6D9; }
+QPushButton#btnTogglePass:checked {
+    background-color: #EA8FAE;
+    color: #FFFFFF;
+    border: 1px solid #EA8FAE;
+}
+
+QCheckBox#rememberCheck { font-size: 12px; color: #B58CA0; }
+QCheckBox#rememberCheck::indicator:checked {
+    background-color: #D66A8C;
+    border: 1.5px solid #FFF6F9;
+    image: url(:/icons/check.svg);
+}
+
+QPushButton#btnForgotLink {
+    background-color: transparent;
+    border: none;
+    color: #D66A8C;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0px;
+}
+QPushButton#btnForgotLink:hover { color: #EA8FAE; }
+
+QPushButton#btnLogin {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #EA8FAE, stop:1 #D66A8C);
+    color: #FFFFFF;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13.5px;
+}
+QPushButton#btnLogin:hover   { background-color: #F2A8C2; }
+QPushButton#btnLogin:pressed { background-color: #D66A8C; }
+
+QLabel#loginFooter {
+    font-family: "Inter";
+    font-size: 10.5px;
+    color: #DCC0CE;
+    qproperty-alignment: AlignCenter;
 }

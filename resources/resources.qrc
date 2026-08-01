@@ -2,7 +2,6 @@
 <qresource prefix="/">
     <file>style.qss</file>
     <file>icons/check.svg</file>
-    <file>icons/home.svg</file>
     <file>fonts/Inter-Regular.ttf</file>
     <file>fonts/Inter-Bold.ttf</file>
     <file>fonts/Inter-SemiBold.ttf</file>

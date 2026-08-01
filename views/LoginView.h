@@ -3,6 +3,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
+#include <QCheckBox>
 #include "controllers/LoginController.h"
 
 class LoginView : public QWidget {
@@ -16,14 +17,19 @@ signals:
 
 private slots:
     void handleLogin();
+    void togglePasswordVisibility();
 
 private:
     void error(const QString& message);
+    void loadRememberedUser();
+    void saveRememberedUser();
 
-    QLineEdit* m_txtUser;
-    QLineEdit* m_txtPass;
+    QLineEdit*   m_txtUser;
+    QLineEdit*   m_txtPass;
+    QPushButton* m_btnTogglePass;
+    QCheckBox*   m_chkRemember;
+    QPushButton* m_btnForgot;
     QPushButton* m_btnLogin;
-    
-    LoginController m_controller; 
 
+    LoginController m_controller;
 };
