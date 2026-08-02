@@ -52,6 +52,7 @@ set(PROJECT_SOURCES
     views/ReportView.cpp 
     views/ReceptionistView.cpp 
     views/InvoiceView.cpp 
+    views/InvoiceDetailDialog.cpp
     views/OccupancyRing.cpp
 
     views/DashboardCard.h 
@@ -59,6 +60,7 @@ set(PROJECT_SOURCES
 
 add_executable(HotelManagement ${PROJECT_SOURCES}
     resources/resources.qrc
+    views/InvoiceDetailDialog.h
 )
 target_include_directories(HotelManagement PRIVATE ${PROJECT_INCLUDE_DIRS})
 target_link_libraries(HotelManagement PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql Qt6::Charts)

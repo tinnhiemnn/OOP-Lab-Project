@@ -56,4 +56,4 @@ std::optional<Invoice> InvoiceController::handleGetInvoiceByBookingId(const QStr
 std::vector<Invoice> InvoiceController::searchInvoices(const QString& keyword, const QString& discountName, const QString& PaymentMethod)
 {
     return invoiceRepo.search(keyword, discountName, PaymentMethod);
-}   
+}
