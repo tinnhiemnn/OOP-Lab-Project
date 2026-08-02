@@ -20,6 +20,7 @@ private:
     void refresh(const std::vector<Invoice>& rows);
     void reload();
     void selected();
+    void showDetail(int row);
     void add();
     void addGroup();          // NEW: "Create All Invoices in Group"
     void search();
@@ -31,6 +32,7 @@ private:
     // Cache of the last loaded/searched list, so filters can be applied
     // without re-querying the backend every time.
     std::vector<Invoice> currentInvoices;
+    std::vector<Invoice> displayedInvoices;
 
     QLineEdit* bookingIdEdit;
     QLineEdit* receptionistIdEdit;

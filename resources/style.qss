@@ -604,3 +604,34 @@ QLabel[role="rankAmt"] {
 QFrame[rankTop1="true"] QLabel[role="rankAmt"] {
     color: #B45309;
 }
+
+/* ------------------------------------------------------------------ */
+/* INVOICE DETAIL DIALOG                                              */
+/* ------------------------------------------------------------------ */
+QDialog#InvoiceDetailDialog {
+    background-color: #F6D8E4;
+}
+QLabel[role="sectionHeader"] {
+    font-family: "Inter";
+    font-weight: 700;
+    font-size: 13px;
+    color: #D66A8C;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #F8DCE8;
+    margin-top: 6px;
+}
+QLabel[role="detailKey"] {
+    color: #B58CA0;
+    font-size: 12px;
+    font-weight: 500;
+}
+QLabel[role="detailValue"] {
+    color: #6B4557;
+    font-weight: 600;
+    font-size: 12.5px;
+}
+QLabel[role="detailTotal"] {
+    color: #D66A8C;
+    font-weight: 700;
+    font-size: 14px;
+}

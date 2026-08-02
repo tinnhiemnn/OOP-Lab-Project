@@ -1,5 +1,6 @@
 #include "DashboardCard.h"
 #include "InvoiceView.h"
+#include "InvoiceDetailDialog.h"
 
 #include <QComboBox>
 #include <QDoubleSpinBox>
@@ -88,10 +89,10 @@ InvoiceView::InvoiceView(QWidget* parent)
     formCard->addContentLayout(actions);
 
     // --- Card 2: tim kiem + danh sach hoa don dang bang ---
-    table->setColumnCount(9);
+    table->setColumnCount(10);
     table->setHorizontalHeaderLabels({
         "ID", "Booking", "Receptionist", "Date",
-        "Subtotal", "Discount Name", "Discount Amount", "Total", "Payment"
+        "Subtotal", "Discount Name", "Discount Amount", "Total", "Payment", "Details"
     });
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -118,6 +119,7 @@ InvoiceView::InvoiceView(QWidget* parent)
 }
 
 void InvoiceView::refresh(const std::vector<Invoice>& rows) {
+    displayedInvoices = rows;
     table->setRowCount(static_cast<int>(rows.size()));
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const auto& i = rows[static_cast<size_t>(row)];
@@ -130,6 +132,12 @@ void InvoiceView::refresh(const std::vector<Invoice>& rows) {
         table->setItem(row, 6, new QTableWidgetItem(QString::number(i.getDiscountAmount(), 'f', 0)));
         table->setItem(row, 7, new QTableWidgetItem(QString::number(i.getTotalAmount(), 'f', 0)));
         table->setItem(row, 8, new QTableWidgetItem(Invoice::paymentMethodToString(i.getPaymentMethod())));
+
+        auto* detailBtn = new QPushButton("👀", this);
+        detailBtn->setProperty("variant", "ghost");
+        detailBtn->setCursor(Qt::PointingHandCursor);
+        connect(detailBtn, &QPushButton::clicked, this, [this, row] { showDetail(row); });
+        table->setCellWidget(row, 9, detailBtn);
     }
 }
 
@@ -173,6 +181,13 @@ void InvoiceView::selected() {
     receptionistIdEdit->setText(table->item(row, 2)->text());
     discountEdit->setCurrentText(table->item(row, 5)->text());
     paymentEdit->setCurrentText(table->item(row, 8)->text());
+}
+
+void InvoiceView::showDetail(int row) {
+    if (row < 0 || row >= static_cast<int>(displayedInvoices.size())) return;
+    const Invoice& inv = displayedInvoices[static_cast<size_t>(row)];
+    InvoiceDetailDialog dialog(inv, this);
+    dialog.exec();
 }
 
 void InvoiceView::add() {
