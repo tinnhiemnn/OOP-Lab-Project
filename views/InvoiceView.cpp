@@ -7,10 +7,13 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QFontMetrics>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QToolButton>
+#include <QIcon>
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QString>
@@ -92,7 +95,7 @@ InvoiceView::InvoiceView(QWidget* parent)
     table->setColumnCount(10);
     table->setHorizontalHeaderLabels({
         "ID", "Booking", "Receptionist", "Date",
-        "Subtotal", "Discount Name", "Discount Amount", "Total", "Payment", "Details"
+        "Subtotal", "Discount Name", "Discount Amount", "Total", "Payment", ""
     });
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -138,13 +141,43 @@ void InvoiceView::refresh(const std::vector<Invoice>& rows) {
         table->setItem(row, 5, new QTableWidgetItem(i.getDiscountName().isEmpty() ? "None" : i.getDiscountName()));
         table->setItem(row, 6, new QTableWidgetItem(QString::number(i.getDiscountAmount(), 'f', 0)));
         table->setItem(row, 7, new QTableWidgetItem(QString::number(i.getTotalAmount(), 'f', 0)));
-        table->setItem(row, 8, new QTableWidgetItem(Invoice::paymentMethodToString(i.getPaymentMethod())));
 
-        auto* detailBtn = new QPushButton("👀", this);
-        detailBtn->setProperty("variant", "ghost");
+        auto* paymentLbl = new QLabel(Invoice::paymentMethodToString(i.getPaymentMethod()), this);
+        paymentLbl->setStyleSheet("background: transparent; border: none;");
+        // Co dinh chieu rong cua label theo chuoi Payment dai nhat ("Bank Transfer")
+        // de icon more_info luon nam thang hang o cung mot vi tri X tren moi dong,
+        // khong bi lech theo do dai text (vd "Cash" ngan hon "Credit Card").
+        {
+            static const int kPaymentLabelWidth = QFontMetrics(paymentLbl->font())
+                .horizontalAdvance("Bank Transfer") + 20; // +20: keo icon ra xa hon mot chut
+            paymentLbl->setFixedWidth(kPaymentLabelWidth);
+        }
+
+        auto* detailBtn = new QToolButton(this);
+        detailBtn->setIcon(QIcon(":/icons/more_info.svg"));
+        detailBtn->setIconSize(QSize(26, 26));
+        detailBtn->setAutoRaise(true);
         detailBtn->setCursor(Qt::PointingHandCursor);
-        connect(detailBtn, &QPushButton::clicked, this, [this, row] { showDetail(row); });
-        table->setCellWidget(row, 9, detailBtn);
+        detailBtn->setToolTip("View invoice details");
+        detailBtn->setStyleSheet(
+            "QToolButton { border: none; background: transparent; padding: 0px; }"
+            "QToolButton:hover { background: transparent; }"
+            "QToolButton:pressed { background: transparent; }"
+        );
+        connect(detailBtn, &QToolButton::clicked, this, [this, row] { showDetail(row); });
+
+        // Gop cot Payment va cot icon lam mot (setSpan) de khong con duong
+        // ke doc giua 2 cot, dong thoi icon nam gan ngay ben canh text Payment.
+        table->setSpan(row, 8, 1, 2);
+        auto* cellWidget = new QWidget(this);
+        cellWidget->setStyleSheet("background: transparent; border: none;");
+        auto* cellLayout = new QHBoxLayout(cellWidget);
+        cellLayout->setContentsMargins(8, 0, 8, 0);
+        cellLayout->setSpacing(10);
+        cellLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        cellLayout->addWidget(paymentLbl);
+        cellLayout->addWidget(detailBtn);
+        table->setCellWidget(row, 8, cellWidget);
     }
 }
 
@@ -187,7 +220,9 @@ void InvoiceView::selected() {
     bookingIdEdit->setText(table->item(row, 1)->text());
     receptionistIdEdit->setText(table->item(row, 2)->text());
     discountEdit->setCurrentText(table->item(row, 5)->text());
-    paymentEdit->setCurrentText(table->item(row, 8)->text());
+    if (row < static_cast<int>(displayedInvoices.size())) {
+        paymentEdit->setCurrentText(Invoice::paymentMethodToString(displayedInvoices[static_cast<size_t>(row)].getPaymentMethod()));
+    }
 }
 
 void InvoiceView::showDetail(int row) {
