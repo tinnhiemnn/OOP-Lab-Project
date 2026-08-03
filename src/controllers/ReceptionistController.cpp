@@ -35,6 +35,11 @@ bool ReceptionistController::addReceptionist(Receptionist& receptionist, QString
         return false;
     }
 
+    if (!ValidationUtils::isValidPassword(receptionist.getPassword())) {
+        error = "Password must be 6-10 characters long and contain no special characters.";
+        return false;
+    }
+
     receptionist.setId(repository.generateNextId());
 
     if (repository.add(receptionist)) return true;
@@ -55,6 +60,11 @@ bool ReceptionistController::updateReceptionist(const Receptionist& receptionist
 
     if (!ValidationUtils::isNonEmpty(receptionist.getPassword())) {
         error = "Receptionist password cannot be empty.";
+        return false;
+    }
+
+    if (!ValidationUtils::isValidPassword(receptionist.getPassword())) {
+        error = "Password must be 6-10 characters long and contain no special characters.";
         return false;
     }
 

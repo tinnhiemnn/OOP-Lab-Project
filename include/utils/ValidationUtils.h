@@ -22,6 +22,16 @@ public:
         return true;
     }
 
+    static bool isValidPassword(const QString& password) {
+        if (password.size() < 6 || password.size() > 10) return false;
+        for (const QChar& c : password) {
+            if (!c.isLetterOrNumber()) {
+                return false; 
+            }
+        }
+        return true;
+    }
+
     static bool isPositiveMoney(double amount) {
         return amount > 0;
     }
