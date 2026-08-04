@@ -33,9 +33,12 @@ struct RoomServiceRow {
 class BookingView : public QWidget {
 public:
     explicit BookingView(QWidget* parent = nullptr);
-    void setReceptionistId(const QString& recId);
+    void setReceptionistId();
+    void setCurrentID(const QString& id);
 
 private:
+    QString currentId;
+
     void refresh(const std::vector<Booking>& rows);
     void reload();
     void selected(int row, int column);   // click 1 dòng trên table -> đổ dữ liệu lên form

@@ -121,9 +121,13 @@ InvoiceView::InvoiceView(QWidget* parent)
     reload();
 }
 
-void InvoiceView::setReceptionistId(const QString& recId) {
+void InvoiceView::setCurrentID(const QString& id) {
+    currentId = id;
+    setReceptionistId();
+}
+void InvoiceView::setReceptionistId() {
     if (receptionistIdEdit) {
-        receptionistIdEdit->setText(recId);
+        receptionistIdEdit->setText(currentId);
         receptionistIdEdit->setReadOnly(true);
     }
 }
@@ -210,6 +214,7 @@ void InvoiceView::reload() {
     table->setCurrentCell(-1, -1);
     bookingIdEdit->clear();
     receptionistIdEdit->clear();
+    setReceptionistId();
     discountEdit->setCurrentIndex(0);
     paymentEdit->setCurrentIndex(0);
 }

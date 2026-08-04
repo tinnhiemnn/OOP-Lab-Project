@@ -93,8 +93,8 @@ MainWindow::MainWindow(const QString& role, const QString& username, QWidget* pa
     auto* reportView = new ReportView(this);
 
     if (role == "RECEPTIONIST") {
-        bookingView->setReceptionistId(username);
-        invoiceView->setReceptionistId(username);
+        bookingView->setCurrentID(username);
+        invoiceView->setCurrentID(username);
     }
 
     auto* mainCol = new QWidget(this);

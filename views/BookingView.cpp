@@ -214,9 +214,14 @@ BookingView::BookingView(QWidget* parent)
     reload();
 }
 
-void BookingView::setReceptionistId(const QString& recId) {
+void BookingView::setCurrentID(const QString& id) {
+    currentId = id;
+    setReceptionistId();
+}
+
+void BookingView::setReceptionistId() {
     if (receptionistIdEdit) {
-        receptionistIdEdit->setText(recId);
+        receptionistIdEdit->setText(currentId);
         receptionistIdEdit->setReadOnly(true);
     }
 }
@@ -336,6 +341,7 @@ void BookingView::reload() {
     bookingIdEdit->clear();
     customerIdEdit->clear();
     receptionistIdEdit->clear();
+    setReceptionistId();
     checkInEdit->setDate(QDate::currentDate());
     checkOutEdit->setDate(QDate::currentDate().addDays(1));
 

@@ -15,9 +15,12 @@ class QFrame;
 class InvoiceView : public QWidget {
 public:
     explicit InvoiceView(QWidget* parent = nullptr);
-    void setReceptionistId(const QString& recId);
+    void setReceptionistId();
+    void setCurrentID(const QString& id);
 
 private:
+    QString currentId;
+
     void refresh(const std::vector<Invoice>& rows);
     void reload();
     void selected();
