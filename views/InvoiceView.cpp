@@ -121,10 +121,17 @@ InvoiceView::InvoiceView(QWidget* parent)
     reload();
 }
 
-void InvoiceView::setCurrentID(const QString& id) {
-    currentId = id;
+void InvoiceView::setBookingId(const QString& bookingId) {
+    if (bookingIdEdit) {
+        bookingIdEdit->setText(bookingId);
+    }
+}
+
+void InvoiceView::setCurrentReceptionistId(const QString& receptionistId) {
+    currentId = receptionistId;
     setReceptionistId();
 }
+
 void InvoiceView::setReceptionistId() {
     if (receptionistIdEdit) {
         receptionistIdEdit->setText(currentId);

@@ -15,12 +15,12 @@ class QFrame;
 class InvoiceView : public QWidget {
 public:
     explicit InvoiceView(QWidget* parent = nullptr);
-    void setReceptionistId();
-    void setCurrentID(const QString& id);
-
+    void setCurrentReceptionistId(const QString& receptionistId);
+    void setBookingId(const QString& bookingId);
+    
 private:
     QString currentId;
-
+    
     void refresh(const std::vector<Invoice>& rows);
     void reload();
     void selected();
@@ -29,6 +29,7 @@ private:
     void addGroup();          // NEW: "Create All Invoices in Group"
     void search();
     void applyFilters();      // NEW: client-side filter by discount/payment
+    void setReceptionistId();
     void error(const QString& message);
 
     InvoiceController controller;

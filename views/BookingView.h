@@ -31,14 +31,18 @@ struct RoomServiceRow {
 };
 
 class BookingView : public QWidget {
+    Q_OBJECT
+signals:
+    // Signal phát đi khi checkout thành công, truyền theo bookingId đã chọn
+    void checkoutCompleted(const QString& bookingId);
+
 public:
     explicit BookingView(QWidget* parent = nullptr);
-    void setReceptionistId();
-    void setCurrentID(const QString& id);
-
-private:
+    void setCurrentReceptionistId(const QString& id);
+    
+    private:
     QString currentId;
-
+    
     void refresh(const std::vector<Booking>& rows);
     void reload();
     void selected(int row, int column);   // click 1 dòng trên table -> đổ dữ liệu lên form
@@ -47,6 +51,7 @@ private:
     void checkOut();
     void cancel();
     void search();
+    void setReceptionistId();
     void error(const QString& message);
 
     void addRoomRow(const QString& roomId = QString());

@@ -93,9 +93,14 @@ MainWindow::MainWindow(const QString& role, const QString& username, QWidget* pa
     auto* reportView = new ReportView(this);
 
     if (role == "RECEPTIONIST") {
-        bookingView->setCurrentID(username);
-        invoiceView->setCurrentID(username);
+        bookingView->setCurrentReceptionistId(username);
+        invoiceView->setCurrentReceptionistId(username);
     }
+
+    connect(bookingView, &BookingView::checkoutCompleted, this, [this, invoiceView, sidebarNav](const QString& bookingId) {
+        invoiceView->setBookingId(bookingId);
+        sidebarNav->setCurrentRow(4); 
+    });
 
     auto* mainCol = new QWidget(this);
     auto* mainColLayout = new QVBoxLayout(mainCol);

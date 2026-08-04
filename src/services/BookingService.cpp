@@ -123,38 +123,63 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
 bool BookingService::checkIn(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
     if (!target) {
-        error = "Booking id not found!";
+        error = "Booking ID not found!";
         return false;
     }
 
-    Booking booking = target.value();
-    if (booking.getStatus() != BookingStatus::Booked) {
-        error = "This reservation is not in a check-in ready status!";
+    Booking selectedBooking = target.value();
+    QString groupCode = selectedBooking.getGroupCode();
+
+    std::vector<Booking> groupBookings = bookings.search(groupCode);
+    if (groupBookings.empty()) {
+        groupBookings.push_back(selectedBooking);
+    }
+
+    std::vector<Booking> bookingsToCheckIn;
+    for (const auto& b : groupBookings) {
+        if (b.getGroupCode() == groupCode && b.getStatus() == BookingStatus::Booked) {
+            bookingsToCheckIn.push_back(b);
+        }
+    }
+
+    if (bookingsToCheckIn.empty()) {
+        error = "No rooms in this group are ready for check-in!";
         return false;
     }
 
-    // Kiểm tra trạng thái phòng hiện tại có Available
-    auto roomPtr = rooms.findById(booking.getRoomId());
-    if (!roomPtr) {
-        error = "Room not found.";
-        return false;
-    }
-    
-    if (roomPtr->getStatus() != RoomStatus::Available) {
-        error = "The current room is not ready for check-in (Status: " + Room::statusToString(roomPtr->getStatus()) + ")!";
-        return false;
-    }
-
-    // Cập nhật trạng thái đơn đặt phòng sang CheckedIn
-    booking.markCheckedIn();
-    if (!bookings.update(booking)) {
-        error = "Error updating reservation status: " + bookings.lastError();
-        return false;
+    for (const auto& b : bookingsToCheckIn) {
+        auto roomPtr = rooms.findById(b.getRoomId());
+        if (!roomPtr) {
+            error = "Room " + b.getRoomId() + " not found!";
+            return false;
+        }
+        if (roomPtr->getStatus() != RoomStatus::Available) {
+            error = "Room " + b.getRoomId() + " is not ready for check-in (Status: " + Room::statusToString(roomPtr->getStatus()) + ")!";
+            return false;
+        }
     }
 
-    // Đồng bộ trạng thái phòng sang "InUse" (Đang sử dụng)
-    if (!rooms.updateStatus(booking.getRoomId(), RoomStatus::InUse)) {
-        error = "Room status update error: " + rooms.lastError();
+    if (!bookings.startTransaction()) {
+        error = "Failed to start transaction: " + bookings.lastError();
+        return false;
+    }
+    for (auto& b : bookingsToCheckIn) {
+        b.markCheckedIn();
+        if (!bookings.update(b)) {
+            bookings.rollbackTransaction();
+            error = "Error updating reservation status for " + b.getId() + ": " + bookings.lastError();
+            return false;
+        }
+
+        if (!rooms.updateStatus(b.getRoomId(), RoomStatus::InUse)) {
+            bookings.rollbackTransaction();
+            error = "Error updating room status for " + b.getRoomId() + ": " + rooms.lastError();
+            return false;
+        }
+    }
+    if (!bookings.commitTransaction()) {
+        bookings.rollbackTransaction();
+        error = "Failed to commit check-in transaction: " + bookings.lastError();
         return false;
     }
 
@@ -164,34 +189,64 @@ bool BookingService::checkIn(const QString& bookingId, QString& error) {
 bool BookingService::checkOut(const QString& bookingId, QString& error) {
     auto target = bookings.findById(bookingId);
     if (!target) {
-        error = "Booking id not found!";
+        error = "Booking ID not found!";
         return false;
     }
 
-    Booking booking = target.value();
-    if (booking.getStatus() != BookingStatus::CheckedIn) {
-        error = "This room has not been checked in, so it cannot be checked out!";
+    Booking selectedBooking = target.value();
+    QString groupCode = selectedBooking.getGroupCode();
+    
+    std::vector<Booking> groupBookings = bookings.search(groupCode);
+    if (groupBookings.empty()) {
+        groupBookings.push_back(selectedBooking);
+    }
+    
+    std::vector<Booking> bookingsToCheckOut;
+    for (const auto& b : groupBookings) {
+        if (b.getGroupCode() == groupCode && b.getStatus() == BookingStatus::CheckedIn) {
+            bookingsToCheckOut.push_back(b);
+        }
+    }
+    if (bookingsToCheckOut.empty()) {
+        error = "No rooms in this group are ready for check-out!";
         return false;
     }
 
-    auto roomPtr = rooms.findById(booking.getRoomId());
-    if (!roomPtr) {
-        error = "Room not found.";
+    for (const auto& b : bookingsToCheckOut) {
+        auto roomPtr = rooms.findById(b.getRoomId());
+        if (!roomPtr) {
+            error = "Room " + b.getRoomId() + " not found!";
+            return false;
+        }
+    }
+
+    if (!bookings.startTransaction()) {
+        error = "Failed to start transaction: " + bookings.lastError();
         return false;
     }
 
-    // Đổi trạng thái đơn thành CheckedOut
-    booking.markCheckedOut();
-    if (!bookings.update(booking)) {
-        error = "Error updating order status to CheckedOut: " + bookings.lastError();
+    for (auto& b : bookingsToCheckOut) {    
+        b.markCheckedOut();
+        if (!bookings.update(b)) {
+            bookings.rollbackTransaction();
+            error = "Error updating booking status for " + b.getId() + ": " + bookings.lastError();
+            return false;
+        }
+
+        if (!rooms.updateStatus(b.getRoomId(), RoomStatus::NeedCleaning)) {
+            bookings.rollbackTransaction();
+            error = "Error updating room status for " + b.getRoomId() + ": " + rooms.lastError();
+            return false;
+        }
+    }
+
+    if (!bookings.commitTransaction()) {
+        bookings.rollbackTransaction();
+        error = "Failed to commit checkout transaction: " + bookings.lastError();
         return false;
     }
 
-    // Đổi trạng thái phòng sang NeedCleaning
-    if (!rooms.updateStatus(booking.getRoomId(), RoomStatus::NeedCleaning)) {
-        error = "Error updating order status to NeedCleaning: " + rooms.lastError();
-        return false;
-    }
+    return true;
 
     return true;
 }

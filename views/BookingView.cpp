@@ -214,7 +214,7 @@ BookingView::BookingView(QWidget* parent)
     reload();
 }
 
-void BookingView::setCurrentID(const QString& id) {
+void BookingView::setCurrentReceptionistId(const QString& id) {
     currentId = id;
     setReceptionistId();
 }
@@ -411,7 +411,11 @@ void BookingView::checkIn() {
 }
 void BookingView::checkOut() {
     QString e;
-    if (!controller.processCheckOut(text(bookingIdEdit), e)) error(e); else reload();
+    if (!controller.processCheckOut(text(bookingIdEdit), e)) error(e); else {
+        QString selectedBookingId = text(bookingIdEdit);
+        reload();
+        emit checkoutCompleted(selectedBookingId);
+    }
 }
 void BookingView::cancel() {
     QString e;
