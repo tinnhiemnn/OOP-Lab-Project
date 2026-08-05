@@ -100,6 +100,7 @@ InvoiceView::InvoiceView(QWidget* parent)
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSortingEnabled(true);
 
     tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
@@ -139,19 +140,26 @@ void InvoiceView::setReceptionistId() {
     }
 }
 
+auto* itemNumber(double t) {
+    auto* item = new QTableWidgetItem();
+    item->setData(Qt::DisplayRole, (int)t);
+    return item;
+}
 void InvoiceView::refresh(const std::vector<Invoice>& rows) {
     displayedInvoices = rows;
+    table->setSortingEnabled(false);
     table->setRowCount(static_cast<int>(rows.size()));
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const auto& i = rows[static_cast<size_t>(row)];
+        
         table->setItem(row, 0, new QTableWidgetItem(i.getId()));
         table->setItem(row, 1, new QTableWidgetItem(i.getBookingId()));
         table->setItem(row, 2, new QTableWidgetItem(i.getReceptionistId()));
         table->setItem(row, 3, new QTableWidgetItem(i.getIssuedDate().toString("yyyy-MM-dd")));
-        table->setItem(row, 4, new QTableWidgetItem(QString::number(i.getSubtotalAmount(), 'f', 0)));
+        table->setItem(row, 4, itemNumber(i.getSubtotalAmount()));
         table->setItem(row, 5, new QTableWidgetItem(i.getDiscountName().isEmpty() ? "None" : i.getDiscountName()));
-        table->setItem(row, 6, new QTableWidgetItem(QString::number(i.getDiscountAmount(), 'f', 0)));
-        table->setItem(row, 7, new QTableWidgetItem(QString::number(i.getTotalAmount(), 'f', 0)));
+        table->setItem(row, 6, itemNumber(i.getDiscountAmount()));
+        table->setItem(row, 7, itemNumber(i.getTotalAmount()));
 
         auto* paymentLbl = new QLabel(Invoice::paymentMethodToString(i.getPaymentMethod()), this);
         paymentLbl->setStyleSheet("background: transparent; border: none;");
@@ -190,6 +198,7 @@ void InvoiceView::refresh(const std::vector<Invoice>& rows) {
         cellLayout->addWidget(detailBtn);
         table->setCellWidget(row, 8, cellWidget);
     }
+    table->setSortingEnabled(true);
 }
 
 void InvoiceView::applyFilters() {

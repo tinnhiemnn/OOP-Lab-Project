@@ -70,6 +70,7 @@ CustomerView::CustomerView(QWidget* parent)
     table->setColumnCount(4);
     table->setHorizontalHeaderLabels({"ID", "Name", "Phone", "Email"});
     table->horizontalHeader()->setStretchLastSection(true);
+    table->setSortingEnabled(true);
 
     QHeaderView *header = table->horizontalHeader();
     header->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -97,6 +98,7 @@ CustomerView::CustomerView(QWidget* parent)
 
 void CustomerView::refresh(const std::vector<Customer>& rows) {
     table->setRowCount(static_cast<int>(rows.size()));
+    table->setSortingEnabled(false);
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const auto& c = rows[static_cast<size_t>(row)];
         table->setItem(row, 0, new QTableWidgetItem(c.getId()));
@@ -104,6 +106,7 @@ void CustomerView::refresh(const std::vector<Customer>& rows) {
         table->setItem(row, 2, new QTableWidgetItem(c.getPhone()));
         table->setItem(row, 3, new QTableWidgetItem(c.getEmail()));
     }
+    table->setSortingEnabled(true);
 }
 
 void CustomerView::reload() { 

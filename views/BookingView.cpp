@@ -188,6 +188,7 @@ BookingView::BookingView(QWidget* parent)
     bookingTable->setSelectionMode(QAbstractItemView::SingleSelection);
     bookingTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     bookingTable->verticalHeader()->setVisible(false);
+    bookingTable->setSortingEnabled(true);
 
     auto* tableLayout = new QVBoxLayout;
     tableLayout->addWidget(bookingTable);
@@ -317,7 +318,7 @@ void BookingView::clearExtraRoomRows() {
 
 void BookingView::refresh(const std::vector<Booking>& rows) {
     currentRows = rows;
-
+    bookingTable->setSortingEnabled(false);
     bookingTable->setRowCount(0);
     bookingTable->setRowCount(static_cast<int>(rows.size()));
 
@@ -346,6 +347,7 @@ void BookingView::refresh(const std::vector<Booking>& rows) {
         setCell(8, Booking::statusToString(b.getStatus()));
         ++r;
     }
+    bookingTable->setSortingEnabled(true);
 }
 
 void BookingView::reload() {

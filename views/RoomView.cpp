@@ -119,6 +119,7 @@ RoomView::RoomView(QWidget* parent)
     table->horizontalHeader()->setStretchLastSection(true);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSortingEnabled(true);
 
     tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(controls);
@@ -140,16 +141,23 @@ RoomView::RoomView(QWidget* parent)
     reload();
 }
 
+auto* itemNumber(int t) {
+    auto* item = new QTableWidgetItem();
+    item->setData(Qt::DisplayRole, t);
+    return item;
+}
 void RoomView::refresh(std::vector<std::unique_ptr<Room>> rows) {
     table->setRowCount(static_cast<int>(rows.size()));
+    table->setSortingEnabled(false);
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const auto& room = rows[static_cast<size_t>(row)];
         table->setItem(row, 0, new QTableWidgetItem(room->getRoomId()));
         table->setItem(row, 1, new QTableWidgetItem(Room::typeToString(room->getRoomType())));
-        table->setItem(row, 2, new QTableWidgetItem(QString::number(room->getBasePrice(), 'f', 0)));
-        table->setItem(row, 3, new QTableWidgetItem(QString::number(room->getBeds())));
+        table->setItem(row, 2, itemNumber((int)room->getBasePrice()));
+        table->setItem(row, 3, itemNumber(room->getBeds()));
         table->setItem(row, 4, new QTableWidgetItem(Room::statusToString(room->getStatus())));
     }
+    table->setSortingEnabled(true);
 }
 
 void RoomView::reload() {

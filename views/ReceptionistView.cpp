@@ -77,6 +77,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
 
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSortingEnabled(true);
 
     tableCard = new DashboardCard(QString(), this);
     tableCard->addContentLayout(searching);
@@ -100,6 +101,7 @@ ReceptionistView::ReceptionistView(QWidget* parent)
 
 void ReceptionistView::refresh(const std::vector<Receptionist>& rows) {
     table->setRowCount(static_cast<int>(rows.size()));
+    table->setSortingEnabled(false);
     for (int row = 0; row < static_cast<int>(rows.size()); ++row) {
         const auto& r = rows[static_cast<size_t>(row)];
         table->setItem(row, 0, new QTableWidgetItem(r.getId()));
@@ -107,6 +109,7 @@ void ReceptionistView::refresh(const std::vector<Receptionist>& rows) {
         table->setItem(row, 2, new QTableWidgetItem(r.getEmail()));
         table->setItem(row, 3, new QTableWidgetItem(r.getPassword()));
     }
+    table->setSortingEnabled(true);
 }
 
 void ReceptionistView::reload() {
