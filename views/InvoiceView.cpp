@@ -133,7 +133,7 @@ void InvoiceView::setCurrentReceptionistId(const QString& receptionistId) {
 }
 
 void InvoiceView::setReceptionistId() {
-    if (receptionistIdEdit) {
+    if (receptionistIdEdit  && !currentId.isEmpty()) {
         receptionistIdEdit->setText(currentId);
         receptionistIdEdit->setReadOnly(true);
     }

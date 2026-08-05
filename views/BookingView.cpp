@@ -220,7 +220,7 @@ void BookingView::setCurrentReceptionistId(const QString& id) {
 }
 
 void BookingView::setReceptionistId() {
-    if (receptionistIdEdit) {
+    if (receptionistIdEdit && !currentId.isEmpty()) {
         receptionistIdEdit->setText(currentId);
         receptionistIdEdit->setReadOnly(true);
     }

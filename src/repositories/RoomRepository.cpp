@@ -113,7 +113,8 @@ std::vector<std::unique_ptr<Room>> RoomRepository::findAvailableInPeriod(const Q
               "WHERE r.id NOT IN ( "
                 "SELECT b.room_id FROM bookings b "
                 "WHERE b.check_in < ? AND b.check_out > ? AND b.status != 'Cancelled' AND b.status != 'CheckedOut' " 
-              ");");
+              ") AND r.status <> 'Maintenance' "
+              "ORDER BY r.id");
         
     q.addBindValue(checkOut);
     q.addBindValue(checkIn);
