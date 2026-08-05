@@ -73,8 +73,9 @@ BookingView::BookingView(QWidget* parent)
     bookingIdEdit->setPlaceholderText("Booking ID");
     bookingIdEdit->setReadOnly(true);
     
-    customerIdEdit->setPlaceholderText("Customer ID");
+    customerIdEdit->setPlaceholderText("Search Customer ID / Name / Phone..");
     receptionistIdEdit->setPlaceholderText("Receptionist ID");
+    setupCustomerAutocomplete();
 
 
     // --- Nhóm thông tin cố định: Booking ID, Group ID, Customer ID, Receptionist ID, Check-in, Check-out ---
@@ -376,7 +377,17 @@ void BookingView::selected(int row, int /*column*/) {
     const Booking& b = currentRows[row];
 
     bookingIdEdit->setText(b.getId());
-    customerIdEdit->setText(b.getCustomerId());
+
+    auto c = cus_controller.getCustomerById(b.getCustomerId());
+    if (c.has_value()) {
+        QString customerInfo = QString("%1 - %2 (%3)")
+                                   .arg(c->getId())
+                                   .arg(c->getName())
+                                   .arg(c->getPhone());
+        customerIdEdit->setText(customerInfo);
+    }
+    else customerIdEdit->setText(b.getCustomerId());
+
     receptionistIdEdit->setText(b.getReceptionistId());
     checkInEdit->setDate(b.getCheckIn());
     checkOutEdit->setDate(b.getCheckOut());
@@ -414,8 +425,15 @@ void BookingView::add() {
         return;
     }
 
+    QString customerId;
+    QStringList customerIdParts = text(customerIdEdit).split(" - ");
+    if (!customerIdParts.isEmpty()) {
+        customerId = customerIdParts[0].trimmed(); 
+    }
+    else customerId = text(customerIdEdit);
+
     QString e;
-    if (!controller.createMultiBookings(text(customerIdEdit), roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), services, e)) {
+    if (!controller.createMultiBookings(customerId, roomIds, checkInEdit->date(), checkOutEdit->date(), text(receptionistIdEdit), services, e)) {
         error(e);
         return;
     }
@@ -474,6 +492,43 @@ void BookingView::updateAvailableRoomsDropdowns() {
 
         r.roomIdEdit->blockSignals(false);
     }
+}
+
+void BookingView::setupCustomerAutocomplete() {
+    completerModel = new QStringListModel(this);
+    customerCompleter = new QCompleter(completerModel, this);
+    
+    // Cấu hình chế độ tìm kiếm: Chấp nhận từ bất kỳ vị trí nào (Unfiltered/MatchContains)
+    customerCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    customerCompleter->setFilterMode(Qt::MatchContains);
+    customerCompleter->setCompletionMode(QCompleter::PopupCompletion);
+    
+    // Gán Completer cho ô nhập customerIdEdit
+    customerIdEdit->setCompleter(customerCompleter);
+
+    // Bắt sự kiện khi người dùng gõ phím vào ô customerIdEdit
+    connect(customerIdEdit, &QLineEdit::textEdited, this, [this](const QString& text) {
+        if (text.trimmed().isEmpty()) {
+            completerModel->setStringList(QStringList());
+            return;
+        }
+
+        auto customers = cus_controller.searchCustomers(text); 
+
+        QStringList suggestions;
+        for (const auto& c : customers) {
+            // Định dạng hiển thị trong popup list: "CUS001 - Nguyễn Văn A - 0901234567"
+            QString itemText = QString("%1 - %2 (%3)")
+                               .arg(c.getId())
+                               .arg(c.getName())
+                               .arg(c.getPhone());
+            suggestions << itemText;
+        }
+
+        // Cập nhật lại danh sách gợi ý cho Completer
+        completerModel->setStringList(suggestions);
+        customerCompleter->complete(); // Hiển thị popup đổ xuống
+    });
 }
 
 void BookingView::error(const QString& message) { QMessageBox::warning(this, "Booking Error", message); }

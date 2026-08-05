@@ -1,12 +1,15 @@
 #pragma once
 
 #include "controllers/BookingController.h"
+#include "controllers/CustomerController.h"
 #include "models/Booking.h"
 
 #include <DashboardCard.h>
 #include <QWidget>
 #include <QVector>
 #include <QComboBox>
+#include <QCompleter>
+#include <QStringListModel>
 
 class QComboBox;
 class QDateEdit;
@@ -42,7 +45,7 @@ public:
     explicit BookingView(QWidget* parent = nullptr);
     void setCurrentReceptionistId(const QString& id);
     
-    private:
+private:
     QString currentId;
     
     void refresh(const std::vector<Booking>& rows);
@@ -59,8 +62,10 @@ public:
     void addRoomRow(const QString& roomId = QString());
     void clearExtraRoomRows();   // giữ lại đúng 1 dòng Room khi đổ dữ liệu 1 booking đã chọn lên form
     void updateAvailableRoomsDropdowns();
+    void setupCustomerAutocomplete();
 
     BookingController controller;
+    CustomerController cus_controller;
 
     QLineEdit* bookingIdEdit;    // Booking ID (READ-ONLY)
     QLineEdit* customerIdEdit;
@@ -77,6 +82,9 @@ public:
 
     QTableWidget* bookingTable;
     std::vector<Booking> currentRows;   // cache dữ liệu đang hiển thị trên table, dùng khi selected()
+
+    QCompleter* customerCompleter;      // Completer xử lý popup danh sách
+    QStringListModel* completerModel;  // Model lưu danh sách gợi ý
 
     DashboardCard* formCard;
     DashboardCard* tableCard;
