@@ -308,7 +308,7 @@ QLineEdit, QComboBox, QDateEdit, QSpinBox, QDoubleSpinBox {
 }
 QLineEdit:focus, QComboBox:focus, QDateEdit:focus { border: 1px solid #EA8FAE; }
 QComboBox::drop-down { border: none; width: 22px; }
-QComboBox QAbstractItemView {
+QComboBox QAbstractItemView, QListView {
     background-color: #FFF6F9;
     border: 1px solid #F3C6D9;
     selection-background-color: #EA8FAE;
@@ -804,4 +804,26 @@ QLabel[role="detailTotal"] {
     color: #D66A8C;
     font-weight: 700;
     font-size: 14px;
+}
+/* ------------------------------------------------------------------ */
+/* ERROR MESSAGE                                                      */
+/* ------------------------------------------------------------------ */
+QMessageBox {
+    background-color: #FFFFFF;
+    border-radius: 12px;
+}
+QMessageBox QLabel {
+    color: #6B4557;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 4px;
+}
+QMessageBox QPushButton {
+    background-color: #D66A8C;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 18px;
+    font-weight: bold;
+    min-width: 70px;
 }
