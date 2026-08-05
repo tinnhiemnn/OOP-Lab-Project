@@ -235,10 +235,8 @@ void BookingView::addRoomRow(const QString& roomId) {
     row->setContentsMargins(0, 0, 0, 0);
     row->setSpacing(8);
 
-    r.roomIdEdit = new QLineEdit(this);
-    r.roomIdEdit->setPlaceholderText("Room ID");
-    r.roomIdEdit->setMaximumWidth(110);
-    if (!roomId.isEmpty()) r.roomIdEdit->setText(roomId);
+    r.roomIdEdit = new QComboBox(this);
+    r.roomIdEdit->setMinimumWidth(110);
 
     auto* buffetLbl = new QLabel("Buffet:", this);
 
@@ -277,6 +275,20 @@ void BookingView::addRoomRow(const QString& roomId) {
     // Chen truoc phan tu stretch (luon la item cuoi cung) de cac dong Room dong len tren.
     roomsLayout->insertWidget(roomsLayout->count() - 1, r.rowWidget);
 
+    updateAvailableRoomsDropdowns();
+    // Nếu có truyền sẵn roomId (ví dụ khi chọn từ bảng)
+    if (!roomId.isEmpty()) {
+        int idx = r.roomIdEdit->findText(roomId);
+        if (idx != -1) {
+            r.roomIdEdit->setCurrentIndex(idx);
+        } else {
+            // Trường hợp phòng đang chọn không nằm trong danh sách rảnh (ví dụ phòng đang bận), 
+            // thêm tạm vào để hiển thị
+            r.roomIdEdit->addItem(roomId);
+            r.roomIdEdit->setCurrentText(roomId);
+        }
+    }
+
     connect(removeBtn, &QPushButton::clicked, this, [this, r] {
         if (roomRows.size() <= 1) return; // luôn giữ ít nhất 1 phòng trong nhóm
         for (int i = 0; i < roomRows.size(); ++i) {
@@ -287,6 +299,9 @@ void BookingView::addRoomRow(const QString& roomId) {
         }
         r.rowWidget->deleteLater();
     });
+
+    connect(checkInEdit, &QDateEdit::dateChanged, this, [this] { updateAvailableRoomsDropdowns(); });
+    connect(checkOutEdit, &QDateEdit::dateChanged, this, [this] { updateAvailableRoomsDropdowns(); });
 }
 
 void BookingView::clearExtraRoomRows() {
@@ -348,7 +363,7 @@ void BookingView::reload() {
     clearExtraRoomRows();
     if (!roomRows.isEmpty()) {
         auto& r = roomRows.first();
-        r.roomIdEdit->clear();
+        updateAvailableRoomsDropdowns();
         r.buffetQtyEdit->setValue(0);
         r.laundryCheck->setChecked(false);
         r.decorCheck->setChecked(false);
@@ -368,7 +383,10 @@ void BookingView::selected(int row, int /*column*/) {
 
     clearExtraRoomRows();
     auto& r = roomRows.first();
-    r.roomIdEdit->setText(b.getRoomId());
+    if (r.roomIdEdit->findText(b.getRoomId()) == -1) {
+        r.roomIdEdit->addItem(b.getRoomId());
+    }
+    r.roomIdEdit->setCurrentText(b.getRoomId());
     r.buffetQtyEdit->setValue(b.getBuffetQuantity());
     r.laundryCheck->setChecked(b.isUsingLaundry());
     r.decorCheck->setChecked(b.isUsingDecoration());
@@ -379,8 +397,8 @@ void BookingView::add() {
     std::vector<QString> roomIds;
     std::vector<RoomServiceSelection> services;   // mỗi phòng có 1 service riêng, khớp index với roomIds
     for (const auto& r : roomRows) {
-        const QString roomId = text(r.roomIdEdit);
-        if (roomId.isEmpty()) continue;
+        const QString roomId = r.roomIdEdit->currentText().trimmed();
+        if (roomId.isEmpty() || roomId == "No Room") continue;
         roomIds.push_back(roomId);
 
         RoomServiceSelection service;
@@ -424,6 +442,38 @@ void BookingView::cancel() {
 
 void BookingView::search() {
     refresh(controller.searchBookings(text(searchEdit)));
+}
+
+void BookingView::updateAvailableRoomsDropdowns() {
+    QDate checkIn = checkInEdit->date();
+    QDate checkOut = checkOutEdit->date();
+    std::vector<QString> availableRoomIds = controller.getAvailableRoomIds(checkIn, checkOut);
+    for (auto& r : roomRows) {
+        if (!r.roomIdEdit) continue;
+        QString currentSelected = r.roomIdEdit->currentText();
+
+        r.roomIdEdit->blockSignals(true); // Tắt signal tạm thời để tránh trigger sự kiện
+        r.roomIdEdit->clear();
+
+        // Nếu danh sách rảnh trống
+        if (availableRoomIds.empty()) {
+            r.roomIdEdit->addItem("No Room");
+        } else {
+            for (const auto& id : availableRoomIds) {
+                r.roomIdEdit->addItem(id);
+            }
+        }
+
+        // Khôi phục lại lựa chọn cũ nếu mã phòng đó vẫn còn trong danh sách rảnh
+        int idx = r.roomIdEdit->findText(currentSelected);
+        if (idx != -1) {
+            r.roomIdEdit->setCurrentIndex(idx);
+        } else if (r.roomIdEdit->count() > 0) {
+            r.roomIdEdit->setCurrentIndex(0);
+        }
+
+        r.roomIdEdit->blockSignals(false);
+    }
 }
 
 void BookingView::error(const QString& message) { QMessageBox::warning(this, "Booking Error", message); }

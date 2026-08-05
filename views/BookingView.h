@@ -6,7 +6,9 @@
 #include <DashboardCard.h>
 #include <QWidget>
 #include <QVector>
+#include <QComboBox>
 
+class QComboBox;
 class QDateEdit;
 class QLineEdit;
 class QTableWidget;
@@ -23,7 +25,7 @@ class QWidget;
 // Dịch vụ (buffet/laundry/decoration) đi kèm TỪNG phòng vì Booking.h lưu field này theo từng record.
 struct RoomServiceRow {
     QWidget* rowWidget = nullptr;
-    QLineEdit* roomIdEdit = nullptr;
+    QComboBox* roomIdEdit = nullptr;
     QSpinBox* buffetQtyEdit = nullptr;
     QCheckBox* laundryCheck = nullptr;
     QCheckBox* decorCheck = nullptr;
@@ -51,11 +53,12 @@ public:
     void checkOut();
     void cancel();
     void search();
-    void setReceptionistId();
     void error(const QString& message);
-
+    
+    void setReceptionistId();
     void addRoomRow(const QString& roomId = QString());
     void clearExtraRoomRows();   // giữ lại đúng 1 dòng Room khi đổ dữ liệu 1 booking đã chọn lên form
+    void updateAvailableRoomsDropdowns();
 
     BookingController controller;
 

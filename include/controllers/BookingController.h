@@ -33,4 +33,5 @@ public:
     std::vector<Booking> getAllBookings();
 
     std::vector<Booking> searchBookings(const QString& keyword);
+    std::vector<QString> getAvailableRoomIds(const QDate& checkIn, const QDate& checkOut);
 };

@@ -86,3 +86,17 @@ std::vector<Booking> BookingController::searchBookings (const QString& keyword)
 {
     return bookingRepo.search(keyword);
 }
+
+std::vector<QString> BookingController::getAvailableRoomIds(const QDate& checkIn, const QDate& checkOut) {
+    std::vector<QString> availableIds;
+    if (checkIn >= checkOut) return availableIds;
+    
+    auto rooms = roomRepo.findAvailableInPeriod(checkIn, checkOut); 
+    for (const auto& room : rooms) {
+        if (room) {
+            availableIds.push_back(room->getRoomId());
+        }
+    }
+    
+    return availableIds;
+}
