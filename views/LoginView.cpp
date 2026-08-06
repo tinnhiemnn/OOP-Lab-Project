@@ -177,6 +177,8 @@ LoginView::LoginView(QWidget *parent) : QWidget(parent) {
         QMessageBox::information(this, "Forgot Password",
             "Please contact your system administrator to reset your password.");
     });
+    connect(m_txtUser, &QLineEdit::returnPressed, m_txtPass, QOverload<>::of(&QWidget::setFocus));
+    connect(m_txtPass, &QLineEdit::returnPressed, m_btnLogin, &QPushButton::click);
 
     loadRememberedUser();
 }

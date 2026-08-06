@@ -213,6 +213,8 @@ BookingView::BookingView(QWidget* parent)
     connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
     connect(bookingTable, &QTableWidget::cellClicked, this, [this](int row, int col) { selected(row, col); });
 
+    connect(searchEdit, &QLineEdit::returnPressed, searchBtn, &QPushButton::click);
+
     reload();
 }
 
@@ -376,7 +378,16 @@ void BookingView::reload() {
 
 void BookingView::selected(int row, int /*column*/) {
     if (row < 0 || row >= static_cast<int>(currentRows.size())) return;
-    const Booking& b = currentRows[row];
+    
+    QTableWidgetItem* idItem = bookingTable->item(row, 0);
+    if (!idItem) return;
+    QString bookingId = idItem->text();
+    auto it = std::find_if(currentRows.begin(), currentRows.end(), [&bookingId](const Booking& b) {
+        return b.getId() == bookingId;
+    });
+
+    if (it == currentRows.end()) return;
+    const Booking& b = *it;
 
     bookingIdEdit->setText(b.getId());
 

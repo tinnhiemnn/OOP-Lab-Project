@@ -616,6 +616,15 @@ QFrame[rankTop1="true"] QLabel[role="rankAmt"] {
     color: #B45309;
 }
 
+QToolTip {
+    background-color: #2B2D42;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
 /* ============================================================
    LOGIN VIEW — Cổng đăng nhập dành cho NHÂN VIÊN (staff portal),
    không phải trang đặt phòng cho khách. Bố cục 2 panel trong 1

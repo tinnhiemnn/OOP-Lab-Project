@@ -24,6 +24,10 @@
 #include <QBarCategoryAxis>
 #include <QValueAxis>
 #include <QAbstractAxis>
+#include <QCategoryAxis>
+#include <QLocale>
+#include <QToolTip>
+#include <QCursor>
 
 #include <algorithm>
 
@@ -454,9 +458,10 @@ void ReportView::updateRevenueChart(const QString& year) {
     auto* smoothLine = new QSplineSeries();
     double maxVal = 0;
     for (int i = 0; i < static_cast<int>(data.size()) && i < kMonthCount; ++i) {
-        boundaryLine->append(i, data[static_cast<size_t>(i)]);
-        smoothLine->append(i, data[static_cast<size_t>(i)]);
-        maxVal = qMax(maxVal, data[static_cast<size_t>(i)]);
+        double valInMillions = data[static_cast<size_t>(i)] / 1000000.0;
+        boundaryLine->append(i, valInMillions);
+        smoothLine->append(i, valInMillions);
+        maxVal = qMax(maxVal, valInMillions);
     }
 
     // Vùng fill gradient dưới đường line, giống hiệu ứng trong mockup.
@@ -494,7 +499,11 @@ void ReportView::updateRevenueChart(const QString& year) {
     axisX->setGridLineVisible(false);
 
     auto* axisY = new QValueAxis;
-    axisY->setRange(0, maxVal > 0 ? maxVal * 1.15 : 10);
+    double maxRange = maxVal > 0 ? maxVal * 1.15 : 10;
+
+    axisY->setRange(0, maxRange);
+    axisY->setTickCount(5);
+    axisY->setLabelFormat("%.1f M");
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
@@ -505,6 +514,20 @@ void ReportView::updateRevenueChart(const QString& year) {
     styleAxis(axisX);
     styleAxis(axisY);
 
+    connect(smoothLine, &QSplineSeries::hovered, this, [](const QPointF &point, bool state) {
+        if (state) {
+            int monthIdx = qBound(0, qRound(point.x()), 11);
+            QString monthName = kMonthLabels[monthIdx];
+            
+            QLocale locale(QLocale::Vietnamese, QLocale::Vietnam);
+            QString amountStr = locale.toString(static_cast<qlonglong>(point.y() * 1000000.0));
+
+            // Hiển thị Tooltip ngay tại vị trí con trỏ chuột
+            QToolTip::showText(QCursor::pos(), QString("<b>%1</b>: %2 VND").arg(monthName, amountStr));
+        } else {
+            QToolTip::hideText(); // Ẩn Tooltip khi di chuột ra ngoài
+        }
+    });
     revenueChartView->setChart(chart);
 }
 
@@ -515,7 +538,7 @@ void ReportView::updateRoomTypeChart() {
     // --- Donut: tỉ lệ doanh thu theo loại phòng ---
     clearLayout(roomPieLegendLayout);
     auto* pieSeries = new QPieSeries();
-    pieSeries->setHoleSize(0.52); // giảm từ 0.62 -> vòng donut dày hơn
+    pieSeries->setHoleSize(0.42); 
     for (int i = 0; i < static_cast<int>(rooms.size()); ++i) {
         const auto& r = rooms[static_cast<size_t>(i)];
         auto* slice = pieSeries->append(r.roomType, r.revenuePercentage);
@@ -524,13 +547,25 @@ void ReportView::updateRoomTypeChart() {
         slice->setBorderColor(chartBackground);
         slice->setBorderWidth(3);
 
-        // Chú thích tương ứng slice này, ví dụ "Standard 35%" - dùng đúng
+        // Chú thích tương ứng slice này, ví dụ "Standard" - dùng đúng
         // màu roomColors[i % 3] để khớp màu slice trên donut.
-        const QString legendText =
-            QString("%1 %2%").arg(r.roomType).arg(qRound(r.revenuePercentage));
+        const QString legendText = QString("%1").arg(r.roomType);
         addLegendItem(roomPieLegendLayout, roomColors[i % 3], legendText);
     }
     roomPieLegendLayout->addStretch();
+
+    connect(pieSeries, &QPieSeries::hovered, this, [](QPieSlice* slice, bool state) {
+        if (state && slice) {
+            slice->setExploded(true); // Đẩy nhẹ miếng donut ra ngoài tạo hiệu ứng 3D
+            slice->setExplodeDistanceFactor(0.08);
+
+            QToolTip::showText(QCursor::pos(),
+                QString("<b>%1</b>: %2%").arg(slice->label()).arg(slice->value(), 0, 'f', 1));
+        } else {
+            if (slice) slice->setExploded(false);
+            QToolTip::hideText();
+        }
+    });
 
     auto* pieChart = new QChart();
     pieChart->addSeries(pieSeries);
@@ -559,6 +594,19 @@ void ReportView::updateRoomTypeChart() {
     auto* barSeries = new QHorizontalStackedBarSeries();
     barSeries->append(completedSet);
     barSeries->append(cancelSet);
+
+    connect(barSeries, &QHorizontalStackedBarSeries::hovered, this, [typeNames](bool status, int index, QBarSet *barset) {
+        if (status && barset && index >= 0 && index < typeNames.size()) {
+            double val = barset->at(index);
+            QString roomType = typeNames[index];      // Tên loại phòng (Standard, Deluxe,...)
+            QString statusName = barset->label();      // "Completed" hoặc "Cancelled"
+
+            QToolTip::showText(QCursor::pos(),
+                QString("<b>%1 (%2)</b>: %3%").arg(roomType, statusName).arg(val, 0, 'f', 1));
+        } else {
+            QToolTip::hideText();
+        }
+    });
 
     auto* barChart = new QChart();
     barChart->addSeries(barSeries);
@@ -609,7 +657,7 @@ void ReportView::updateReceptionistChart() {
         // chính họ. Các set khác đều 0 tại vị trí này nên không vẽ đè lên.
         auto* set = new QBarSet(k.name);
         for (int j = 0; j < n; ++j)
-            *set << (j == i ? k.totalRevenue : 0.0);
+            *set << (j == i ? k.totalRevenue / 1000000.0 : 0.0);
 
         // Độ đậm nhạt theo tỉ lệ so với doanh thu cao nhất: doanh thu càng
         // thấp thì cột càng nhạt màu. Cột đứng đầu (ratio = 1) giữ nguyên
@@ -637,6 +685,11 @@ void ReportView::updateReceptionistChart() {
     auto* axisX = new QBarCategoryAxis;
     axisX->append(names);
     auto* axisY = new QValueAxis;
+    double maxRange = maxVal > 0 ? (maxVal / 1000000.0) : 10;
+
+    axisY->setRange(0, maxRange);
+    axisY->setTickCount(5);        // 5 đường kẻ ngang chia đều
+    axisY->setLabelFormat("%.1f M");
 
     chart->addAxis(axisX, Qt::AlignBottom);
     chart->addAxis(axisY, Qt::AlignLeft);
@@ -645,6 +698,19 @@ void ReportView::updateReceptionistChart() {
     styleAxis(axisX);
     styleAxis(axisY);
 
+    connect(series, &QBarSeries::hovered, this, [](bool status, int index, QBarSet *barset) {
+        if (status && barset) {
+            double val = barset->at(index);
+            if (val > 0) { // Chỉ hiện tooltip với cột có doanh thu
+                QLocale locale(QLocale::Vietnamese, QLocale::Vietnam);
+                QString amountStr = locale.toString(static_cast<qlonglong>(val * 1000000.0));
+
+                QToolTip::showText(QCursor::pos(), QString("<b>%1</b>: %2 VND").arg(barset->label(), amountStr));
+            }
+        } else {
+            QToolTip::hideText();
+        }
+    });
     receptionistChartView->setChart(chart);
 }
 
@@ -684,7 +750,7 @@ void ReportView::updateTopCustomers() {
         nameCol->addWidget(idLabel);
 
         double totalMillion = c.totalSpending / 1000000.0;
-        auto* amount = new QLabel(QString::number(totalMillion, 'f', 1) + "tr ₫", this);
+        auto* amount = new QLabel(QString::number(totalMillion, 'f', 1) + "M VND", this);
         amount->setProperty("role", "rankAmt");
 
         h->addWidget(num);

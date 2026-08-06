@@ -95,6 +95,8 @@ ReceptionistView::ReceptionistView(QWidget* parent)
     connect(reloadBtn, &QPushButton::clicked, this, [this] { reload(); });
     connect(searchBtn, &QPushButton::clicked, this, [this] { search(); });
     connect(table, &QTableWidget::itemSelectionChanged, this, [this] { selected(); });
+
+    connect(searchEdit, &QLineEdit::returnPressed, searchBtn, &QPushButton::click);
     reload();
 }
 

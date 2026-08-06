@@ -119,6 +119,8 @@ InvoiceView::InvoiceView(QWidget* parent)
     connect(discountFilter, &QComboBox::currentTextChanged, this, [this] { applyFilters(); });
     connect(paymentFilter, &QComboBox::currentTextChanged, this, [this] { applyFilters(); });
     connect(table, &QTableWidget::itemSelectionChanged, this, [this] { selected(); });
+
+    connect(searchEdit, &QLineEdit::returnPressed, searchBtn, &QPushButton::click);
     reload();
 }
 
