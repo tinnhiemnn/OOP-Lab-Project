@@ -51,24 +51,24 @@ Nếu lệnh `cmake` chưa có trong `PATH`, sử dụng đường dẫn đầy 
 & "C:\Qt\Tools\CMake_64\bin\cmake.exe" --version
 ```
 
-#### Bước 2: Cấu hình thư mục build
+#### Bước 2: Cấu hình thư mục build (bật flag `-DBUILD_TESTS=ON` để build test)
 
-Cấu hình mặc định:
+Mặc định dự án tắt build test để tối ưu thời gian biên dịch chương trình chính (`HotelManagement`). Khi muốn chạy test, hãy truyền flag `-DBUILD_TESTS=ON`:
 
 ```powershell
-cmake -S . -B out/build/tests
+cmake -S . -B build -DBUILD_TESTS=ON
 ```
 
 Nếu dùng MinGW trên Windows và cần chỉ định generator:
 
 ```powershell
-cmake -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER="g++" -S . -B out/build/tests
+cmake -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER="g++" -S . -B build -DBUILD_TESTS=ON
 ```
 
 Nếu CMake không tự tìm thấy Qt, truyền thêm tham số `CMAKE_PREFIX_PATH`:
 
 ```powershell
-cmake -S . -B out/build/tests -DCMAKE_PREFIX_PATH="C:/Qt/6.x.x/mingw_64"
+cmake -S . -B build -DBUILD_TESTS=ON -DCMAKE_PREFIX_PATH="C:/Qt/6.x.x/mingw_64"
 ```
 
 #### Bước 3: Build các target kiểm thử
@@ -76,7 +76,7 @@ cmake -S . -B out/build/tests -DCMAKE_PREFIX_PATH="C:/Qt/6.x.x/mingw_64"
 Build toàn bộ project và tất cả target test:
 
 ```powershell
-cmake --build out/build/tests
+cmake --build build
 ```
 
 Hoặc build từng target cụ thể:

@@ -9,9 +9,12 @@ public:
     }
 
     static bool isValidEmail(const QString& email) {
+        if (email.contains(' ') || email.count('@') != 1 || email.contains("..")) {
+            return false;
+        }
         const auto at = email.indexOf('@');
         const auto dot = email.lastIndexOf('.');
-        return at != -1 && dot != -1 && at > 0 && dot > at + 1 && dot + 1 < email.size();
+        return at > 0 && dot > at + 1 && dot + 1 < email.size();
     }
 
     static bool isValidPhone(const QString& phone) {
