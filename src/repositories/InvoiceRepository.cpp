@@ -168,8 +168,9 @@ std::vector<ReceptionistKPI> InvoiceRepository::getRevenueByReceptionist() {
     q.prepare("SELECT r.id, r.name, SUM(i.total_amount) as total_revenue "
               "FROM receptionists r "
               "LEFT JOIN invoices i ON r.id = i.receptionist_id "
+              "WHERE r.status = 'Active' "
               "GROUP BY r.id "
-              "ORDER BY r.id"); 
+              "ORDER BY r.id");
     std::vector<ReceptionistKPI> results;
     if (!q.exec()) {
         lastErrorMessage = q.lastError().text();

@@ -698,6 +698,11 @@ void ReportView::updateReceptionistChart() {
     styleAxis(axisX);
     styleAxis(axisY);
 
+    // Căn giữa nhãn dưới mỗi cột, tắt đường kẻ lưới dọc của trục X
+    //axisX->setLabelsAlignment(Qt::AlignCenter);
+    axisX->setGridLineVisible(false);
+    axisX->setLineVisible(false);
+
     connect(series, &QBarSeries::hovered, this, [](bool status, int index, QBarSet *barset) {
         if (status && barset) {
             double val = barset->at(index);
