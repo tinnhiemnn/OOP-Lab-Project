@@ -16,7 +16,7 @@ bool BookingService::hasConflict(const QString& roomId, const QDate& checkIn, co
 
         //kiểm tra xung đột với các đơn đang hoạt động (Booked hoặc CheckedIn)
         if (existing.isActive()) {
-            if (checkIn < existing.getCheckOut() && checkOut > existing.getCheckIn()) {
+            if (DateUtils::datesOverlap(checkIn, checkOut, existing.getCheckIn(), existing.getCheckOut())) {
                 return true; 
             }
         }
@@ -46,7 +46,7 @@ bool BookingService::createMultiBookings(const QString& customerId, const std::v
         return false;
     }
 
-    if (checkIn >= checkOut) {
+    if (!DateUtils::isDateRangeValid(checkIn, checkOut)) {
         error = "Check-out date must be after check-in date.";
         return false;
     }

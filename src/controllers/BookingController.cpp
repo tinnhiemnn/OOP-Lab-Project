@@ -1,5 +1,6 @@
 #include "controllers/BookingController.h"
 #include "utils/ValidationUtils.h"
+#include "utils/DateUtils.h"
 
 BookingController::BookingController()
     : bookingRepo(),
@@ -89,7 +90,8 @@ std::vector<Booking> BookingController::searchBookings (const QString& keyword)
 
 std::vector<QString> BookingController::getAvailableRoomIds(const QDate& checkIn, const QDate& checkOut) {
     std::vector<QString> availableIds;
-    if (checkIn >= checkOut) return availableIds;
+    if (!DateUtils::isDateRangeValid(checkIn, checkOut))
+    return availableIds;
     
     auto rooms = roomRepo.findAvailableInPeriod(checkIn, checkOut); 
     for (const auto& room : rooms) {

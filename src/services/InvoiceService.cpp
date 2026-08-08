@@ -41,8 +41,7 @@ double InvoiceService::servicesTotal(const QString &bookingId) {
     decorationTotal = prices.decoration;
   }
 
-  double total = (booking->getBuffetQuantity() * prices.buffet) + laundryTotal +
-                 decorationTotal;
+  double total = (booking->getBuffetQuantity() * prices.buffet) + laundryTotal + decorationTotal;
 
   return total;
 }

@@ -1,10 +1,6 @@
 #pragma once
 
-
-#include "repositories/BookingRepository.h"
-#include "repositories/CustomerRepository.h"
-#include "repositories/ReceptionistRepository.h"
-#include "repositories/RoomRepository.h"
+#include "controllers/InvoiceController.h"
 
 #include "models/Invoice.h"
 #include <QDialog>

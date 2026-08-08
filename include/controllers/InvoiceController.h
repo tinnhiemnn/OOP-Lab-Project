@@ -2,6 +2,10 @@
 
 #include "services/InvoiceService.h"
 #include "repositories/InvoiceRepository.h"
+#include "repositories/BookingRepository.h"
+#include "repositories/CustomerRepository.h"
+#include "repositories/ReceptionistRepository.h"
+#include "repositories/RoomRepository.h"
 
 #include <QString>
 #include <vector>
